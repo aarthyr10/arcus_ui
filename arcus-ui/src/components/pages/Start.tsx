@@ -5,7 +5,7 @@ const Start = () => {
     <>
     <div className="min-h-screen bg-gradient-to-br from-[#eaf6fb] to-[#dbeef7]">
         <div className="p-5">
-           <img src={logo} alt="Daikin logo" className=""/>
+           <img src={logo} alt="Daikin logo" className="h-10 w-25"/>
         </div>
          <div className="flex items-center align-middle justify-center px-4">
       
