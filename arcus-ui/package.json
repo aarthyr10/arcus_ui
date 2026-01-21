@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/react-fontawesome": "^3.1.1",
+    "@mantine/core": "^8.3.13",
+    "font-awesome": "^4.7.0",
     "framer-motion": "^12.27.0",
+    "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.12.0",

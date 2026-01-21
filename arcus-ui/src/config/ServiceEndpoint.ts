@@ -1,0 +1,5 @@
+const ServiceEndpoint={
+
+}
+
+export {ServiceEndpoint}
