@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@mantine/core";
 import logo from '../../public/Images/daikin.png';
+import '../App.css'
 
 const Start = () => {
   const navigate = useNavigate();
@@ -12,7 +13,10 @@ const Start = () => {
       <div className="p-5">
         <img src={logo} alt="Daikin logo" className="h-10 w-35" />
       </div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+<div className=" relative">
+      {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"> */}
+      <div className="flex items-center justify-center mt-10 mb-20">
+
         {/* Absolute centering: positions at 50% top/left and translates back by 50% for perfect center */}
         <div
           className="
@@ -88,6 +92,7 @@ const Start = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </>
   );

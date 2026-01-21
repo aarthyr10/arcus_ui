@@ -5,5 +5,9 @@
     --primary-btn-color: rgba(43, 127, 255, 1);
     --primary-btn-color-rgb: 43, 127, 255;
 
+    --primary-card-upload-bg: rgba(222, 243, 255, 1);
+    --primary-card-upload-bg-rgb: 222, 243, 255;
 
+    --primary-card-upload-bdr: rgba(154, 216, 251, 1);
+    --primary-card-upload-bdr-rgb: 154, 216, 251;
 }

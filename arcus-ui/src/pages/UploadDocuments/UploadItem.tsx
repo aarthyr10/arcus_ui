@@ -253,14 +253,16 @@ const UploadItem = ({ name, date }: Props) => {
     w-full max-w-[363px]
     min-h-[148px]
     px-4 pt-4 pb-3
-    bg-[#DEF3FF]
+    bg-[var(--primary-card-upload-bg)]
+    hover:bg-white
+    transition-colors
     border border-[#9AD8FB]
+    hover:border-white
     rounded-[16.4px]" >
 
       {/* Top section */}
       <div className="flex gap-3 w-full">
         <FileText className="w-5 h-5 text-[var(--primary-btn-color)] mt-1 shrink-0" />
-
         <div className="flex-1 min-w-0">
           <p className="text-sm font-normal text-[#1F2937] truncate">
             {name}

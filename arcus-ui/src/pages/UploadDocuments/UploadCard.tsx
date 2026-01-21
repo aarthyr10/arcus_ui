@@ -1,4 +1,37 @@
+import { Input } from "@mantine/core";
+import { useRef } from "react";
+
 const UploadCard = () => {
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Trigger file picker
+  const uploadFiles = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle selected files
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    console.log("Selected files:", files);
+
+    // Example: upload to backend
+    // const formData = new FormData();
+    // Array.from(files).forEach(file => formData.append("files", file));
+    // axios.post("/upload", formData);
+  };
+
+  // Drag & drop handlers
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+
+    console.log("Dropped files:", files);
+  };
+
   return (
     <>
       <div className="
@@ -16,7 +49,13 @@ h-[430px]
         <p className="text-gray-500 text-center mt-1 mb-6">
           Drop your compliance forms and specification documents
         </p>
-
+ <Input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        className="hidden"
+        onChange={handleFileChange}
+      />
         {/* Upload Box */}
         <div className="
         border-2 border-dashed border-gray-300
@@ -24,8 +63,11 @@ h-[430px]
         p-12
         flex flex-col items-center justify-center
         text-center
-        bg-white/40
-      ">
+        bg-white/40"
+         onDragOver={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+        onClick={uploadFiles}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-12 w-12 text-blue-500 mb-4"

@@ -1,6 +1,10 @@
 :root {
-    --primary-btn-rgb: var(--primary-btn-color-rgb);
     --primary-btn: var(--primary-btn-color);
+    --primary-btn-rgb: var(--primary-btn-color-rgb);
 
+    --primary-card-upload: var(--primary-card-upload-bg);
+    --primary-card-upload-rgb: var(--primary-card-upload-bg-rgb);
 
+    --primary-card-upload-bdr: var(--primary-card-upload-bdr);
+    --primary-card-upload-bdr-rgb: var(--primary-card-upload-bdr-rgb);
 }
