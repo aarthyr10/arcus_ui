@@ -1,37 +1,58 @@
 import { Input } from "@mantine/core";
 import { useRef } from "react";
+import { useNavigate } from "react-router";
 
 const UploadCard = () => {
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  // const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Trigger file picker
-  const uploadFiles = () => {
-    fileInputRef.current?.click();
+  // // Trigger file picker
+  // const uploadFiles = () => {
+  //   fileInputRef.current?.click();
+  // };
+
+  // // Handle selected files
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) return;
+
+  //   console.log("Selected files:", files);
+
+  //   // Example: upload to backend
+  //   // const formData = new FormData();
+  //   // Array.from(files).forEach(file => formData.append("files", file));
+  //   // axios.post("/upload", formData);
+  // };
+
+  // // Drag & drop handlers
+  // const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
+  //   const files = e.dataTransfer.files;
+  //   if (!files || files.length === 0) return;
+
+  //   console.log("Dropped files:", files);
+  // };
+//     const navigate = useNavigate();
+// const uploadFiles = () => {
+//   navigate('/UploadsProgess');
+// }
+ const inputRef = useRef<HTMLInputElement | null>(null);
+  const navigate = useNavigate();
+
+  const openPicker = () => {
+    inputRef.current?.click();
   };
 
-  // Handle selected files
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
-    console.log("Selected files:", files);
+    const file = e.target.files[0];
 
-    // Example: upload to backend
-    // const formData = new FormData();
-    // Array.from(files).forEach(file => formData.append("files", file));
-    // axios.post("/upload", formData);
+    // Navigate immediately and pass file in memory
+    navigate("/UploadsProgess", {
+      state: { file },
+    });
   };
-
-  // Drag & drop handlers
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const files = e.dataTransfer.files;
-    if (!files || files.length === 0) return;
-
-    console.log("Dropped files:", files);
-  };
-
   return (
     <>
       <div className="
@@ -49,12 +70,18 @@ h-[430px]
         <p className="text-gray-500 text-center mt-1 mb-6">
           Drop your compliance forms and specification documents
         </p>
- <Input
+ {/* <Input
         ref={fileInputRef}
         type="file"
         multiple
         className="hidden"
-        onChange={handleFileChange}
+        // onChange={handleFileChange}
+      /> */}
+        <Input
+        ref={inputRef}
+        type="file"
+        hidden
+        onChange={handleFiles}
       />
         {/* Upload Box */}
         <div className="
@@ -64,9 +91,11 @@ h-[430px]
         flex flex-col items-center justify-center
         text-center
         bg-white/40"
-         onDragOver={(e) => e.preventDefault()}
-        onDrop={handleDrop}
-        onClick={uploadFiles}
+        //  onDragOver={(e) => e.preventDefault()}
+        // onDrop={handleDrop}
+        // onClick={uploadFiles}
+                onClick={openPicker}
+
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -93,3 +122,54 @@ h-[430px]
 };
 
 export default UploadCard;
+
+
+
+
+// import { useRef } from "react";
+// import { useNavigate } from "react-router-dom";
+
+// const UploadCard = () => {
+//   const inputRef = useRef<HTMLInputElement | null>(null);
+//   const navigate = useNavigate();
+
+//   const openPicker = () => {
+//     inputRef.current?.click();
+//   };
+
+//   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     if (!e.target.files || e.target.files.length === 0) return;
+
+//     const file = e.target.files[0];
+
+//     // Navigate immediately and pass file in memory
+//     navigate("/UploadsProgess", {
+//       state: { file },
+//     });
+//   };
+
+//   return (
+//     <div className="w-full lg:w-[600px] h-[430px] bg-[#eef8fd] rounded-3xl shadow p-8">
+//       <h2 className="text-2xl font-semibold text-center">
+//         Upload Documents
+//       </h2>
+
+//       <input
+//         ref={inputRef}
+//         type="file"
+//         hidden
+//         onChange={handleFiles}
+//       />
+
+//       <div
+//         onClick={openPicker}
+//         className="border-2 border-dashed rounded-2xl p-12 mt-6 text-center bg-white/40 cursor-pointer"
+//       >
+//         <p className="font-medium">Drag & Drop files here</p>
+//         <p className="text-sm text-gray-500">or click to browse</p>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default UploadCard;
