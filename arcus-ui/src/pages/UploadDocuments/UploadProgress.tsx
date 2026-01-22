@@ -4,6 +4,7 @@ import { LiaCheckCircleSolid } from "react-icons/lia";
 import { useEffect, useState } from "react";
 import { FaCloud } from "react-icons/fa";
 import AnalyzingDocuments from "./AnalyzingDocuments";
+import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 
 const UploadProgress = () => {
   const location = useLocation();
@@ -12,6 +13,9 @@ const UploadProgress = () => {
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.upload;
+console.log(endPoint);
 
   const handleProcess = () => {
     setLoading(true);
@@ -50,6 +54,8 @@ useEffect(() => {
     }, 300);
   }
 }, [progress]);
+
+
 
   return (
     <>

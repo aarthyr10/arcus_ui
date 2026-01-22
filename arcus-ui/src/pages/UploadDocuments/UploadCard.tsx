@@ -81,6 +81,8 @@ const UploadCard = () => {
           ref={inputRef}
           type="file"
           hidden
+          multiple
+          accept=".pdf,.doc,.docx"  // Restrict to PDFs and Word docs
           onChange={handleFiles}
         />
         {/* Upload Box */}

@@ -8,6 +8,15 @@ export default defineConfig({
     tailwindcss()
   ],
   server: {
+       proxy: {
+      "/api": {
+        target: "https://contractional-napoleon-superblessed.ngrok-free.dev",
+        secure: false,
+        changeOrigin: true,
+        ws:true,
+        rewrite: path => path.replace(/^\/api/, '')
+      }
+    },
     open: true,
     port: 5173,
     host: "0.0.0.0"
