@@ -32,11 +32,11 @@ const UploadCard = () => {
 
   //   console.log("Dropped files:", files);
   // };
-//     const navigate = useNavigate();
-// const uploadFiles = () => {
-//   navigate('/UploadsProgess');
-// }
- const inputRef = useRef<HTMLInputElement | null>(null);
+  //     const navigate = useNavigate();
+  // const uploadFiles = () => {
+  //   navigate('/UploadsProgess');
+  // }
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
   const openPicker = () => {
@@ -49,7 +49,7 @@ const UploadCard = () => {
     const file = e.target.files[0];
 
     // Navigate immediately and pass file in memory
-    navigate("/UploadsProgess", {
+    navigate("/uploadsprogess", {
       state: { file },
     });
   };
@@ -57,7 +57,7 @@ const UploadCard = () => {
     <>
       <div className="
       w-full lg:w-[600px]
-h-[430px]
+      h-[430px]
       bg-[#eef8fd]
       rounded-3xl
       shadow-[0_20px_40px_rgba(0,0,0,0.18)]
@@ -70,7 +70,7 @@ h-[430px]
         <p className="text-gray-500 text-center mt-1 mb-6">
           Drop your compliance forms and specification documents
         </p>
- {/* <Input
+        {/* <Input
         ref={fileInputRef}
         type="file"
         multiple
@@ -78,11 +78,11 @@ h-[430px]
         // onChange={handleFileChange}
       /> */}
         <Input
-        ref={inputRef}
-        type="file"
-        hidden
-        onChange={handleFiles}
-      />
+          ref={inputRef}
+          type="file"
+          hidden
+          onChange={handleFiles}
+        />
         {/* Upload Box */}
         <div className="
         border-2 border-dashed border-gray-300
@@ -91,10 +91,10 @@ h-[430px]
         flex flex-col items-center justify-center
         text-center
         bg-white/40"
-        //  onDragOver={(e) => e.preventDefault()}
-        // onDrop={handleDrop}
-        // onClick={uploadFiles}
-                onClick={openPicker}
+          //  onDragOver={(e) => e.preventDefault()}
+          // onDrop={handleDrop}
+          // onClick={uploadFiles}
+          onClick={openPicker}
 
         >
           <svg

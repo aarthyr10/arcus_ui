@@ -6,7 +6,7 @@ import '../App.css'
 const Start = () => {
   const navigate = useNavigate();
   const UploadDocuments = () => {
-    navigate('/Uploads');
+    navigate('/uploads');
   }
   return (
     <>

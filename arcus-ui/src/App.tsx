@@ -6,6 +6,7 @@ import Start from './pages/Start';
 import UploadDocuments from './pages/UploadDocuments/UploadDocuments';
 import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
+import AnalyzingDocuments from './pages/UploadDocuments/AnalyzingDocuments';
 
 function App() {
   return (
@@ -14,8 +15,10 @@ function App() {
         <Routes>
           <Route path='/' element={<Start />} />
             <Route element={<AppLayout />}>
-              <Route path='/Uploads' element={<UploadDocuments />} />
-              <Route path='/UploadsProgess' element={<UploadProgress />} />
+              <Route path='/uploads' element={<UploadDocuments />} />
+              <Route path='/uploadsprogess' element={<UploadProgress />} />
+                <Route path="/analyzing" element={<AnalyzingDocuments />} />
+    
             </Route>
         </Routes>
       </BrowserRouter>
