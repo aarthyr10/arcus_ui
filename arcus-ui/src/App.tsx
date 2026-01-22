@@ -8,6 +8,7 @@ import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
 import AnalyzingDocuments from './pages/UploadDocuments/AnalyzingDocuments';
 import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
+import { EditReviewScreen } from './pages/Edit&Review/EditReviewScreen';
 
 function App() {
   return (
@@ -18,10 +19,10 @@ function App() {
             <Route element={<AppLayout />}>
               <Route path='/uploads' element={<UploadDocuments />} />
               <Route path='/uploadsprogess' element={<UploadProgress />} />
-                <Route path="/analyzing" element={<AnalyzingDocuments />} />
-                <Route path="/compliancedocuments" element={<ComplianceDocuments />} />
-    
+                <Route path="/compliance" element={<ComplianceDocuments />} />
+                <Route path="/editreviewscreen" element={<EditReviewScreen/>} />
             </Route>
+                <Route path="/analyzing" element={<AnalyzingDocuments />} />
         </Routes>
       </BrowserRouter>
     </>
