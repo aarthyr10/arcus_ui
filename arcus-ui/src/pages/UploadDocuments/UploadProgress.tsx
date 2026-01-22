@@ -407,13 +407,14 @@
 
 
 import { useLocation, useNavigate } from "react-router-dom";
-import { X, CloudUpload, FileText } from "lucide-react";
+import { X, FileText } from "lucide-react";
 import { LiaCheckCircleSolid } from "react-icons/lia";
 import { useEffect, useState } from "react";
+import { FaCloud } from "react-icons/fa";
 
 const UploadProgress = () => {
   const location = useLocation();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const file: File | undefined = location.state?.file;
 
   const [loading, setLoading] = useState(false);
@@ -439,12 +440,12 @@ const UploadProgress = () => {
 
     return () => clearInterval(interval);
   }, [loading]);
-  
+
   useEffect(() => {
     if (progress === 100) {
       setTimeout(() => {
         navigate("/analyzing");
-      }, 300); 
+      }, 300);
     }
   }, [progress, navigate]);
 
@@ -456,10 +457,7 @@ const UploadProgress = () => {
             transform: scale(0.5);
             opacity: 0;
           }
-          50% { 
-            transform: scale(1.1);
-            opacity: 1;
-          }
+       
           100% { 
             transform: scale(1);
             opacity: 1;
@@ -484,29 +482,31 @@ const UploadProgress = () => {
         }
         
         @keyframes progressSlide {
-          0% { 
-            transform: translateX(-100%);
-          }
-          100% { 
-            transform: translateX(500%);
-          }
+                0% { width: 0%; }
+                20% { width: 20%; }
+                40% { width: 40%; }
+                60% { width: 60%; }
+                80% { width: 80%; }
+                100% { width: 100%; }
         }
         
         .animate-cloudPopup {
-          animation: cloudPopup 2s ease-in-out infinite;
+          animation: cloudPopup 1.5s ease-in-out infinite;
         }
         
        .animate-arrowMove {
           animation: arrowMove 2s ease-in-out infinite;
         }
         
-        .animate-progressSlide {
-          animation: progressSlide 1.5s ease-in-out infinite;
-        }
+
+           .animate-progressSlide {
+  animation: progressSlide 2s ease-in-out infinite;
+}
+
       `}</style>
-      
+
       <div className="w-full max-w-[700px] bg-white/80 backdrop-blur-xl rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.18)] px-8 py-4">
-        
+
         {/* Header */}
         <h1 className="text-[28px] font-semibold text-gray-800 text-center">
           Upload Documents
@@ -521,43 +521,16 @@ const UploadProgress = () => {
             <div className="flex flex-col items-center">
               <div className="mt-8 flex flex-col items-center">
                 <div className="relative w-24 h-24 flex items-center justify-center">
-                  
-                  {/* Circular Progress */}
-                  <svg className="absolute w-full h-full rotate-[-90deg]">
-                    <circle
-                      cx="48"
-                      cy="48"
-                      r="42"
-                      stroke="#dbeafe"
-                      strokeWidth="6"
-                      fill="none"
-                    />
-                    <circle
-                      cx="48"
-                      cy="48"
-                      r="42"
-                      stroke="#3b82f6"
-                      strokeWidth="6"
-                      fill="none"
-                      strokeDasharray={2 * Math.PI * 42}
-                      strokeDashoffset={
-                        2 * Math.PI * 42 -
-                        (progress / 100) * 2 * Math.PI * 42
-                      }
-                      strokeLinecap="round"
-                    />
-                  </svg>
-
                   {/* Cloud Animation with Popup */}
-                  <div className="relative w-16 h-16 rounded-full bg-[#e8f3ff] flex items-center justify-center animate-cloudPopup overflow-hidden">
-                    {/* Chevron Arrow moving like train */}
-                  <div className="absolute animate-arrowMove">
+                  <div className="relative w-16 h-16   flex items-center justify-center animate-cloudPopup overflow-hidden">
+                    <FaCloud className="text-[#4f8df7]" size={100} />
+                    <div className="absolute inset-0 flex items-center justify-center animate-arrowMove z-10">
                       <svg
                         width="20"
                         height="20"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#4f8df7"
+                        stroke="#fff"
                         strokeWidth="3"
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -565,7 +538,6 @@ const UploadProgress = () => {
                         <polyline points="18 15 12 9 6 15" />
                       </svg>
                     </div>
-                    <CloudUpload className="text-[#4f8df7]" size={30} />
                   </div>
                 </div>
 
@@ -604,8 +576,8 @@ const UploadProgress = () => {
           {/* BACK TO PREVIOUS PAGE */}
           <button
             aria-label="Remove file"
-            onClick={() => navigate(-1)}  
-            className="cursor-pointer" 
+            onClick={() => navigate(-1)}
+            className="cursor-pointer"
           >
             <X className="text-red-500 hover:scale-110 transition" size={18} />
           </button>
@@ -618,14 +590,14 @@ const UploadProgress = () => {
             className="
               mt-6 w-full h-14 rounded-full
               bg-gradient-to-r from-[#2f80ff] to-[#12c2e9]
-              text-white font-medium text-lg
+              text-white font-medium text-medium
               shadow-[0_18px_40px_rgba(47,128,255,0.45)]
               hover:scale-[1.02] transition
               flex items-center justify-center gap-2 cursor-pointer
             "
           >
             <span className="w-5 h-5 flex items-center justify-center">
-              <LiaCheckCircleSolid size={20} />
+              <LiaCheckCircleSolid size={18} />
             </span>
             Process Documents
           </button>

@@ -82,7 +82,7 @@ const Start = () => {
                   hover:scale-105
                   transition-transform duration-300
                   flex items-center justify-center gap-2
-                  mx-auto
+                  mx-auto cursor-pointer
                 "
                 onClick={UploadDocuments}
               >

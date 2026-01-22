@@ -1,4 +1,3 @@
-import React from 'react'
 import PreviousUploads from './PreviousUploads';
 import UploadCard from './UploadCard';
 

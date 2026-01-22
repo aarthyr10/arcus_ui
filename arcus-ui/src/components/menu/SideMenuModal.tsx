@@ -29,7 +29,7 @@ const SideMenuModal = ({ onClose }: Props) => {
         text-gray-700
         hover:bg-[#05b4e6]
         hover:text-white
-        transition-colors duration-200
+        transition-colors duration-200 cursor-pointer
       "
     >
       <span className="text-lg">{icon}</span>
@@ -69,7 +69,7 @@ const SideMenuModal = ({ onClose }: Props) => {
             text-[#05b4e6]
             hover:bg-gray-100
             text-sm font-medium
-            transition-colors
+            transition-colors cursor-pointer
           "
         >
           <span className="text-lg">

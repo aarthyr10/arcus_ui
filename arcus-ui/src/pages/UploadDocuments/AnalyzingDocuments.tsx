@@ -26,7 +26,7 @@ export default function AnalyzingDocuments() {
   useEffect(() => {
     if (visibleSteps === steps.length) {
       const timeout = setTimeout(() => {
-        navigate("/next-page");
+        navigate("/compliancedocuments");
       }, 800);
 
       return () => clearTimeout(timeout);

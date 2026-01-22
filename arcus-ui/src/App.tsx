@@ -7,6 +7,7 @@ import UploadDocuments from './pages/UploadDocuments/UploadDocuments';
 import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
 import AnalyzingDocuments from './pages/UploadDocuments/AnalyzingDocuments';
+import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
               <Route path='/uploads' element={<UploadDocuments />} />
               <Route path='/uploadsprogess' element={<UploadProgress />} />
                 <Route path="/analyzing" element={<AnalyzingDocuments />} />
+                <Route path="/compliancedocuments" element={<ComplianceDocuments />} />
     
             </Route>
         </Routes>

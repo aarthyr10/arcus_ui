@@ -89,7 +89,7 @@ const UploadCard = () => {
         rounded-2xl
         p-12
         flex flex-col items-center justify-center
-        text-center
+        text-center cursor-pointer
         bg-white/40"
           //  onDragOver={(e) => e.preventDefault()}
           // onDrop={handleDrop}
