@@ -1,10 +1,13 @@
-import logo from "../../../public/Images/daikin.png"
+import Logo from "../logo/Logo"
+import HamburgerMenu from "../menu/HamburgerMenu"
+
 
 const Header = () => {
     return (
         <>
-            <div className="p-5">
-                <img src={logo} alt="Daikin logo" className="h-10 w-35" />
+            <div className="flex justify-between p-3">
+                <HamburgerMenu />
+                <Logo />
             </div>
         </>
     )
