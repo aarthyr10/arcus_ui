@@ -10,12 +10,12 @@ const Start = () => {
   }
   return (
     <>
-      <div className="p-5">
+      <div className="px-13 py-10">
         <img src={logo} alt="Daikin logo" className="h-10 w-35" />
       </div>
 <div className=" relative">
       {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"> */}
-      <div className="flex items-center justify-center mt-10 mb-20">
+      <div className="flex items-center justify-center mb-20">
 
         {/* Absolute centering: positions at 50% top/left and translates back by 50% for perfect center */}
         <div
@@ -24,7 +24,7 @@ const Start = () => {
               bg-[#f3fbff]
               rounded-3xl
               shadow-[0_20px_40px_rgba(0,0,0,0.15)]
-              p-2 sm:p-8 md:p-10 lg:p-12
+               sm:p-8 md:p-10 lg:p-12
               text-center
             "
         >
@@ -71,7 +71,7 @@ const Start = () => {
             </h1>
 
             {/* Button */}
-            <div className="py-10 sm:py-10 lg:py-15">
+            <div className="py-10 sm:py-10 lg:py-7">
               <Button className="
                   px-8 py-4
                   rounded-full
@@ -81,13 +81,13 @@ const Start = () => {
                   shadow-[0_10px_25px_rgba(47,128,255,0.4)]
                   hover:scale-105
                   transition-transform duration-300
-                  flex items-center justify-center gap-2
+                  flex items-center justify-center gap-5
                   mx-auto cursor-pointer
                 "
                 onClick={UploadDocuments}
               >
                 Start Compliance Check
-                <span className="text-lg">→</span>
+                <span className="text-xl">→</span>
               </Button>
             </div>
           </div>

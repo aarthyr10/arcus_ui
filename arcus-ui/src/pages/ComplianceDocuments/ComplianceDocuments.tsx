@@ -34,7 +34,7 @@ export default function ComplianceDocuments() {
   const navigate = useNavigate(); // ✅ init navigate
 
   return (
-    <div className="w-full bg-gradient-to-br from-[#eaf6fb] to-[#dbeef7] flex justify-center px-6 py-3">
+    <div className="w-full bg-gradient-to-br from-[#eaf6fb] to-[#dbeef7] flex justify-center px-6 py-3 mt-13">
       <div className="w-full max-w-6xl">
 
         {/* HEADER */}

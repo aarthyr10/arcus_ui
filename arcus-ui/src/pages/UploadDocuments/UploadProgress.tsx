@@ -450,7 +450,7 @@ const UploadProgress = () => {
   }, [progress, navigate]);
 
   return (
-    <div className="flex items-center justify-center bg-gradient-to-br from-[#eaf6fb] to-[#cfe9f6] px-4 py-2">
+    <div className="flex w-full items-center align-middle mt-7 justify-center bg-gradient-to-br from-[#eaf6fb] to-[#cfe9f6] px-4 py-2">
       <style>{`
         @keyframes cloudPopup {
           0% { 
@@ -495,7 +495,7 @@ const UploadProgress = () => {
         }
         
        .animate-arrowMove {
-          animation: arrowMove 2s ease-in-out infinite;
+          animation: arrowMove 1.5s ease-in-out infinite;
         }
         
 
@@ -505,7 +505,7 @@ const UploadProgress = () => {
 
       `}</style>
 
-      <div className="w-full max-w-[700px] bg-white/80 backdrop-blur-xl rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.18)] px-8 py-4">
+      <div className="w-full max-w-[650px] bg-white/80 backdrop-blur-xl rounded-[32px] shadow-[0_30px_70px_rgba(0,0,0,0.18)] px-8 py-4">
 
         {/* Header */}
         <h1 className="text-[28px] font-semibold text-gray-800 text-center">
