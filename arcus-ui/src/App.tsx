@@ -10,6 +10,7 @@ import AnalyzingDocuments from './pages/UploadDocuments/AnalyzingDocuments';
 import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
 import EditReview from './pages/Edit&Review/EditReview';
 import { useEffect } from 'react';
+import ComplianceResults from './pages/Result/ComplianceResult';
 
 function App() {
 //   useEffect(() => {
@@ -49,6 +50,7 @@ function App() {
             <Route path='/uploadsprogess' element={<UploadProgress />} />
             <Route path="/compliance" element={<ComplianceDocuments />} />
             <Route path="/editreview" element={<EditReview />} />
+            <Route path="/result" element={<ComplianceResults/>} />
           </Route>
           {/* <Route path="/analyzing" element={<AnalyzingDocuments />} /> */}
         </Routes>
