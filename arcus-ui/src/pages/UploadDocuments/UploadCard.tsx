@@ -52,6 +52,7 @@ const UploadCard = () => {
     navigate("/uploadsprogess", {
       state: { file },
     });
+      e.target.value = "";
   };
   return (
     <>

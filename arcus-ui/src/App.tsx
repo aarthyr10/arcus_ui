@@ -11,6 +11,7 @@ import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments
 import EditReview from './pages/Edit&Review/EditReview';
 import { useEffect } from 'react';
 import ComplianceResults from './pages/Result/ComplianceResult';
+import axios from 'axios';
 
 function App() {
 //   useEffect(() => {
@@ -38,6 +39,20 @@ function App() {
 //     window.removeEventListener("beforeunload", blockRefresh);
 //   };
 // }, []);
+ axios.interceptors.response.use(
+    (response) => {
+      return response;
+    },
+    (error) => {
+      if (error.config.headers["X-Skip-Interceptor"] === "true") {
+        return Promise.reject(error);
+      }
+      // else if (error.response && error.response.status === 500) {
+      //   showServerErrorToast();
+      // }
+      return Promise.reject(error);
+    }
+  );
 
   return (
     <>

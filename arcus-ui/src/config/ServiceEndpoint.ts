@@ -1,5 +1,8 @@
 const ServiceEndpoint={
-    apiBaseUrl: "https://contractional-napoleon-superblessed.ngrok-free.dev",
+    // apiBaseUrl: "https://contractional-napoleon-superblessed.ngrok-free.dev/api/v1",
+    // apiBaseUrl: "/api",
+      apiBaseUrl: "/api/v1",  // Use this for dev (proxy); switch to full URL for prod
+
     // trainDocuments: {
     //     documentUpload: "/train-documents"
     // }

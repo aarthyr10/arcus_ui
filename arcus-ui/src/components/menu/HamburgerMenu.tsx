@@ -10,7 +10,7 @@ const HamburgerMenu = () => {
         onClick={() => setOpen(!open)}
         aria-label="Toggle menu"
         className="
-          fixed top-6 right-25 z-[9999]
+          fixed top-6 right-10 z-[9999]
           w-11 h-11
           rounded-xl
           bg-[#eef6f8]

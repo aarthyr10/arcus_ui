@@ -182,7 +182,7 @@ export default function AnalyzingDocumentsModal({ open }: Props) {
       setVisibleSteps((prev) =>
         prev < steps.length ? prev + 1 : prev
       );
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(timer);
   }, [open]);
@@ -191,7 +191,7 @@ export default function AnalyzingDocumentsModal({ open }: Props) {
     if (visibleSteps === steps.length) {
       const timeout = setTimeout(() => {
         navigate("/compliance");
-      }, 800);
+      }, 500);
       return () => clearTimeout(timeout);
     }
   }, [visibleSteps, navigate]);
@@ -203,7 +203,7 @@ export default function AnalyzingDocumentsModal({ open }: Props) {
 
       {/* overlay */}
       {/* <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fadeIn" /> */}
-<div className="absolute inset-0 bg-gradient-to-br from-[#2f80ff]/60 to-[#12c2e9]/60 backdrop-blur-sm animate-fadeIn" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#2f80ff]/60 to-[#12c2e9]/60 backdrop-blur-sm animate-fadeIn" />
 
       {/* modal content */}
       <div className="relative w-full h-full flex items-center justify-center animate-scaleIn">
@@ -254,9 +254,9 @@ export default function AnalyzingDocumentsModal({ open }: Props) {
                   `}
                 >
                   <Icon size={25} color="#0092B8" />
-<span className="text-[#fff] font-medium">
-    {step.label}
-  </span>                </div>
+                  <span className="text-[#fff] font-medium">
+                    {step.label}
+                  </span>                </div>
               );
             })}
           </div>
