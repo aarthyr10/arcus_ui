@@ -4,12 +4,14 @@ import axios from "axios";
 import { ChevronLeft, Download, Loader, Pencil, Trash2 } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
+
 type ResultRow = {
   id: number;
-  clause: string;
-  response: string;
-  score: number;
+  file_name: string;
+  extracted_data: string;
+  text: string; // chunk text
 };
+
 type Props = {
   docId: string;
 };
@@ -33,7 +35,7 @@ function chunk<T>(array: T[], size: number): T[][] {
   return [head, ...chunk(tail, size)];
 }
 
-export default function ComplianceResults() {
+export default function TrainingDocumentsResult() {
   const navigate = useNavigate();
   const { docId } = useParams<{ docId: string }>();
   const [rows, setRows] = useState<ResultRow[]>([]);
@@ -55,20 +57,25 @@ export default function ComplianceResults() {
 
         const endpoint =
           ServiceEndpoint.apiBaseUrl +
-          ServiceEndpoint.uploadedDocuments.getById(docId);
+          ServiceEndpoint.trainDocuments.getById(docId);
 
         const res = await axios.get(endpoint, {
           headers: { "ngrok-skip-browser-warning": "true" },
         });
+const fileName = res.data?.file_name;
+const extractedData = res.data?.data?.extracted_data ?? "";
+const chunks = res.data?.data?.chunks ?? [];
 
-        const questions = res.data?.data?.questions ?? [];
+const mappedRows: ResultRow[] = chunks.map((chunk: any, index: number) => ({
+  id: index + 1,
+  file_name: fileName,
+  extracted_data: extractedData,
+  text: chunk.text,
+}));
 
-        const mappedRows: ResultRow[] = questions.map((q: any) => ({
-          id: q.question_no,
-          clause: q.question,
-          response: q.answer,
-          score: q.confidence_score ?? getScoreFromAnswer(q.answer),
-        }));
+setRows(mappedRows);
+setPage(1);
+
 
         setRows(mappedRows);
         setPage(1);
@@ -130,7 +137,7 @@ export default function ComplianceResults() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => navigate("/compliance")}>
+            <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => navigate("/knowledge")}>
               <ChevronLeft size={16} />
               Back
             </button>

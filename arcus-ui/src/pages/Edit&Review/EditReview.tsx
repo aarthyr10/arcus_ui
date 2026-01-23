@@ -1,8 +1,11 @@
 import { ArrowLeft, X, Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 
 export default function EditReview() {
+    const { docId, id } = useParams();
+    console.log(docId, id); // use these to fetch or edit
+
   const navigate = useNavigate();
 
   const originalText =

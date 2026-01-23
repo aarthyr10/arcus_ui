@@ -1,9 +1,9 @@
 import axios from "axios";
 import { ChevronRight, FileText, Calendar } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-import ComplianceResults from "./ComplianceResult";
 import { useNavigate } from "react-router-dom";
+import { Pagination, Select, Text } from "@mantine/core";
 
 export interface UploadedDoc {
   doc_id: string;
@@ -13,12 +13,19 @@ export interface UploadedDoc {
   file_url?: string;
   clauses: number;
 }
+function chunk<T>(array: T[], size: number): T[][] {
+  if (!array.length) return [];
+  const head = array.slice(0, size);
+  const tail = array.slice(size);
+  return [head, ...chunk(tail, size)];
+}
 
 export default function ComplianceDocuments() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-
+  // const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const endPoint =
     ServiceEndpoint.apiBaseUrl +
     ServiceEndpoint.uploadedDocuments.getAll;
@@ -49,25 +56,38 @@ export default function ComplianceDocuments() {
       .then(setDocs)
       .catch(() => setDocs([]));
   }, []);
-  useEffect(() => {
-    if (selectedDocId) {
-      console.log("State updated:", selectedDocId);
-    }
-  }, [selectedDocId]);
-  useEffect(() => {
-    if (selectedDocId) {
-      setTimeout(() => {
-        document
-          .getElementById("ComplianceResults")
-          ?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-  }, [selectedDocId]);
+
+
+  // useEffect(() => {
+  //   if (selectedDocId) {
+  //     setTimeout(() => {
+  //       document
+  //         .getElementById("ComplianceResults")
+  //         ?.scrollIntoView({ behavior: "smooth" });
+  //     }, 100);
+  //   }
+  // }, [selectedDocId]);
+
+  const rows = docs; // 👈 missing line
+
+  const pages = useMemo(() => {
+    return chunk(rows, pageSize);
+  }, [rows, pageSize]);
+
+  const paginatedRows = pages[page - 1] ?? [];
+
+  const totalResults = rows.length;
+  const totalPages = pages.length;
+
+  const startIndex =
+    totalResults === 0 ? 0 : (page - 1) * pageSize + 1;
+
+  const endIndex = Math.min(page * pageSize, totalResults);
 
 
   return (
     <>
-      <div className="w-full bg-gradient-to-br from-[#eaf6fb] to-[#dbeef7] flex justify-center px-6 py-3 mt-13">
+      <div className="w-full flex justify-center px-6 py-3 mt-13">
         <div className="w-full max-w-6xl">
 
           {/* HEADER */}
@@ -96,24 +116,21 @@ export default function ComplianceDocuments() {
           </div>
 
           <div className="space-y-5">
-            {docs.map((doc) => (
+            {paginatedRows.map((doc: any) => (
               <div
                 key={doc.doc_id}
-                onClick={() => {
-                  setSelectedDocId(doc.doc_id);
-                  console.log("Selected doc id:", doc.doc_id);
-                }}
+                // onClick={() => {
+                //   setSelectedDocId(doc.doc_id);
+                //   console.log("Selected doc id:", doc.doc_id);
+                // }
+                onClick={() => navigate(`/complianceresult/${doc.doc_id}`)}
                 className={`
                   flex items-center justify-between
-                  bg-white/70 backdrop-blur-md
+                bg-white/30 border border-white/40  backdrop-blur-md
                   rounded-2xl px-6 py-5
-                  border shadow-sm
+                  shadow-sm
                   cursor-pointer transition
-                  hover:shadow-md hover:bg-white
-                  ${selectedDocId === doc.doc_id
-                    ? "ring-2 ring-blue-500"
-                    : "border-gray-200"}
-                `}
+                  hover:shadow-md hover:bg-white `}
               >
                 <div className="flex gap-4">
                   <div className="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center">
@@ -143,16 +160,86 @@ export default function ComplianceDocuments() {
                 <ChevronRight className="text-gray-400" />
               </div>
             ))}
-          </div>
+            <div className="max-w-[1200px] mx-auto mt-10 px-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
 
-          {/* RESULTS */}
-          {selectedDocId && (
-            <div id="ComplianceResults" className="mt-12">
-              <ComplianceResults docId={selectedDocId} />
+                {/* LEFT */}
+                <div className="flex items-center gap-2 text-sm whitespace-nowrap">
+                  <Text size="sm">Showing</Text>
+
+                  <Select
+                    value={String(pageSize)}
+                    onChange={(v) => {
+                      setPageSize(Number(v));
+                      setPage(1);
+                    }}
+                    data={(() => {
+                      const step = 10;
+                      const sizes: number[] = [];
+
+                      // Use totalResults instead of totalPages
+                      const maxSize = Math.ceil(totalResults / step) * step;
+
+                      for (let i = step; i <= maxSize; i += step) {
+                        sizes.push(i);
+                      }
+
+                      // Always at least one option
+                      if (sizes.length === 0) sizes.push(10);
+
+                      return sizes.map(String);
+                    })()}
+                    size="xs"
+                    w={70}
+                    classNames={{
+                      input:
+                        "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500 z-[-10]",
+                    }}
+                  />
+
+
+                  <Text size="sm">
+                    {`${startIndex} - ${endIndex} of ${totalResults} Results`}
+                  </Text>
+                </div>
+
+                {/* RIGHT */}
+                {totalPages > 1 && (
+                  <Pagination
+                    total={totalPages}
+                    value={page}
+                    onChange={setPage}
+                    size="sm"
+                    radius="xl"
+                    siblings={1}
+                    withEdges
+                    classNames={{
+                      root: "flex flex-row flex-nowrap items-center gap-1",
+                      control:
+                        "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
+                    }}
+                    styles={{
+                      control: {
+                        "&[data-active]": {
+                          backgroundColor: "#0B63E5",
+                          color: "white",
+                          borderColor: "#0B63E5",
+                        },
+                      },
+                    }}
+                  />
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
+      {/* RESULTS */}
+      {/* {selectedDocId && (
+        <div id="ComplianceResults" className="mt-12">
+          <ComplianceResults docId={selectedDocId} />
+        </div>
+      )} */}
     </>
   );
 }

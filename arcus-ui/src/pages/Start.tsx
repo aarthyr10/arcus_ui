@@ -65,7 +65,7 @@ const Start = () => {
           </h2>
 
           {/* BUTTON */}
-          <Button
+          <button
             onClick={() => navigate("/compliance")}
             className="
               px-8 py-4
@@ -81,7 +81,7 @@ const Start = () => {
             "
           >
             Start Compliance Check <span className="text-xl">→</span>
-          </Button>
+          </button>
         </div>
 
       </div>
