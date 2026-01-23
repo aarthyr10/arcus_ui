@@ -54,15 +54,15 @@ export default function ComplianceDocuments() {
       console.log("State updated:", selectedDocId);
     }
   }, [selectedDocId]);
-  // useEffect(() => {
-  //   if (selectedDocId) {
-  //     setTimeout(() => {
-  //       document
-  //         .getElementById("ComplianceResults")
-  //         ?.scrollIntoView({ behavior: "smooth" });
-  //     }, 100);
-  //   }
-  // }, [selectedDocId]);
+  useEffect(() => {
+    if (selectedDocId) {
+      setTimeout(() => {
+        document
+          .getElementById("ComplianceResults")
+          ?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [selectedDocId]);
 
 
   return (
@@ -147,9 +147,9 @@ export default function ComplianceDocuments() {
 
           {/* RESULTS */}
           {selectedDocId && (
-            // <div id="ComplianceResults" className="mt-12">
+            <div id="ComplianceResults" className="mt-12">
               <ComplianceResults docId={selectedDocId} />
-            // </div>
+            </div>
           )}
         </div>
       </div>
