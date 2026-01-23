@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
-import { LuBookOpen } from "react-icons/lu";
 import { BsFileText } from "react-icons/bs";
-import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
 import React from "react";
 
 type Props = {
