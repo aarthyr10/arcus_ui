@@ -103,7 +103,7 @@ export default function TrainingDocuments() {
 
             {/* ✅ NAVIGATION ADDED HERE */}
             <button
-              onClick={() => navigate("/uploadsTrainingDocuments")}
+              onClick={() => navigate("/uploadknowledge")}
               className="
               h-11 px-6 rounded-full
               bg-gradient-to-r from-[#2f80ff] to-[#12c2e9]
