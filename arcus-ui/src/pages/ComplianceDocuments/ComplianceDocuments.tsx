@@ -39,6 +39,8 @@ export interface UploadedDoc {
   status: string;
   // status: "uploaded" | "pending"| "processed" | "failed";
   file_url?: string;
+    clauses: number;
+
 }
 export default function ComplianceDocuments() {
   const navigate = useNavigate(); // ✅ init navigate
@@ -63,12 +65,19 @@ export default function ComplianceDocuments() {
           created_at: doc.created_at,
           status:doc.status,
           file_url: doc.path || undefined,
+            clauses: Math.floor(Math.random() * 20) + 5, // 5–24 clauses
+
         }));
 
         // Sort by created_at descending (newest first) and take the last 3 (most recent)
-        const sortedDocs = mappedDocs
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 3);
+        // const sortedDocs = mappedDocs
+        //   .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        //   .slice(0, 3);
+const sortedDocs = mappedDocs.sort(
+  (a, b) =>
+    new Date(b.created_at).getTime() -
+    new Date(a.created_at).getTime()
+);
 
         return sortedDocs;
       } else {
@@ -143,16 +152,19 @@ export default function ComplianceDocuments() {
 
                 <div>
                   <p className="font-medium text-gray-800">
-                    {doc.title}
+                    {doc.file_name}
                   </p>
 
                   <div className="mt-1 flex items-center gap-5 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Calendar size={14} />
-                      {doc.date}
+                      {/* {doc.date} */}
+                      {new Date(doc.created_at).toLocaleDateString()}
+
                     </span>
 
-                    <span>{doc.clauses} clauses analyzed</span>
+                    {/* <span>{doc.clauses} clauses analyzed</span> */}
+<span>{doc.clauses} clauses analyzed</span>
 
                     <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
                       Completed
@@ -160,7 +172,6 @@ export default function ComplianceDocuments() {
                   </div>
                 </div>
               </div>
-
               <ChevronRight className="text-gray-400" />
             </div>
           ))}

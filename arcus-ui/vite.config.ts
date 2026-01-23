@@ -26,7 +26,8 @@ export default defineConfig({
     // },
      proxy: {
       "/api": {  // Proxy all /api/* requests
-        target: "https://contractional-napoleon-superblessed.ngrok-free.dev",
+        // target: "https://contractional-napoleon-superblessed.ngrok-free.dev",
+        target: "https://robbi-ungouty-babette.ngrok-free.dev",
         changeOrigin: true,
         secure: false,
       },},
