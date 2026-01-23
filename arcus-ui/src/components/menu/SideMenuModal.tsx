@@ -52,12 +52,10 @@ const SideMenuModal = ({ onClose }: Props) => {
           rounded-2xl
           shadow-2xl
           p-4
-          z-50
-        "
-      >
+          z-50 " >
         {menuItem("Compliance Form", "/compliance", <BsFileText />)}
-        {/* {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)}
-        {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)} */}
+         {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)} 
+        {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)} 
 
         <hr className="my-3 border-gray-300" />
 

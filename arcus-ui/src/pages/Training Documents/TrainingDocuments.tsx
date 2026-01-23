@@ -2,7 +2,7 @@ import axios from "axios";
 import { ChevronRight, FileText, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-import ComplianceResults from "./ComplianceResult";
+import ComplianceResults from "../ComplianceDocuments/ComplianceResult";
 import { useNavigate } from "react-router-dom";
 
 export interface UploadedDoc {
@@ -14,14 +14,14 @@ export interface UploadedDoc {
   clauses: number;
 }
 
-export default function ComplianceDocuments() {
+export default function TrainingDocuments() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   const endPoint =
     ServiceEndpoint.apiBaseUrl +
-    ServiceEndpoint.uploadedDocuments.getAll;
+    ServiceEndpoint.trainDocuments.getAll;
 
   const getUploadedDocuments = async (): Promise<UploadedDoc[]> => {
     const res = await axios.get(endPoint, {
@@ -54,16 +54,6 @@ export default function ComplianceDocuments() {
       console.log("State updated:", selectedDocId);
     }
   }, [selectedDocId]);
-  // useEffect(() => {
-  //   if (selectedDocId) {
-  //     setTimeout(() => {
-  //       document
-  //         .getElementById("ComplianceResults")
-  //         ?.scrollIntoView({ behavior: "smooth" });
-  //     }, 100);
-  //   }
-  // }, [selectedDocId]);
-
 
   return (
     <>
@@ -74,16 +64,16 @@ export default function ComplianceDocuments() {
           <div className="flex items-center justify-between mb-10">
             <div>
               <h1 className="text-3xl font-semibold text-gray-800">
-                Compliance Documents
+                Training Documents
               </h1>
               <p className="mt-1 text-gray-500">
-                View previously uploaded compliance documents and their analysis results
+                Manage AI knowledge base with manuals, SOPs, and policies
               </p>
             </div>
 
             {/* ✅ NAVIGATION ADDED HERE */}
             <button
-              onClick={() => navigate("/uploads")}
+              onClick={() => navigate("/uploadsTrainingDocuments")}
               className="
               h-11 px-6 rounded-full
               bg-gradient-to-r from-[#2f80ff] to-[#12c2e9]
@@ -147,9 +137,9 @@ export default function ComplianceDocuments() {
 
           {/* RESULTS */}
           {selectedDocId && (
-            // <div id="ComplianceResults" className="mt-12">
+            <div className="mt-12">
               <ComplianceResults docId={selectedDocId} />
-            // </div>
+            </div>
           )}
         </div>
       </div>

@@ -8,8 +8,9 @@ import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
 import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
 import EditReview from './pages/Edit&Review/EditReview';
-import ComplianceResults from './pages/Result/ComplianceResult';
+// import ComplianceResults from './pages/Result/ComplianceResult';
 import axios from 'axios';
+import TrainingDocuments from './pages/Training Documents/TrainingDocuments';
 
 function App() {
 //   useEffect(() => {
@@ -63,7 +64,8 @@ function App() {
             <Route path='/uploadsprogess' element={<UploadProgress />} />
             <Route path="/compliance" element={<ComplianceDocuments />} />
             <Route path="/editreview" element={<EditReview />} />
-            <Route path="/result" element={<ComplianceResults/>} />
+            <Route path="/knowledge" element={<TrainingDocuments />} />
+            {/* <Route path="/result" element={<ComplianceResults/>} /> */}
           </Route>
           {/* <Route path="/analyzing" element={<AnalyzingDocuments />} /> */}
         </Routes>
