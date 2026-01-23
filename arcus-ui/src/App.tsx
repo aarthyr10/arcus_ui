@@ -6,10 +6,8 @@ import Start from './pages/Start';
 import UploadDocuments from './pages/UploadDocuments/UploadDocuments';
 import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
-import AnalyzingDocuments from './pages/UploadDocuments/AnalyzingDocuments';
 import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
 import EditReview from './pages/Edit&Review/EditReview';
-import { useEffect } from 'react';
 import ComplianceResults from './pages/Result/ComplianceResult';
 import axios from 'axios';
 
