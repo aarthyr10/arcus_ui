@@ -9,7 +9,7 @@ export default function AppLayout() {
             </div>
             {/* This takes remaining height after header */}
             {/* <main> */}
-                  <main className="h-full flex items-center justify-center px-4">
+                  <main className="flex-1 overflow-hidden flex items-center justify-center px-4">
 
                   <Outlet />
                 {/* {children} */}
