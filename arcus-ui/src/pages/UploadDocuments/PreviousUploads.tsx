@@ -129,7 +129,7 @@ const PreviousUploads = () => {
         <p className="text-gray-400 text-sm">No documents uploaded</p>
       )}
 
-      <div className="space-y-4 pr-2">
+      <div className="space-y-4">
         {docs.map((doc) => (
           <UploadItem
             key={doc.doc_id}

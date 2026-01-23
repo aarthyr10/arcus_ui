@@ -92,7 +92,7 @@ const UploadProgress = () => {
 
   return (
     <>
-      <div className="flex w-full items-center align-middle justify-center bg-gradient-to-br from-[#eaf6fb] to-[#] px-4 py-2">
+      <div className="flex w-full items-center align-middle mt-7 justify-center bg-linear-to-br from-[#eaf6fb] to-[#cfe9f6] px-4 py-2">
         <style>{`
         @keyframes cloudPopup {
           0% { 
