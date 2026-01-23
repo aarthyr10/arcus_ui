@@ -11,12 +11,10 @@ export default function EditReview() {
   const [text, setText] = useState(originalText);
 
   return (
-    <div className="min-h-screen w-250 mt-5 bg-gradient-to-br from-[#edf3f6] to-[#fafdff] px-10 py-6">
+    <div className="h-full w-250 mt-5 overflow-y-auto bg-gradient-to-br from-[#edf3f6] to-[#fafdff] px-10 py-6">
 
-      {/* 🌍 PAGE CONTAINER — WIDTH FIX HERE */}
       <div className="w-full max-w-6xl mx-auto">
 
-        {/* 🔝 TOP BAR */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
@@ -36,10 +34,8 @@ export default function EditReview() {
           </button>
         </div>
 
-        {/* 📦 MAIN CARD */}
         <div className="bg-white/60 backdrop-blur-xl border border-white/40 rounded-2xl p-8 shadow-lg">
 
-          {/* 🧠 AI GENERATED RESPONSE */}
           <div>
             <label
               htmlFor="ai-response"
@@ -66,7 +62,6 @@ export default function EditReview() {
             />
           </div>
 
-          {/* 💡 AI SUGGESTIONS */}
           <div className="mt-8">
             <p className="text-sm font-semibold text-gray-600 mb-3">
               AI Suggestions
@@ -110,7 +105,6 @@ export default function EditReview() {
             </div>
           </div>
 
-          {/* 🎯 ACTION BUTTONS */}
           <div className="mt-10 flex gap-6">
             <button
               onClick={() => navigate(-1)}
@@ -146,7 +140,6 @@ export default function EditReview() {
           </div>
         </div>
 
-        {/* 📘 EDITING TIPS */}
         <div className="mt-8 bg-white/50 backdrop-blur-xl border border-white/40 rounded-2xl p-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">
             Editing Tips

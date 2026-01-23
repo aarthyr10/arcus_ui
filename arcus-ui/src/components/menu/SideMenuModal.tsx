@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
+import { LuBookOpen } from "react-icons/lu";
 import { BsFileText } from "react-icons/bs";
+import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
 import React from "react";
 
 type Props = {
@@ -44,7 +46,7 @@ const SideMenuModal = ({ onClose }: Props) => {
 
       <div
         className="
-          fixed top-20 right-30
+          fixed top-20 right-15
           w-64
           bg-[#eaf7fb]
           rounded-2xl
