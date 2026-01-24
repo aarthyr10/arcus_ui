@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, FileText, Upload, X } from "lucide-react";
-import axios from "axios";
-import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-import { Navigate, useNavigate } from "react-router-dom";
+// import axios from "axios";
+// import { ServiceEndpoint } from "../../config/ServiceEndpoint";
+import { useNavigate } from "react-router-dom";
 import { LiaCheckCircleSolid } from "react-icons/lia";
 
 export default function UploadTrainingDocument() {
@@ -11,12 +11,10 @@ export default function UploadTrainingDocument() {
 
     const [file, setFile] = useState<File | null>(null);
     const [docType, setDocType] = useState<string>("");
-    const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
+    const [loading, _setLoading] = useState(false);
+    const [_progress, _setProgress] = useState(0);
 
-    const endPoint =
-        ServiceEndpoint.apiBaseUrl +
-        ServiceEndpoint.trainDocuments.upload;
+    // const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.trainDocuments.upload;
 
     // ✅ Browse file
     const handleBrowse = () => {
@@ -43,33 +41,33 @@ export default function UploadTrainingDocument() {
     };
 
     // ✅ Upload handler
-    const handleProcess = async () => {
-        if (!file || !docType) return;
+    // const handleProcess = async () => {
+    //     if (!file || !docType) return;
 
-        const formData = new FormData();
-        formData.append("files", file);
-        formData.append("product_code", "TEST123");
+    //     const formData = new FormData();
+    //     formData.append("files", file);
+    //     formData.append("product_code", "TEST123");
 
-        try {
-            setLoading(true);
-            setProgress(0);
+    //     try {
+    //         setLoading(true);
+    //         setProgress(0);
 
-            const res = await axios.post(endPoint, formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-                onUploadProgress: (e) => {
-                    if (e.total) {
-                        setProgress(Math.round((e.loaded * 100) / e.total));
-                    }
-                },
-            });
-            navigate("/knowledge");
-        } catch (err) {
-            console.error("Upload failed", err);
-            alert("Upload failed. Please try again.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    //         const res = await axios.post(endPoint, formData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //             onUploadProgress: (e) => {
+    //                 if (e.total) {
+    //                     setProgress(Math.round((e.loaded * 100) / e.total));
+    //                 }
+    //             },
+    //         });
+    //         navigate("/knowledge");
+    //     } catch (err) {
+    //         console.error("Upload failed", err);
+    //         alert("Upload failed. Please try again.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
     const documentTypes = [
         {
             title: "Manual",
@@ -232,7 +230,7 @@ export default function UploadTrainingDocument() {
                     </button>
 
                     <button
-                        onClick={handleProcess}
+                        // onClick={handleProcess}
                         disabled={!file || !docType || loading}
                         className={`px-6 py-2 rounded-lg text-sm flex items-center gap-2
       ${file && docType

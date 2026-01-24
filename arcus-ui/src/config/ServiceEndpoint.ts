@@ -23,7 +23,7 @@ const ServiceEndpoint={
     getAll: "/uploaded-documents",               // GET
     getById: (id: string) => `/uploaded-documents/${id}`, // GET
     updateAnswer: (docId: string, questionId: string) =>
-     ` /uploaded-documents/${docId}/questions/${questionId}`, // POST
+     `/uploaded-documents/${docId}/questions/${questionId}`, // POST
   },
 
   // =========================

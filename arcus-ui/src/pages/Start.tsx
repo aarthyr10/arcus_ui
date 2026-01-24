@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "@mantine/core";
 import logo from "../../public/Images/daikin.png";
 
 const Start = () => {

@@ -41,17 +41,13 @@ const PreviousUploads = () => {
         },
       });
 
-      console.log("View document response:", res.data);
 
-      navigate(`/uploaded-documents/${id}`, {
+      navigate(`/complianceresult/${id}`, {
         state: { document: res.data },
       });
 
     } catch (err: any) {
-      console.error(
-        "Failed to view document",
-        err.response?.data || err.message
-      );
+  
       alert("Failed to view document. Please try again.");
     }
   };

@@ -10,9 +10,9 @@ type ResultRow = {
   response: string;
   score: number;
 };
-type Props = {
-  docId: string;
-};
+// type Props = {
+//   docId: string;
+// };
 
 const getScoreFromAnswer = (answer: string) => {
   if (answer?.toLowerCase() === "compliant") return 95;
@@ -43,7 +43,7 @@ export default function ComplianceResults() {
   const [pageSize, setPageSize] = useState(10);
 
   // ✅ FIX: view state added
-  const [view, setView] = useState<"table" | "cards">("table");
+  // const [view, setView] = useState<"table" | "cards">("table");
 
 
   useEffect(() => {
@@ -84,13 +84,11 @@ export default function ComplianceResults() {
   }, [docId]);
 
   const handleEdit = (id: number) => {
-    console.log("Edit row with id:", id);
     navigate(`/compliance/edit/${docId}/${id}`);
   };
 
-  const handleDelete = (id: number) => {
-    console.log("Delete row with id:", id);
-  };
+  // const handleDelete = () => {
+  // };
 
   const pages = useMemo(() => {
     return chunk(rows, pageSize);
@@ -136,7 +134,7 @@ export default function ComplianceResults() {
             </button>
 
             {/* TOGGLE */}
-            <div className="flex p-1">
+            {/* <div className="flex p-1">
               <button
                 onClick={() => setView("table")}
                 className={`px-4 py-1 rounded-md text-sm ${view === "table"
@@ -155,7 +153,7 @@ export default function ComplianceResults() {
               >
                 Cards
               </button>
-            </div>
+            </div> */}
 
             <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm">
               <Download size={14} />
@@ -165,7 +163,7 @@ export default function ComplianceResults() {
         </div>
 
         {/* TABLE VIEW */}
-        {view === "table" && (
+        {/* {view === "table" && ( */}
           <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6">
             <table className="w-full text-sm">
               <thead>
@@ -215,7 +213,7 @@ export default function ComplianceResults() {
                         <Trash2
                           size={16}
                           className="text-red-500 cursor-pointer hover:text-red-700"
-                          onClick={() => handleDelete(row.id)}
+                          // onClick={() => handleDelete(row.id)}
                         />
                       </div>
                     </td>
@@ -225,10 +223,10 @@ export default function ComplianceResults() {
               </tbody>
             </table>
           </div>
-        )}
+        {/* )} */}
 
         {/* CARD VIEW */}
-        {view === "cards" && (
+        {/* {view === "cards" && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {paginatedRows.map((row: any) => (
               <div key={row.id} className="bg-white/70 rounded-2xl p-5 shadow">
@@ -237,7 +235,7 @@ export default function ComplianceResults() {
               </div>
             ))}
           </div>
-        )}
+        )} */}
       </div>
       <div className="max-w-[1200px] mx-auto mt-10 px-4">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
