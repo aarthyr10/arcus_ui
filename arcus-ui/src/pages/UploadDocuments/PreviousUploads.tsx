@@ -11,7 +11,13 @@ export interface UploadedDoc {
   doc_id: string;
   file_name: string;
   created_at: string;
-  status: "uploaded" | "pending"| "processed" | "failed";
+  status:  "UPLOADED"
+  | "PROCESSING"
+  | "SUCCESS"
+  | "FAILED"
+  | "ERROR"
+  | "PENDING"
+  | "NOT_FOUND";
   file_url?: string;
 }
 
@@ -54,16 +60,22 @@ const PreviousUploads = () => {
     apiStatus: string
   ): UploadedDoc["status"] => {
     switch (apiStatus) {
-      case "UPLOADED":
-        return "uploaded";
-      case "PROCESSING":
-        return "pending";
-        case "SUCCESS":
-        return "processed";
-      case "ERROR":
-        return "failed";
-      default:
-        return "pending";
+        case "UPLOADED":
+      return "UPLOADED";
+    case "PROCESSING":
+      return "PROCESSING";
+    case "SUCCESS":
+      return "SUCCESS";
+    case "FAILED":
+      return "FAILED";
+    case "ERROR":
+      return "ERROR";
+    case "PENDING":
+      return "PENDING";
+    case "NOT_FOUND":
+      return "NOT_FOUND";
+    default:
+      return "NOT_FOUND";
     }
   };
 

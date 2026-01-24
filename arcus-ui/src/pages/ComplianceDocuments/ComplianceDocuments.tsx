@@ -1,10 +1,10 @@
 import axios from "axios";
-import { ChevronRight, FileText, Calendar } from "lucide-react";
+import { ChevronRight, FileText, Calendar, ListChecks, FileCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { useNavigate } from "react-router-dom";
 import { Pagination, Select, Text } from "@mantine/core";
-
+import { CheckCircle, XCircle, Clock, UploadCloud } from "lucide-react";
 export interface UploadedDoc {
   doc_id: string;
   file_name: string;
@@ -19,6 +19,47 @@ function chunk<T>(array: T[], size: number): T[][] {
   const tail = array.slice(size);
   return [head, ...chunk(tail, size)];
 }
+
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    icon: React.ReactNode;
+    badgeClass: string;
+    iconBg: string;
+  }
+> = {
+  UPLOADED: {
+    label: "Uploaded",
+    icon: <UploadCloud size={14} />,
+    badgeClass: "bg-blue-100 text-blue-700",
+    iconBg: "bg-blue-500",
+  },
+  PROCESSING: {
+    label: "Processing",
+    icon: <Clock size={14} />,
+    badgeClass: "bg-yellow-100 text-yellow-700",
+    iconBg: "bg-yellow-500",
+  },
+  SUCCESS: {
+    label: "Completed",
+    icon: <CheckCircle size={14} />,
+    badgeClass: "bg-green-100 text-green-700",
+    iconBg: "bg-green-500",
+  },
+  ERROR: {
+    label: "Error",
+    icon: <XCircle size={14} />,
+    badgeClass: "bg-red-100 text-red-700",
+    iconBg: "bg-red-500",
+  },
+  FAILED: {
+    label: "Failed",
+    icon: <XCircle size={14} />,
+    badgeClass: "bg-red-100 text-red-700",
+    iconBg: "bg-red-500",
+  },
+};
 
 export default function ComplianceDocuments() {
   const navigate = useNavigate();
@@ -116,50 +157,77 @@ export default function ComplianceDocuments() {
           </div>
 
           <div className="space-y-5">
-            {paginatedRows.map((doc: any) => (
-              <div
-                key={doc.doc_id}
-                // onClick={() => {
-                //   setSelectedDocId(doc.doc_id);
-                //   console.log("Selected doc id:", doc.doc_id);
-                // }
-                onClick={() => navigate(`/complianceresult/${doc.doc_id}`)}
-                className={`
+            {paginatedRows.map((doc: any) => {
+              const status =
+                STATUS_CONFIG[doc.status] ?? STATUS_CONFIG.UPLOADED;
+              return (
+                <div
+                  key={doc.doc_id}
+                  // onClick={() => {
+                  //   setSelectedDocId(doc.doc_id);
+                  //   console.log("Selected doc id:", doc.doc_id);
+                  // }
+                  onClick={() => navigate(`/complianceresult/${doc.doc_id}`)}
+                  className={`
                   flex items-center justify-between
                 bg-white/30 border border-white/40  backdrop-blur-md
                   rounded-2xl px-6 py-5
                   shadow-sm
                   cursor-pointer transition
                   hover:shadow-md hover:bg-white `}
-              >
-                <div className="flex gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center">
-                    <FileText className="text-white" size={22} />
-                  </div>
+                >
+                  <div className="flex gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center">
+                      <FileText className="text-white" size={22} />
+                    </div>
 
-                  <div>
-                    <p className="font-medium text-gray-800">
-                      {doc.file_name}
-                    </p>
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {doc.file_name}
+                      </p>
 
-                    <div className="mt-1 flex gap-5 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {new Date(doc.created_at).toLocaleDateString()}
-                      </span>
+                      {/* <div className="mt-1 flex gap-10 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(doc.created_at).toLocaleDateString()}
+                        </span>
 
-                      <span>{doc.clauses} clauses analyzed</span>
+                        <span>{doc.clauses} clauses analyzed</span>
 
-                      <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
+                        {/* <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
                         Completed
-                      </span>
+                      </span> 
+                        <span
+                          className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium ${status.badgeClass}`}
+                        >
+                          {status.icon}
+                          {status.label}
+                        </span>
+                      </div> */}
+                      <div className="mt-1 flex items-center gap-10 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          {new Date(doc.created_at).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <FileCheck size={14} />
+                          {doc.clauses} clauses analyzed
+                        </span>
+                        <span
+                          className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium ${status.badgeClass}`}
+                        >
+                          {status.icon}
+                          {status.label}
+                        </span>
+                      </div>
+
                     </div>
                   </div>
-                </div>
 
-                <ChevronRight className="text-gray-400" />
-              </div>
-            ))}
+                  <ChevronRight className="text-gray-400" />
+                </div>
+              );
+            })}
             <div className="max-w-[1200px] mx-auto mt-10 px-4">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
 

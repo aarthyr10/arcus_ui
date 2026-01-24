@@ -4,21 +4,33 @@ interface UploadItemProps {
   id: string; // 👈 add this
   name: string;
   date: string;
-  status: "uploaded" | "pending" | "processed" | "failed";
-  // status: string;
+status: "UPLOADED"
+  | "PROCESSING"
+  | "SUCCESS"
+  | "FAILED"
+  | "ERROR"
+  | "PENDING"
+  | "NOT_FOUND"; // status: string;
   onView: (id: string) => void;
 }
 
 const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
   // Dynamic status configuration
   const statusConfig = {
-    uploaded: {
+    UPLOADED: {
       label: "Uploaded", color: "#3B82F6",
       icon: Upload
     },
-    processed: { label: "Processed", color: "#05DF72", icon: CheckCircle },
-    pending: { label: "Pending", color: "#F59E0B", icon: Clock },
-    failed: { label: "Failed", color: "#EF4444", icon: XCircle },
+    PROCESSING: {
+      label: "Processing", color: "#3B82F6",
+      icon: Clock
+    },
+    SUCCESS: { label: "Completed", color: "#05DF72", icon: CheckCircle },
+    FAILED: { label: "Failed", color: "#EF4444", icon: XCircle },
+    ERROR: { label: "Error", color: "#EF4444", icon: XCircle },
+    NOT_FOUND: { label: "Not Found", color: "#EF4444", icon: XCircle },
+    PENDING: { label: "Pending", color: "#F59E0B", icon: Clock },
+    
   };
 
   const config = statusConfig[status];

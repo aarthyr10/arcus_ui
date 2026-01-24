@@ -1,8 +1,9 @@
 import { useRef, useState } from "react";
-import { FileText, Upload } from "lucide-react";
+import { ChevronLeft, FileText, Upload, X } from "lucide-react";
 import axios from "axios";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { Navigate, useNavigate } from "react-router-dom";
+import { LiaCheckCircleSolid } from "react-icons/lia";
 
 export default function UploadTrainingDocument() {
     const navigate = useNavigate();
@@ -98,13 +99,22 @@ export default function UploadTrainingDocument() {
             <div className="w-full max-w-[1100px]">
 
                 {/* Title */}
-                <div className="text-center mb-10">
-                    <h1 className="text-2xl font-semibold text-gray-800">
-                        Upload Training Document
-                    </h1>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Add documents to enhance AI knowledge base
-                    </p>
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-gray-800">
+                            Upload Training Document
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Add documents to enhance AI knowledge base
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => navigate("/knowledge")}>
+                            <ChevronLeft size={16} />
+                            Back
+                        </button>
+                    </div>
                 </div>
 
                 {/* Document Type */}
@@ -133,19 +143,14 @@ export default function UploadTrainingDocument() {
                             );
                         })}
                     </div>
-
-
                 </div>
 
-                {/* Upload Box */}
                 {/* Upload Box */}
                 <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-8 mb-10">
                     <div
                         onDrop={handleDrop}
                         onDragOver={(e) => e.preventDefault()}
-                        className="relative rounded-xl border border-dashed border-[#7dd3fc]
-               bg-[#f3fbff] px-6 py-14 text-center"
-                    >
+                        className="relative rounded-xl border border-dashed border-[#7dd3fc]bg-[#f3fbff] px-6 py-14 text-center">
                         <Upload className="mx-auto text-gray-600 mb-4" size={36} />
 
                         <p className="text-sm font-medium text-gray-700">
@@ -157,11 +162,8 @@ export default function UploadTrainingDocument() {
 
                         <button
                             onClick={handleBrowse}
-                            className="mt-4 px-5 py-2 text-sm rounded-md
-                 bg-[#2f80ff] text-white hover:bg-blue-700"
-                            type="button"
-
-                        >
+                            className="mt-4 px-5 py-2 text-sm rounded-md bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white"
+                            type="button"  >
                             Browse Files
                         </button>
 
@@ -192,7 +194,7 @@ export default function UploadTrainingDocument() {
                                 </div>
                             </div>
 
-                            <button
+                            {/* <button
                                 onClick={() => {
                                     setFile(null);
                                     setDocType("");
@@ -203,20 +205,29 @@ export default function UploadTrainingDocument() {
                                     }
                                 }} className="text-gray-400 hover:text-red-500 text-lg"
                             >
-                                ✕
+                                <X className="text-red-500 hover:scale-110 transition" size={18} />
+                            </button> */}
+                            <button
+                                aria-label="Remove file"
+                                onClick={() => {
+                                    setFile(null);
+                                    // setDocType("");
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.value = "";
+                                        // navigate(-1)
+                                    }
+                                }} className="cursor-pointer"
+                            >
+                                <X className="text-red-500 hover:scale-110 transition" size={18} />
                             </button>
                         </div>
                     )}
                 </div>
-
-
-                {/* Actions */}
                 {/* Actions */}
                 <div className="flex justify-end gap-4">
                     <button
-                        className="px-6 py-2 rounded-lg text-sm
-               bg-white text-gray-600 shadow-sm"
-                    >
+                        className="px-6 py-2 rounded-lg text-sm bg-white text-gray-600 shadow-sm"
+                        onClick={() => { setDocType(""); }} >
                         Cancel
                     </button>
 
@@ -229,7 +240,9 @@ export default function UploadTrainingDocument() {
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
                     >
-                        ✓ Upload Documents
+                        <span className="w-5 h-5 flex items-center justify-center">
+                            <LiaCheckCircleSolid size={18} />
+                        </span> Upload Documents
                     </button>
                 </div>
 

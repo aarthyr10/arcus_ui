@@ -5,6 +5,8 @@ import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 // import ComplianceResults from "../ComplianceDocuments/ComplianceResult";
 import { useNavigate } from "react-router-dom";
 import { Pagination, Select, Text } from "@mantine/core";
+import { CheckCircle, XCircle, Clock, UploadCloud } from "lucide-react";
+
 
 export interface UploadedDoc {
   doc_id: string;
@@ -21,6 +23,47 @@ function chunk<T>(array: T[], size: number): T[][] {
   const tail = array.slice(size);
   return [head, ...chunk(tail, size)];
 }
+
+const STATUS_CONFIG: Record<
+  string,
+  {
+    label: string;
+    icon: React.ReactNode;
+    badgeClass: string;
+    iconBg: string;
+  }
+> = {
+  UPLOADED: {
+    label: "Uploaded",
+    icon: <UploadCloud size={14} />,
+    badgeClass: "bg-blue-100 text-blue-700",
+    iconBg: "bg-blue-500",
+  },
+  PROCESSING: {
+    label: "Processing",
+    icon: <Clock size={14} />,
+    badgeClass: "bg-yellow-100 text-yellow-700",
+    iconBg: "bg-yellow-500",
+  },
+  SUCCESS: {
+    label: "Success",
+    icon: <CheckCircle size={14} />,
+    badgeClass: "bg-green-100 text-green-700",
+    iconBg: "bg-green-500",
+  },
+  ERROR: {
+    label: "Error",
+    icon: <XCircle size={14} />,
+    badgeClass: "bg-red-100 text-red-700",
+    iconBg: "bg-red-500",
+  },
+    FAILED: {
+    label: "Failed",
+    icon: <XCircle size={14} />,
+    badgeClass: "bg-red-100 text-red-700",
+    iconBg: "bg-red-500",
+  },
+};
 
 export default function TrainingDocuments() {
   const navigate = useNavigate();
@@ -116,7 +159,10 @@ export default function TrainingDocuments() {
           </div>
 
           <div className="space-y-5">
-            {paginatedRows.map((doc: any) => (
+            {paginatedRows.map((doc: any) => {
+                const status =
+                STATUS_CONFIG[doc.status] ?? STATUS_CONFIG.UPLOADED;
+              return (
               <div
                 key={doc.doc_id}
                 // onClick={() => {
@@ -153,7 +199,7 @@ export default function TrainingDocuments() {
                       {/* <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
                         Completed
                       </span> */}
-                      <span
+                      {/* <span
                         className={`px-3 py-[2px] rounded-md text-xs font-medium ${doc.status === "Manual" && "bg-blue-100 text-blue-600"
                           } ${doc.status === "SOP" && "bg-purple-100 text-purple-600"}
             ${doc.status === "Policy" && "bg-green-100 text-green-600"}
@@ -162,7 +208,13 @@ export default function TrainingDocuments() {
           `}
                       >
                         {doc.status}
-                      </span>
+                      </span> */}
+                       <span
+                          className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium ${status.badgeClass}`}
+                        >
+                          {status.icon}
+                          {status.label}
+                        </span>
                     </div>
                   </div>
                 </div>
@@ -170,7 +222,8 @@ export default function TrainingDocuments() {
                 <ChevronRight className="text-gray-400" />
               </div>
 
-            ))}
+            );
+            })}
             {/* <div className="mt-10 px-6 py-4 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto"> */}
             <div className="bg-white/30 border border-white/40 mt-10 px-6 py-4 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto">
               <h1 className="text-xl mb-2">
