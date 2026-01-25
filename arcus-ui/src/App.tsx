@@ -12,14 +12,13 @@ import TrainingDocuments from './pages/Training Documents/TrainingDocuments';
 import ComplianceResults from './pages/ComplianceDocuments/ComplianceResult';
 import TrainingDocumentsResult from './pages/Training Documents/TrainingDocumentsResult';
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
-import ExportComplianceReport from './pages/ComplianceDocuments/ExportComplianceReport';
 import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
 import { useEffect } from 'react';
 
 function App() {
   useEffect(() => {
     const handlePopState = () => {
-      alert("Upload in progress. Please wait until it completes.");
+      // alert("Upload in progress. Please wait until it completes.");
       window.history.pushState(null, "", window.location.href);
     };
 
@@ -55,7 +54,6 @@ function App() {
               <Route path="/compliance" element={<ComplianceDocuments />} />
               <Route path="/complianceresult/:docId" element={<ComplianceResults />} />
               <Route path="/compliance/edit/:docId/:id" element={<EditReview />} />
-              <Route path="/compliancereport" element={<ExportComplianceReport />} />
               <Route path="/knowledge" element={<TrainingDocuments />} />
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />

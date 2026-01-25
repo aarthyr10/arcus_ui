@@ -75,8 +75,6 @@ const PreviousUploads = () => {
         },
       });
 
-      console.log("API Response:", res.data);
-
       if (Array.isArray(res.data)) {
         const mappedDocs = res.data.map((doc: any) => ({
           doc_id: doc.doc_id,

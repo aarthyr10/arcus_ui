@@ -4,13 +4,14 @@ import axios from "axios";
 import { ChevronLeft, Download, Loader, Pencil, Trash2 } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
+import ExportComplianceReportModal from "./ExportComplianceReport";
 
 type ResultRow = {
   id: number;
   clause: string;
   response: string;
   score: number;
-  reference?: string;  
+  reference?: string;
 };
 
 const getScoreFromAnswer = (answer: string) => {
@@ -37,12 +38,14 @@ export default function ComplianceResults() {
   const { docId } = useParams<{ docId: string }>();
   const [rows, setRows] = useState<ResultRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
-    if (!docId) return; 
+    if (!docId) return;
     const fetchResults = async () => {
       try {
         setLoading(true);
@@ -115,168 +118,182 @@ export default function ComplianceResults() {
   }
 
   return (
-    <div className="z-10 px-6 py-6 mt-13">
-      <div className="max-w-[1200px] mx-auto">
+    <>
+      <div className="z-10 px-6 py-6 mt-13">
+        <div className="max-w-[1200px] mx-auto">
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-800">
-              Compliance Results
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Review AI-generated compliance responses
-            </p>
+          {/* HEADER */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-semibold text-gray-800">
+                Compliance Results
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Review AI-generated compliance responses
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer" onClick={() => navigate("/compliance")}>
+                <ChevronLeft size={16} />
+                Back
+              </button>
+
+              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer"
+                onClick={() =>
+                  // navigate("/compliancereport", {
+                  //   state: {
+                  //     questions: rows.map(r => ({
+                  //       question_no: r.id,
+                  //       question: r.clause,
+                  //       answer: r.response,
+                  //       reference: r.reference ?? "-", 
+                  //       score: r.score
+                  //     }))
+                  //   }
+                  // })
+                  setOpen(true)
+                }>
+                <Download size={14} />
+                Export Report
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 text-sm text-blue-600" onClick={() => navigate("/compliance")}>
-              <ChevronLeft size={16} />
-              Back
-            </button>
-
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm"
-              onClick={() =>
-                navigate("/compliancereport", {
-                  state: {
-                    questions: rows.map(r => ({
-                      question_no: r.id,
-                      question: r.clause,
-                      answer: r.response,
-                      reference: r.reference ?? "-", 
-                      score: r.score
-                    }))
-                  }
-                })
-              }>
-              <Download size={14} />
-              Export Report
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-600 ">
-                <th className="py-3 px-2 w-[60px]">S.No</th>
-                <th className="py-3 px-2 w-[500px]">Compliance Clause</th>
-                <th className="py-3 px-5">AI Response</th>
-                <th className="py-3 px-2 w-[180px]">Confidence</th>
-                <th className="py-3 px-2 w-[120px] text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedRows.map((row: any) => (
-                <tr key={row.id}>
-                  <td className="py-4 px-2">{row.id}</td>
-                  <td className="py-4 px-2">{row.clause}</td>
-                  <td className="py-4 px-5">{row.response}</td>
-                  <td className="py-4 px-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-sm font-medium ${row.score >= 80
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-600 ">
+                  <th className="py-3 px-2 w-[60px]">S.No</th>
+                  <th className="py-3 px-2 w-[650px]">Compliance Clause</th>
+                  <th className="py-3 px-5 w-[200px]">AI Response</th>
+                  <th className="py-3 px-2 w-[180px]">Confidence</th>
+                  <th className="py-3 px-2 w-[120px] text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedRows.map((row: any) => (
+                  <tr key={row.id}>
+                    <td className="py-4 px-2">{row.id}</td>
+                    <td className="py-4 px-2">{row.clause}</td>
+                    <td className="py-4 px-5">{row.response}</td>
+                    <td className="py-4 px-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-sm font-medium ${row.score >= 80
                             ? "text-green-600"
                             : row.score >= 50
                               ? "text-yellow-600"
                               : "text-red-600"
-                          }`} >
-                        {row.score}%
-                      </span>
-                      {/* Progress bar container */}
-                      <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            }`} >
+                          {row.score}%
+                        </span>
+                        {/* Progress bar container */}
                         <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${getColor(row.score)}`}
-                            style={{ width: `${row.score}%` }}
-                          />
+                          <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${getColor(row.score)}`}
+                              style={{ width: `${row.score}%` }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  <td className="py-4 text-center">
-                    <div className="flex items-center justify-center gap-3">
-                      <Pencil
-                        size={16}
-                        className="text-blue-600 cursor-pointer hover:text-blue-800"
-                        onClick={() => handleEdit(row.id)}
-                      />
-                      <Trash2
-                        size={16}
-                        className="text-red-500 cursor-pointer hover:text-red-700"
-                      />
-                    </div>
-                  </td>
+                    <td className="py-4 text-center">
+                      <div className="flex items-center justify-center gap-3">
+                        <Pencil
+                          size={16}
+                          className="text-blue-600 cursor-pointer hover:text-blue-800"
+                          onClick={() => handleEdit(row.id)}
+                        />
+                        <Trash2
+                          size={16}
+                          className="text-red-500 cursor-pointer hover:text-red-700"
+                        />
+                      </div>
+                    </td>
 
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div className="max-w-[1200px] mx-auto mt-10 px-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-
-          {/* LEFT */}
-          <div className="flex items-center gap-2 text-sm whitespace-nowrap">
-            <Text size="sm">Showing</Text>
-            <Select
-              value={String(pageSize)}
-              onChange={(v) => {
-                setPageSize(Number(v));
-                setPage(1);
-              }}
-              data={(() => {
-                const step = 10;
-                const sizes: number[] = [];
-                const maxSize = Math.ceil(totalResults / step) * step;
-                for (let i = step; i <= maxSize; i += step) {
-                  sizes.push(i);
-                }
-                if (sizes.length === 0) sizes.push(10);
-                return sizes.map(String);
-              })()}
-              size="xs"
-              w={70}
-              classNames={{
-                input:
-                  "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500 z-[-10]",
-              }}
-            />
-            <Text size="sm">
-              {`${startIndex} - ${endIndex} of ${totalResults} Results`}
-            </Text>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        </div>
+        <div className="max-w-[1200px] mx-auto mt-10 px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
 
-          {/* RIGHT */}
-          {totalPages > 1 && (
-            <Pagination
-              total={totalPages}
-              value={page}
-              onChange={setPage}
-              size="sm"
-              radius="xl"
-              siblings={1}
-              withEdges
-              classNames={{
-                root: "flex flex-row flex-nowrap items-center gap-1",
-                control:
-                  "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
-              }}
-              styles={{
-                control: {
-                  "&[data-active]": {
-                    backgroundColor: "#0B63E5",
-                    color: "white",
-                    borderColor: "#0B63E5",
+            {/* LEFT */}
+            <div className="flex items-center gap-2 text-sm whitespace-nowrap">
+              <Text size="sm">Showing</Text>
+              <Select
+                value={String(pageSize)}
+                onChange={(v) => {
+                  setPageSize(Number(v));
+                  setPage(1);
+                }}
+                data={(() => {
+                  const step = 10;
+                  const sizes: number[] = [];
+                  const maxSize = Math.ceil(totalResults / step) * step;
+                  for (let i = step; i <= maxSize; i += step) {
+                    sizes.push(i);
+                  }
+                  if (sizes.length === 0) sizes.push(10);
+                  return sizes.map(String);
+                })()}
+                size="xs"
+                w={70}
+                classNames={{
+                  input:
+                    "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500 z-[-10]",
+                }}
+              />
+              <Text size="sm">
+                {`${startIndex} - ${endIndex} of ${totalResults} Results`}
+              </Text>
+            </div>
+
+            {/* RIGHT */}
+            {totalPages > 1 && (
+              <Pagination
+                total={totalPages}
+                value={page}
+                onChange={setPage}
+                size="sm"
+                radius="xl"
+                siblings={1}
+                withEdges
+                classNames={{
+                  root: "flex flex-row flex-nowrap items-center gap-1",
+                  control:
+                    "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
+                }}
+                styles={{
+                  control: {
+                    "&[data-active]": {
+                      backgroundColor: "#0B63E5",
+                      color: "white",
+                      borderColor: "#0B63E5",
+                    },
                   },
-                },
-              }}
-            />
-          )}
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+      <ExportComplianceReportModal
+        opened={open}
+        onClose={() => setOpen(false)}
+        questions={rows.map(r => ({
+          question_no: r.id,
+          question: r.clause,
+          answer: r.response,
+          score: r.score,
+        }))}
+      />
+
+    </>
   );
 }

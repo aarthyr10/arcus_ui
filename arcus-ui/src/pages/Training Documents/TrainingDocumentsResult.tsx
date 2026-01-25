@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronLeft, Download, Loader } from "lucide-react";
+import { ChevronLeft, Loader } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -112,10 +112,10 @@ export default function TrainingDocumentsResult() {
               Back
             </button>
 
-            <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm">
+            {/* <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm">
               <Download size={14} />
               Export Report
-            </button>
+            </button> */}
           </div>
         </div>
 

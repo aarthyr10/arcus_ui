@@ -104,7 +104,7 @@ export default function EditReview() {
           {/* Back button (top-right) */}
           <button
             onClick={() => navigate(-1)}
-            className="absolute top-5 right-6 flex items-center gap-1 text-sm text-blue-600 font-medium hover:underline"
+            className="absolute top-5 right-6 flex items-center gap-1 text-sm text-blue-600 font-medium cursor-pointer"
           >
             <ArrowLeft size={16} />
             Back
