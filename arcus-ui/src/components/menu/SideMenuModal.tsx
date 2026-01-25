@@ -60,7 +60,7 @@ const SideMenuModal = ({ onClose }: Props) => {
         <hr className="my-3 border-gray-300" />
 
         <button
-          onClick={() => alert("Logged out")}
+          onClick={() =>(navigate("/"))}
           className="
             w-full flex items-center gap-3
             px-4 py-3 rounded-lg
