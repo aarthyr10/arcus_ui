@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ChevronLeft, FileText, Upload, X } from "lucide-react";
-// import axios from "axios";
-// import { ServiceEndpoint } from "../../config/ServiceEndpoint";
+import axios from "axios";
+import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { useNavigate } from "react-router-dom";
 import { LiaCheckCircleSolid } from "react-icons/lia";
 
@@ -9,36 +9,79 @@ export default function UploadTrainingDocument() {
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const [file, setFile] = useState<File | null>(null);
+    const [file, setFile] = useState<File[]>([]);
     const [docType, setDocType] = useState<string>("");
-    const [loading, _setLoading] = useState(false);
-    const [_progress, _setProgress] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [inputKey, setInputKey] = useState(0);
 
-    // const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.trainDocuments.upload;
+
+    const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.trainDocuments.upload;
 
     // ✅ Browse file
+    // const handleBrowse = () => {
+    //     fileInputRef.current?.click();
+    // };
     const handleBrowse = () => {
-        fileInputRef.current?.click();
-    };
-
-    // ✅ File select
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (!selectedFile) return;
-
-        setFile(selectedFile);
-
-        // 🔑 allow same file to be selected again
-        e.target.value = "";
-    };
-
-    // ✅ Drag & Drop
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        if (e.dataTransfer.files?.[0]) {
-            setFile(e.dataTransfer.files[0]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""; // 🔥 force reset
+            fileInputRef.current.click();
         }
     };
+// const handleBrowse = () => {
+//   setInputKey((k) => k + 1); // 🔥 recreate input
+// };
+
+    // ✅ File select
+    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const selectedFile = e.target.files?.[0];
+    //     if (!selectedFile) return;
+
+    //     setFile(selectedFile);
+
+    //     // 🔑 allow same file to be selected again
+    //     e.target.value = "";
+    // };
+const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files;
+  if (!files || files.length === 0) return;
+
+  // Add new files, avoid duplicates
+  setFile((prev) => {
+    const newFiles = Array.from(files).filter(
+      (f) => !prev.some((p) => p.name === f.name && p.size === f.size)
+    );
+    return [...prev, ...newFiles];
+  });
+
+  e.target.value = ""; // reset input
+};
+
+const handleRemoveFile = (index: number) => {
+  setFile((prev) => {
+    const updated = prev.filter((_, i) => i !== index);
+    if (updated.length === 0) setInputKey((k) => k + 1); // reset input
+    return updated;
+  });
+};
+
+    // ✅ Drag & Drop
+    // const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    //     e.preventDefault();
+    //     if (e.dataTransfer.files?.[0]) {
+    //         setFile(e.dataTransfer.files[0]);
+    //     }
+    // };
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+
+        const files = e.dataTransfer.files;
+        if (!files || files.length === 0) return;
+
+        setFile((prev) => [...prev, ...Array.from(files)]);
+    };
+
+
 
     // ✅ Upload handler
     // const handleProcess = async () => {
@@ -59,7 +102,10 @@ export default function UploadTrainingDocument() {
     //                     setProgress(Math.round((e.loaded * 100) / e.total));
     //                 }
     //             },
+
     //         });
+    //               console.log("Upload success:", res.data);
+
     //         navigate("/knowledge");
     //     } catch (err) {
     //         console.error("Upload failed", err);
@@ -68,6 +114,56 @@ export default function UploadTrainingDocument() {
     //         setLoading(false);
     //     }
     // };
+
+    const handleProcess = async () => {
+        if (!file.length || !docType) return;
+
+        const formData = new FormData();
+
+        file.forEach((file) => {
+            formData.append("files", file); // backend must accept array
+        });
+
+        formData.append("product_code", "TEST123");
+
+        try {
+            setLoading(true);
+            setProgress(0);
+
+            const res = await axios.post(endPoint, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: (e) => {
+                    if (e.total) {
+                        setProgress(Math.round((e.loaded * 100) / e.total));
+                    }
+                },
+            });
+
+            console.log("Upload success:", res.data);
+            navigate("/knowledge");
+        } catch (err) {
+            console.error("Upload failed", err);
+            alert("Upload failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+// const handleCancel = () => {
+//   setFile([]);
+//   setDocType("");
+
+//   if (fileInputRef.current) {
+//     fileInputRef.current.value = ""; // 🔥 critical
+//   }
+// };
+const handleCancel = () => {
+  setFile([]);
+  setDocType("");
+  setInputKey((k) => k + 1); // recreate input
+};
+
+
     const documentTypes = [
         {
             title: "Manual",
@@ -92,7 +188,7 @@ export default function UploadTrainingDocument() {
     ];
 
     return (
-        <div className="min-h-screen bg-white/30 border border-white/40  backdrop-blur-md
+        <div className="min-h-screen 
                   rounded-2xl flex items-center justify-center p-6">
             <div className="w-full max-w-[1100px]">
 
@@ -148,7 +244,11 @@ export default function UploadTrainingDocument() {
                     <div
                         onDrop={handleDrop}
                         onDragOver={(e) => e.preventDefault()}
-                        className="relative rounded-xl border border-dashed border-[#7dd3fc]bg-[#f3fbff] px-6 py-14 text-center">
+                        // className="relative rounded-xl border border-dashed border-[#7dd3fc]bg-[#f3fbff] px-6 py-14 text-center"
+                        className="relative rounded-xl border border-dashed border-[#7dd3fc] bg-[#f3fbff] px-6 py-14 text-center"
+
+
+                    >
                         <Upload className="mx-auto text-gray-600 mb-4" size={36} />
 
                         <p className="text-sm font-medium text-gray-700">
@@ -167,16 +267,18 @@ export default function UploadTrainingDocument() {
 
                         <input
                             ref={fileInputRef}
+                              key={inputKey}
                             type="file"
                             hidden
                             multiple
+                            accept=".pdf,.doc,.docx,.xlsx,.csv"
                             onChange={handleFileChange}
                         />
                     </div>
 
                     {/* AFTER FILE SELECTED */}
-                    {file && (
-                        <div className="mt-5 flex items-center justify-between rounded-lg
+                    {file.map((file, _index) => (
+                        <div key={`${file.name}-${_index}`} className="mt-5 flex items-center justify-between rounded-lg
                     bg-white px-4 py-3 shadow-sm">
                             <div className="flex items-center gap-3">
                                 <div className="text-blue-600">
@@ -207,37 +309,31 @@ export default function UploadTrainingDocument() {
                             </button> */}
                             <button
                                 aria-label="Remove file"
-                                onClick={() => {
-                                    setFile(null);
-                                    // setDocType("");
-                                    if (fileInputRef.current) {
-                                        fileInputRef.current.value = "";
-                                        // navigate(-1)
-                                    }
-                                }} className="cursor-pointer"
+                              onClick={() => handleRemoveFile(_index)} className="cursor-pointer"
                             >
                                 <X className="text-red-500 hover:scale-110 transition" size={18} />
                             </button>
                         </div>
-                    )}
+                    ))}
                 </div>
                 {/* Actions */}
                 <div className="flex justify-end gap-4">
                     <button
                         className="px-6 py-2 rounded-lg text-sm bg-white text-gray-600 shadow-sm"
-                        onClick={() => { setDocType(""); }} >
+                          onClick={handleCancel}  >
                         Cancel
                     </button>
 
                     <button
-                        // onClick={handleProcess}
-                        disabled={!file || !docType || loading}
+                        onClick={handleProcess}
+                        disabled={!file.length || !docType || loading}
                         className={`px-6 py-2 rounded-lg text-sm flex items-center gap-2
-      ${file && docType
+    ${file.length && docType && !loading
                                 ? "bg-[#2f80ff] text-white hover:bg-blue-700 shadow-md"
                                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
                     >
+
                         <span className="w-5 h-5 flex items-center justify-center">
                             <LiaCheckCircleSolid size={18} />
                         </span> Upload Documents

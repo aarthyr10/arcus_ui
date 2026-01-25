@@ -10,11 +10,12 @@ import { uploadDocument } from "../../services/upload.service";
 const UploadProgress = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const file: File | undefined = location.state?.file;
+  // const file: File[] = location.state?.file ?? [];
+  const [file, setFile] = useState<File[]>(location.state?.file ?? []);
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-    const [showAnalyzing, setShowAnalyzing] = useState(false);
+  const [showAnalyzing, setShowAnalyzing] = useState(false);
 
 
   const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.upload;
@@ -24,11 +25,32 @@ const UploadProgress = () => {
   //   setLoading(true);
   //   setProgress(0);
   // };
+  // useEffect(() => {
+  //   if (!file.length) {
+  //     navigate("/", { replace: true });
+  //   }
+  // }, [file, navigate]);
   useEffect(() => {
-  if (!file) {
-    navigate("/", { replace: true });
+    if (!file.length) {
+      const stored = sessionStorage.getItem("uploadedFiles");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // show metadata only, block upload
+        setFile(parsed);
+      } else {
+        navigate("/uploads");
+      }
+    }
+  }, []);
+  useEffect(() => {
+  if (!file.length) {
+    sessionStorage.removeItem("uploadedFiles");
+    navigate("/uploads", { replace: true });
   }
 }, [file, navigate]);
+
+
+
   const handleProcess = async () => {
     if (!file) return;
 
@@ -89,6 +111,39 @@ const UploadProgress = () => {
   //     }, 300);
   //   }
   // }, [progress]);
+
+  // const handleProcess = async () => {
+  //   if (!file.length) return;
+
+  //   try {
+  //     setLoading(true);
+  //     setProgress(0);
+
+  //     let uploaded = 0;
+
+  //     for (const file of file) {
+  //       await uploadDocument(
+  //         file,
+  //         "TEST123",
+  //         (percent) => {
+  //           const totalProgress =
+  //             ((uploaded + percent / 100) / file.length) * 100;
+  //           setProgress(Math.round(totalProgress));
+  //         }
+  //       );
+
+  //       uploaded++;
+  //     }
+
+  //     setShowAnalyzing(true);
+
+  //   } catch (error) {
+  //     console.error("Upload failed", error);
+  //     alert("Upload failed. Please try again.");
+  //     setLoading(false);
+  //   }
+  // };
+
 
   return (
     <>
@@ -200,31 +255,42 @@ const UploadProgress = () => {
           </div>
 
           {/* Uploaded File */}
-          <div className="mt-6 rounded-xl border border-gray-200 bg-white/70 px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileText className="text-[#2f80ff]" size={20} />
-              <div>
-                <p className="text-sm font-medium text-gray-800">
-                  {file?.name}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {/* {file
+          {file.map((file, index) => (
+            <div
+              key={index} className="mt-6 rounded-xl border border-gray-200 bg-white/70 px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="text-[#2f80ff]" size={20} />
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    {file?.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {/* {file
                   `${(file.size / 1024).toFixed(2)} KB`
                   } */}
-                  {file ? `${(file.size / 1024).toFixed(2)} KB` : ""}
-                </p>
+                    {file ? `${(file.size / 1024).toFixed(2)} KB` : ""}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* BACK TO PREVIOUS PAGE */}
-            <button
-              aria-label="Remove file"
-              onClick={() => navigate(-1)}
-              className="cursor-pointer"
-            >
-              <X className="text-red-500 hover:scale-110 transition" size={18} />
-            </button>
-          </div>
+              {/* BACK TO PREVIOUS PAGE */}
+              <button
+                aria-label="Remove file"
+                onClick={() => {
+  setFile((prev) => {
+    const updated = prev.filter((_, i) => i !== index);
+    if (!updated.length) {
+      sessionStorage.removeItem("uploadedFiles");
+    }
+    return updated;
+  });
+}}
+ className="cursor-pointer"
+              >
+                <X className="text-red-500 hover:scale-110 transition" size={18} />
+              </button>
+            </div>
+          ))}
 
           {/* Button / Loader */}
           {!loading ? (

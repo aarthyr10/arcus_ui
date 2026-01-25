@@ -16,6 +16,8 @@ import TrainingDocuments from './pages/Training Documents/TrainingDocuments';
 import ComplianceResults from './pages/ComplianceDocuments/ComplianceResult';
 import TrainingDocumentsResult from './pages/Training Documents/TrainingDocumentsResult';
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
+import ExportComplianceReport from './pages/ComplianceDocuments/ExportComplianceReport';
+import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
 
 function App() {
   //   useEffect(() => {
@@ -70,9 +72,11 @@ function App() {
               <Route path="/compliance" element={<ComplianceDocuments />} />
               <Route path="/complianceresult/:docId" element={<ComplianceResults />} />
               <Route path="/compliance/edit/:docId/:id" element={<EditReview />} />
+              <Route path="/compliancereport" element={<ExportComplianceReport />} />
               <Route path="/knowledge" element={<TrainingDocuments />} />
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />
+              <Route path="/knowledge/edit/:docId/:id" element={<EditReviewTrainingDocument />} />
             </Route>
             {/* <Route path="/analyzing" element={<AnalyzingDocuments />} /> */}
           </Routes>

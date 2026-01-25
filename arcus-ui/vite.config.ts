@@ -8,9 +8,8 @@ export default defineConfig({
   ],
   server: {
      proxy: {
-      "/api": {  // Proxy all /api/* requests
-        // target: "https://contractional-napoleon-superblessed.ngrok-free.dev",
-        target: "https://robbi-ungouty-babette.ngrok-free.dev",
+      "/api": {  
+        target: "https://20.193.149.193",
         changeOrigin: true,
         secure: false,
       },},

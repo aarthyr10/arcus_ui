@@ -43,18 +43,32 @@ const UploadCard = () => {
     inputRef.current?.click();
   };
 
-  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
+  // const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (!e.target.files || e.target.files.length === 0) return;
 
-    const file = e.target.files[0];
+  //   const file = e.target.files[0];
 
-    // Navigate immediately and pass file in memory
-    navigate("/uploadsprogess", {
-      state: { file },
-    });
-      e.target.value = "";
-  };
-  return (
+  //   // Navigate immediately and pass file in memory
+  //   navigate("/uploadsprogess", {
+  //     state: { file },
+  //   });
+  //     e.target.value = "";
+  // };
+
+const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (!e.target.files || e.target.files.length === 0) return;
+
+  const files = Array.from(e.target.files); // ✅ multiple files
+
+  navigate("/uploadsprogess", {
+    state: { file: files }, // ✅ keep payload name as "file"
+  });
+
+  e.target.value = "";
+};
+
+
+    return (
     <>
       <div className="
       w-full lg:w-[600px]
@@ -83,7 +97,7 @@ const UploadCard = () => {
           type="file"
           hidden
           multiple
-          accept=".pdf,.doc,.docx"  // Restrict to PDFs and Word docs
+          accept=".pdf,.doc,.docx,.xlsx,.csv"  // Restrict to PDFs and Word docs
           onChange={handleFiles}
         />
         {/* Upload Box */}

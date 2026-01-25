@@ -225,7 +225,7 @@ export default function TrainingDocuments() {
             );
             })}
             {/* <div className="mt-10 px-6 py-4 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto"> */}
-            <div className="bg-white/30 border border-white/40 mt-10 px-6 py-4 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto">
+            {/* <div className="bg-white/30 border border-white/40 mt-10 px-6 py-4 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto">
               <h1 className="text-xl mb-2">
                 About Training Documents
               </h1>
@@ -235,7 +235,7 @@ export default function TrainingDocuments() {
                 to improve compliance analysis accuracy and enable the Smart Assistant
                 to provide better responses.
               </p>
-            </div>
+            </div> */}
 
 
             <div className="max-w-[1200px] mx-auto mt-10 px-4">
