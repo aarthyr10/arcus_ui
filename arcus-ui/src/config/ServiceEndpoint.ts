@@ -12,7 +12,7 @@ const ServiceEndpoint={
   trainDocuments: {
     upload: "/train-documents",                  // POST
     getAll: "/trained-documents",               // GET
-    getById: (id: string) =>` /trained-documents/${id}`, // GET
+    getById: (id: string) => `/trained-documents/${id}`, // GET
   },
 
   // =========================
