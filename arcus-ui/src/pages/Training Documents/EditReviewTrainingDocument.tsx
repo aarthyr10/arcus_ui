@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, Book, Calendar, HardDrive, Download, FileText } from 'lucide-react';
 
 export default function EditReviewTrainingDocument() {
-  const [selectedChunk, setSelectedChunk] = useState(null);
+  const [_selectedChunk, setSelectedChunk] = useState(null);
 
   const document = {
     title: "HVAC Installation Manual v3.2",
@@ -30,12 +30,6 @@ export default function EditReviewTrainingDocument() {
     { id: 3, pages: "76-120", title: "Technical Specifications", status: "Trained" },
     { id: 4, pages: "121-145", title: "Appendices", status: "Low Certainty" }
   ];
-
-  const getStatusColor = (status:any) => {
-    if (status === "Trained") return "bg-green-500";
-    if (status === "Low Certainty") return "bg-orange-500";
-    return "bg-gray-400";
-  };
 
   const getStatusTextColor = (status:any) => {
     if (status === "Trained") return "text-green-700 bg-green-100";

@@ -40,7 +40,7 @@ const UploadProgress = () => {
       setLoading(true);
       setProgress(0);
 
-      const response = await uploadDocument(
+      await uploadDocument(
         file,
         "TEST123",
         (percent) => setProgress(percent)

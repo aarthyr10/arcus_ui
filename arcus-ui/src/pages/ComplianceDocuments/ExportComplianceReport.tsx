@@ -17,13 +17,6 @@ type Question = {
   score: number; // ✅ add this
 };
 
-type ResultRow = {
-  id: number;
-  clause: string;
-  response: string;
-  score: number;
-  reference: string; // ✅ add this
-};
 
 export default function ExportComplianceReport() {
   const navigate = useNavigate();
@@ -53,14 +46,6 @@ const questions: Question[] = rawQuestions.map((q: any) => {
 
   const [status, setStatus] = useState<Status>("idle");
   const [exportType, setExportType] = useState<ExportType | null>(null);
-
-  const mappedRows: ResultRow[] = questions.map((q: any) => ({
-    id: q.question_no,
-    clause: q.question,
-    response: q.answer,
-    score: q.confidence_score ?? getScoreFromAnswer(q.answer),
-    reference: q.reference ?? "-", 
-  }));
 
 const generatePDF = (questions: Question[]) => {
   const doc = new jsPDF("landscape", "pt", "a4");

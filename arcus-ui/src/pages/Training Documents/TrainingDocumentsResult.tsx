@@ -20,12 +20,6 @@ function chunk<T>(array: T[], size: number): T[][] {
   return [head, ...chunk(tail, size)];
 }
 
-const getColor = (score: number) => {
-  if (score >= 80) return "bg-green-500";
-  if (score >= 50) return "bg-yellow-400";
-  return "bg-red-500";
-};
-
 export default function TrainingDocumentsResult() {
   const navigate = useNavigate();
   const { docId } = useParams<{ docId: string }>();
@@ -80,13 +74,13 @@ export default function TrainingDocumentsResult() {
   const startIndex = totalResults === 0 ? 0 : (page - 1) * pageSize + 1;
   const endIndex = Math.min(page * pageSize, totalResults);
 
-  const handleEdit = (id: number) => {
-    console.log("Edit row:", id);
-    navigate(`/compliance/edit/${docId}/${id}`);
-  };
-  const handleDelete = (id: number) => {
-    console.log("Delete row:", id);
-  };
+  // const handleEdit = (id: number) => {
+  //   console.log("Edit row:", id);
+  //   navigate(`/compliance/edit/${docId}/${id}`);
+  // };
+  // const handleDelete = (id: number) => {
+  //   console.log("Delete row:", id);
+  // };
 
   if (loading) {
     return (

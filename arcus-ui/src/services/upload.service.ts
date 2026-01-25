@@ -21,7 +21,7 @@ export const uploadDocument = async (
       onUploadProgress: (event) => {
         if (!event.total) return;
         const percent = Math.round((event.loaded * 100) / event.total);
-        onProgress?.(percent);
+        onProgress?.(Math.min(99, percent));
       },
       withCredentials: true,
     },
