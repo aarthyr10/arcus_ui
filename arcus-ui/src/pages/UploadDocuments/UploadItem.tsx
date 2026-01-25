@@ -1,25 +1,20 @@
 import { Eye, FileText, RefreshCw, CheckCircle, Clock, XCircle, Upload } from "lucide-react";
-// import { useNavigate } from "react-router-dom";
 
 interface UploadItemProps {
-  id: string; // 👈 add this
+  id: string;
   name: string;
   date: string;
-status: "UPLOADED"
+  status: "UPLOADED"
   | "PROCESSING"
   | "SUCCESS"
   | "FAILED"
   | "ERROR"
   | "PENDING"
-  | "NOT_FOUND"; // status: string;
+  | "NOT_FOUND";
   onView: (id: string) => void;
 }
 
 const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
-
-  // const docId = id;
-  // const navigate = useNavigate();
-  // Dynamic status configuration
   const statusConfig = {
     UPLOADED: {
       label: "Uploaded", color: "#3B82F6",
@@ -34,13 +29,11 @@ const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
     ERROR: { label: "Error", color: "#EF4444", icon: XCircle },
     NOT_FOUND: { label: "Not Found", color: "#EF4444", icon: XCircle },
     PENDING: { label: "Pending", color: "#F59E0B", icon: Clock },
-    
+
   };
 
   const config = statusConfig[status];
-//  const handleEdit = (id: number) => {
-//     navigate(`/compliance/edit/${docId}/${id}`);
-//   };
+
   return (
     <div className="flex flex-col items-start gap-3 w-full max-w-[363px] min-h-[148px] px-4 pt-4 pb-3 bg-[var(--primary-card-upload-bg)] hover:bg-white transition-colors border border-[#9AD8FB] hover:border-white rounded-[16.4px]">
       {/* Top section */}
@@ -60,7 +53,7 @@ const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
       {/* Buttons row */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-[8px] w-full">
         <button className="flex items-center justify-center gap-2 w-full sm:w-[161.5px] h-[32px] text-white rounded-[10px] text-sm font-medium bg-[var(--primary-btn-color)] hover:bg-[var(--primary-btn-color)] transition-colors"
-  onClick={() => onView(id)}
+          onClick={() => onView(id)}
         >
           <Eye className="w-4 h-4" />
           View

@@ -3,21 +3,14 @@ const ServiceEndpoint={
     // apiBaseUrl: "/api",
       apiBaseUrl: "/api/v1",  // Use this for dev (proxy); switch to full URL for prod
 
-    // trainDocuments: {
-    //     documentUpload: "/train-documents"
-    // }
-     // =========================
   // TRAINING DOCUMENTS
-  // =========================
   trainDocuments: {
     upload: "/train-documents",                  // POST
     getAll: "/trained-documents",               // GET
     getById: (id: string) => `/trained-documents/${id}`, // GET
   },
 
-  // =========================
   // UPLOADED DOCUMENTS
-  // =========================
   uploadedDocuments: {
     upload: "/upload-documents",                 // POST
     getAll: "/uploaded-documents",               // GET
@@ -26,9 +19,7 @@ const ServiceEndpoint={
      `/uploaded-documents/${docId}/questions/${questionId}`, // POST
   },
 
-  // =========================
   // CHAT
-  // =========================
   chat: {
     send: "/chat",                               // POST
   },

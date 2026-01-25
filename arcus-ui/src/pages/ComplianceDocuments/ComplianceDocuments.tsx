@@ -64,7 +64,6 @@ const STATUS_CONFIG: Record<
 export default function ComplianceDocuments() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
-  // const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const endPoint =
@@ -98,18 +97,7 @@ export default function ComplianceDocuments() {
       .catch(() => setDocs([]));
   }, []);
 
-
-  // useEffect(() => {
-  //   if (selectedDocId) {
-  //     setTimeout(() => {
-  //       document
-  //         .getElementById("ComplianceResults")
-  //         ?.scrollIntoView({ behavior: "smooth" });
-  //     }, 100);
-  //   }
-  // }, [selectedDocId]);
-
-  const rows = docs; // 👈 missing line
+  const rows = docs; 
 
   const pages = useMemo(() => {
     return chunk(rows, pageSize);
@@ -163,10 +151,6 @@ export default function ComplianceDocuments() {
               return (
                 <div
                   key={doc.doc_id}
-                  // onClick={() => {
-                  //   setSelectedDocId(doc.doc_id);
-                  //   console.log("Selected doc id:", doc.doc_id);
-                  // }
                   onClick={() => navigate(`/complianceresult/${doc.doc_id}`)}
                   className={`
                   flex items-center justify-between
@@ -186,24 +170,6 @@ export default function ComplianceDocuments() {
                         {doc.file_name}
                       </p>
 
-                      {/* <div className="mt-1 flex gap-10 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          {new Date(doc.created_at).toLocaleDateString()}
-                        </span>
-
-                        <span>{doc.clauses} clauses analyzed</span>
-
-                        {/* <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
-                        Completed
-                      </span> 
-                        <span
-                          className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium ${status.badgeClass}`}
-                        >
-                          {status.icon}
-                          {status.label}
-                        </span>
-                      </div> */}
                       <div className="mt-1 flex items-center gap-10 text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
@@ -244,17 +210,12 @@ export default function ComplianceDocuments() {
                     data={(() => {
                       const step = 10;
                       const sizes: number[] = [];
-
-                      // Use totalResults instead of totalPages
                       const maxSize = Math.ceil(totalResults / step) * step;
 
                       for (let i = step; i <= maxSize; i += step) {
                         sizes.push(i);
                       }
-
-                      // Always at least one option
                       if (sizes.length === 0) sizes.push(10);
-
                       return sizes.map(String);
                     })()}
                     size="xs"
@@ -264,7 +225,6 @@ export default function ComplianceDocuments() {
                         "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500 z-[-10]",
                     }}
                   />
-
 
                   <Text size="sm">
                     {`${startIndex} - ${endIndex} of ${totalResults} Results`}
@@ -302,12 +262,6 @@ export default function ComplianceDocuments() {
           </div>
         </div>
       </div>
-      {/* RESULTS */}
-      {/* {selectedDocId && (
-        <div id="ComplianceResults" className="mt-12">
-          <ComplianceResults docId={selectedDocId} />
-        </div>
-      )} */}
     </>
   );
 }

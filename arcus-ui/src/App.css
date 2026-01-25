@@ -5,7 +5,6 @@
 
 html, body {
   height: 100%;
-  /* overflow: hidden; */
 }
 
 body {
@@ -16,76 +15,3 @@ body {
             #e6f3fb 45%,
             #dbeef7 100%);
 }
-/* .m_38a85659.mantine-Popover-dropdown {
-  background-color: #ffffff;  Change background 
-  border: 1px solid #ddd;  Optional border 
-}
-
-
- Mobile styles 
-@media (max-width: 768px) {
-  .py-datagrid-header-left-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-@media (max-width: 768px) {
-   Assuming the container uses flex-direction: column already 
-
-   Make the button a column flex container 
-  button.mantine-Button-root {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch; full width by default 
-  }
-}
-
- responsive for filter modal 
-.m_38a85659 .mantine-Popover-dropdown {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    width: 300px !important;
-}
-@media (max-width: 768px) {
- #mantine-gabnszavw-dropdown 
-.m_38a85659 .mantine-Popover-dropdown {
-        width: 90vw !important;
-        left: 4% !important;
-        margin-bottom: 7px !important;
-    }
-}
-
-.btn-switch-container {
-    width: 100%;
-}
-
-.btn-switch-field-container {
-    background-color: var(--primary-color);
-    width: 100%;
-}
-
-.btn-switch-label {
-    font-weight: 600;
-    color: rgba(var(--dark-color-rgb), 0.75);
-    font-size: 1em;
-}
-
-.btn-switch,
-.btn-switch:hover {
-    border-radius: 5px !important;
-    word-wrap: break-word;
-    background-color: var(--primary-color) !important;
-    transition: all 0.5s ease;
-    width: 50% !important;
-}
-
-.btn-switch-selected,
-.btn-switch-selected:hover {
-    background-color: var(--default-bgcolor) !important;
-    color: var(--primary-color) !important;
-} */

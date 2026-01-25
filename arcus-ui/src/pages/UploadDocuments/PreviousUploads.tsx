@@ -5,8 +5,6 @@ import UploadItem from "./UploadItem";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { useNavigate } from "react-router-dom";
 
-/* ================= TYPES ================= */
-
 export interface UploadedDoc {
   doc_id: string;
   file_name: string;
@@ -21,18 +19,12 @@ export interface UploadedDoc {
   file_url?: string;
 }
 
-/* ================= COMPONENT ================= */
-
 const PreviousUploads = () => {
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  /* ================= API ================= */
   const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.getAll;
-  // const handleView = (id: string) => {
-  // navigate(`/uploaded-documents/${id}`);
-  // };
   const handleView = async (id: string) => {
     try {
       const res = await axios.get(`${endPoint}/${id}`, {
@@ -86,7 +78,6 @@ const PreviousUploads = () => {
       console.log("API Response:", res.data);
 
       if (Array.isArray(res.data)) {
-        // Map API fields to your interface
         const mappedDocs = res.data.map((doc: any) => ({
           doc_id: doc.doc_id,
           file_name: doc.file_name,
@@ -94,8 +85,6 @@ const PreviousUploads = () => {
           status: mapStatus(doc.status),
           file_url: doc.path || undefined,
         }));
-
-        // Sort by created_at descending (newest first) and take the last 3 (most recent)
         const sortedDocs = mappedDocs
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 3);
@@ -110,7 +99,6 @@ const PreviousUploads = () => {
       throw err;
     }
   };
-  /* ================= FETCH ================= */
 
   useEffect(() => {
     getUploadedDocuments()
@@ -121,8 +109,6 @@ const PreviousUploads = () => {
       })
       .finally(() => setLoading(false));
   }, []);
-
-  /* ================= UI ================= */
 
   return (
     <div className="w-full lg:w-[420px] bg-[#eef8fd] rounded-3xl p-6">
@@ -141,7 +127,7 @@ const PreviousUploads = () => {
         {docs.map((doc) => (
           <UploadItem
             key={doc.doc_id}
-            id={doc.doc_id}               // 👈 important
+            id={doc.doc_id}               
             name={doc.file_name}
             date={new Date(doc.created_at).toLocaleString()}
             status={doc.status}

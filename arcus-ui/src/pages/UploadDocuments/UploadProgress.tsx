@@ -4,38 +4,22 @@ import { LiaCheckCircleSolid } from "react-icons/lia";
 import { useEffect, useState } from "react";
 import { FaCloud } from "react-icons/fa";
 import AnalyzingDocuments from "./AnalyzingDocuments";
-import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { uploadDocument } from "../../services/upload.service";
 
 const UploadProgress = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  // const file: File[] = location.state?.file ?? [];
   const [file, setFile] = useState<File[]>(location.state?.file ?? []);
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showAnalyzing, setShowAnalyzing] = useState(false);
 
-
-  const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.upload;
-  console.log(endPoint);
-
-  // const handleProcess = () => {
-  //   setLoading(true);
-  //   setProgress(0);
-  // };
-  // useEffect(() => {
-  //   if (!file.length) {
-  //     navigate("/", { replace: true });
-  //   }
-  // }, [file, navigate]);
   useEffect(() => {
     if (!file.length) {
       const stored = sessionStorage.getItem("uploadedFiles");
       if (stored) {
         const parsed = JSON.parse(stored);
-        // show metadata only, block upload
         setFile(parsed);
       } else {
         navigate("/uploads");
@@ -43,13 +27,11 @@ const UploadProgress = () => {
     }
   }, []);
   useEffect(() => {
-  if (!file.length) {
-    sessionStorage.removeItem("uploadedFiles");
-    navigate("/uploads", { replace: true });
-  }
-}, [file, navigate]);
-
-
+    if (!file.length) {
+      sessionStorage.removeItem("uploadedFiles");
+      navigate("/uploads", { replace: true });
+    }
+  }, [file, navigate]);
 
   const handleProcess = async () => {
     if (!file) return;
@@ -60,13 +42,10 @@ const UploadProgress = () => {
 
       const response = await uploadDocument(
         file,
-        "TEST123", // 🔴 replace with real product code
+        "TEST123",
         (percent) => setProgress(percent)
       );
 
-      console.log("Upload success:", response.data);
-
-      // Show analyzing modal after upload completes
       setTimeout(() => {
         setShowAnalyzing(true);
       }, 300);
@@ -77,73 +56,6 @@ const UploadProgress = () => {
       setLoading(false);
     }
   };
-
-
-  // useEffect(() => {
-  //   if (!loading) return;
-
-  //   const interval = setInterval(() => {
-  //     setProgress((prev) => {
-  //       if (prev >= 100) {
-  //         clearInterval(interval);
-  //         return 100;
-  //       }
-  //       return prev + 1;
-  //     });
-  //   }, 40);
-
-  //   return () => clearInterval(interval);
-  // }, [loading]);
-
-  // useEffect(() => {
-  //   if (progress === 100) {
-  //     setTimeout(() => {
-  //       navigate("/analyzing");
-  //     }, 300);
-  //   }
-  // }, [progress, navigate]);
-  // const [showAnalyzing, setShowAnalyzing] = useState(false);
-
-  // useEffect(() => {
-  //   if (progress === 100) {
-  //     setTimeout(() => {
-  //       setShowAnalyzing(true);
-  //     }, 300);
-  //   }
-  // }, [progress]);
-
-  // const handleProcess = async () => {
-  //   if (!file.length) return;
-
-  //   try {
-  //     setLoading(true);
-  //     setProgress(0);
-
-  //     let uploaded = 0;
-
-  //     for (const file of file) {
-  //       await uploadDocument(
-  //         file,
-  //         "TEST123",
-  //         (percent) => {
-  //           const totalProgress =
-  //             ((uploaded + percent / 100) / file.length) * 100;
-  //           setProgress(Math.round(totalProgress));
-  //         }
-  //       );
-
-  //       uploaded++;
-  //     }
-
-  //     setShowAnalyzing(true);
-
-  //   } catch (error) {
-  //     console.error("Upload failed", error);
-  //     alert("Upload failed. Please try again.");
-  //     setLoading(false);
-  //   }
-  // };
-
 
   return (
     <>
@@ -265,9 +177,6 @@ const UploadProgress = () => {
                     {file?.name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {/* {file
-                  `${(file.size / 1024).toFixed(2)} KB`
-                  } */}
                     {file ? `${(file.size / 1024).toFixed(2)} KB` : ""}
                   </p>
                 </div>
@@ -277,15 +186,15 @@ const UploadProgress = () => {
               <button
                 aria-label="Remove file"
                 onClick={() => {
-  setFile((prev) => {
-    const updated = prev.filter((_, i) => i !== index);
-    if (!updated.length) {
-      sessionStorage.removeItem("uploadedFiles");
-    }
-    return updated;
-  });
-}}
- className="cursor-pointer"
+                  setFile((prev) => {
+                    const updated = prev.filter((_, i) => i !== index);
+                    if (!updated.length) {
+                      sessionStorage.removeItem("uploadedFiles");
+                    }
+                    return updated;
+                  });
+                }}
+                className="cursor-pointer"
               >
                 <X className="text-red-500 hover:scale-110 transition" size={18} />
               </button>

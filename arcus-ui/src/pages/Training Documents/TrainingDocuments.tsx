@@ -2,11 +2,9 @@ import axios from "axios";
 import { ChevronRight, FileText, Calendar } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-// import ComplianceResults from "../ComplianceDocuments/ComplianceResult";
 import { useNavigate } from "react-router-dom";
 import { Pagination, Select, Text } from "@mantine/core";
 import { CheckCircle, XCircle, Clock, UploadCloud } from "lucide-react";
-
 
 export interface UploadedDoc {
   doc_id: string;
@@ -68,7 +66,6 @@ const STATUS_CONFIG: Record<
 export default function TrainingDocuments() {
   const navigate = useNavigate();
   const [docs, setDocs] = useState<UploadedDoc[]>([]);
-  // const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -102,12 +99,6 @@ export default function TrainingDocuments() {
       .then(setDocs)
       .catch(() => setDocs([]));
   }, []);
-  // useEffect(() => {
-  //   if (selectedDocId) {
-  //     console.log("State updated:", selectedDocId);
-  //   }
-  // }, [selectedDocId]);
-
   const rows = docs; // 👈 missing line
 
   const pages = useMemo(() => {
@@ -165,10 +156,6 @@ export default function TrainingDocuments() {
               return (
               <div
                 key={doc.doc_id}
-                // onClick={() => {
-                //   setSelectedDocId(doc.doc_id);
-                //   console.log("Selected doc id:", doc.doc_id);
-                // }}
                 onClick={() => navigate(`/knowledgeresult/${doc.doc_id}`)}
                 className={`
                   flex items-center justify-between
@@ -193,22 +180,6 @@ export default function TrainingDocuments() {
                         <Calendar size={14} />
                         {new Date(doc.created_at).toLocaleDateString()}
                       </span>
-
-                      {/* <span>{doc.clauses} clauses analyzed</span> */}
-
-                      {/* <span className="px-3 py-[2px] rounded-md text-xs font-medium bg-green-100 text-green-700">
-                        Completed
-                      </span> */}
-                      {/* <span
-                        className={`px-3 py-[2px] rounded-md text-xs font-medium ${doc.status === "Manual" && "bg-blue-100 text-blue-600"
-                          } ${doc.status === "SOP" && "bg-purple-100 text-purple-600"}
-            ${doc.status === "Policy" && "bg-green-100 text-green-600"}
-            ${doc.status === "Specification" && "bg-orange-100 text-orange-600"}
-            ${doc.status === "Standard" && "bg-cyan-100 text-cyan-600"}
-          `}
-                      >
-                        {doc.status}
-                      </span> */}
                        <span
                           className={`flex items-center gap-1 px-3 py-2 rounded-md text-xs font-medium ${status.badgeClass}`}
                         >
@@ -221,23 +192,8 @@ export default function TrainingDocuments() {
 
                 <ChevronRight className="text-gray-400" />
               </div>
-
             );
             })}
-            {/* <div className="mt-10 px-6 py-4 bg-white/70 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto"> */}
-            {/* <div className="bg-white/30 border border-white/40 mt-10 px-6 py-4 backdrop-blur-md rounded-2xl shadow-sm text-sm text-gray-700 max-w-6xl mx-auto">
-              <h1 className="text-xl mb-2">
-                About Training Documents
-              </h1>
-              <p>
-                Training documents are used to enhance the AI's knowledge base. Upload
-                manuals, standard operating procedures, policies, and specifications
-                to improve compliance analysis accuracy and enable the Smart Assistant
-                to provide better responses.
-              </p>
-            </div> */}
-
-
             <div className="max-w-[1200px] mx-auto mt-10 px-4">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
 
@@ -254,15 +210,10 @@ export default function TrainingDocuments() {
                     data={(() => {
                       const step = 10;
                       const sizes: number[] = [];
-
-                      // Use totalResults instead of totalPages
                       const maxSize = Math.ceil(totalResults / step) * step;
-
                       for (let i = step; i <= maxSize; i += step) {
                         sizes.push(i);
                       }
-
-                      // Always at least one option
                       if (sizes.length === 0) sizes.push(10);
 
                       return sizes.map(String);
@@ -274,8 +225,6 @@ export default function TrainingDocuments() {
                         "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500 z-[-10]",
                     }}
                   />
-
-
                   <Text size="sm">
                     {`${startIndex} - ${endIndex} of ${totalResults} Results`}
                   </Text>
@@ -310,13 +259,6 @@ export default function TrainingDocuments() {
               </div>
             </div>
           </div>
-
-          {/* RESULTS */}
-          {/* {selectedDocId && (
-            <div className="mt-12">
-              <ComplianceResults docId={selectedDocId} />
-            </div>
-          )} */}
         </div>
       </div>
     </>

@@ -149,7 +149,7 @@ export default function EditReviewTrainingDocument() {
           <h2 className="text-xl font-semibold text-gray-800 mb-6">Chunk Information</h2>
           
           <div className="space-y-4">
-            {chunks.map((chunk) => (
+            {chunks.map((chunk:any) => (
               <div
                 key={chunk.id}
                 className="flex items-center justify-between p-5 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors cursor-pointer"

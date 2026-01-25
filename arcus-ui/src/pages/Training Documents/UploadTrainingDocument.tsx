@@ -12,66 +12,37 @@ export default function UploadTrainingDocument() {
     const [file, setFile] = useState<File[]>([]);
     const [docType, setDocType] = useState<string>("");
     const [loading, setLoading] = useState(false);
-    const [progress, setProgress] = useState(0);
+    const [_progress, setProgress] = useState(0);
     const [inputKey, setInputKey] = useState(0);
 
-
     const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.trainDocuments.upload;
-
-    // ✅ Browse file
-    // const handleBrowse = () => {
-    //     fileInputRef.current?.click();
-    // };
     const handleBrowse = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = ""; // 🔥 force reset
             fileInputRef.current.click();
         }
     };
-// const handleBrowse = () => {
-//   setInputKey((k) => k + 1); // 🔥 recreate input
-// };
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-    // ✅ File select
-    // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const selectedFile = e.target.files?.[0];
-    //     if (!selectedFile) return;
+        setFile((prev) => {
+            const newFiles = Array.from(files).filter(
+                (f) => !prev.some((p) => p.name === f.name && p.size === f.size)
+            );
+            return [...prev, ...newFiles];
+        });
 
-    //     setFile(selectedFile);
+        e.target.value = "";
+    };
 
-    //     // 🔑 allow same file to be selected again
-    //     e.target.value = "";
-    // };
-const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const files = e.target.files;
-  if (!files || files.length === 0) return;
-
-  // Add new files, avoid duplicates
-  setFile((prev) => {
-    const newFiles = Array.from(files).filter(
-      (f) => !prev.some((p) => p.name === f.name && p.size === f.size)
-    );
-    return [...prev, ...newFiles];
-  });
-
-  e.target.value = ""; // reset input
-};
-
-const handleRemoveFile = (index: number) => {
-  setFile((prev) => {
-    const updated = prev.filter((_, i) => i !== index);
-    if (updated.length === 0) setInputKey((k) => k + 1); // reset input
-    return updated;
-  });
-};
-
-    // ✅ Drag & Drop
-    // const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    //     e.preventDefault();
-    //     if (e.dataTransfer.files?.[0]) {
-    //         setFile(e.dataTransfer.files[0]);
-    //     }
-    // };
+    const handleRemoveFile = (index: number) => {
+        setFile((prev) => {
+            const updated = prev.filter((_, i) => i !== index);
+            if (updated.length === 0) setInputKey((k) => k + 1); // reset input
+            return updated;
+        });
+    };
     const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
 
@@ -80,40 +51,6 @@ const handleRemoveFile = (index: number) => {
 
         setFile((prev) => [...prev, ...Array.from(files)]);
     };
-
-
-
-    // ✅ Upload handler
-    // const handleProcess = async () => {
-    //     if (!file || !docType) return;
-
-    //     const formData = new FormData();
-    //     formData.append("files", file);
-    //     formData.append("product_code", "TEST123");
-
-    //     try {
-    //         setLoading(true);
-    //         setProgress(0);
-
-    //         const res = await axios.post(endPoint, formData, {
-    //             headers: { "Content-Type": "multipart/form-data" },
-    //             onUploadProgress: (e) => {
-    //                 if (e.total) {
-    //                     setProgress(Math.round((e.loaded * 100) / e.total));
-    //                 }
-    //             },
-
-    //         });
-    //               console.log("Upload success:", res.data);
-
-    //         navigate("/knowledge");
-    //     } catch (err) {
-    //         console.error("Upload failed", err);
-    //         alert("Upload failed. Please try again.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     const handleProcess = async () => {
         if (!file.length || !docType) return;
@@ -149,19 +86,11 @@ const handleRemoveFile = (index: number) => {
         }
     };
 
-// const handleCancel = () => {
-//   setFile([]);
-//   setDocType("");
-
-//   if (fileInputRef.current) {
-//     fileInputRef.current.value = ""; // 🔥 critical
-//   }
-// };
-const handleCancel = () => {
-  setFile([]);
-  setDocType("");
-  setInputKey((k) => k + 1); // recreate input
-};
+    const handleCancel = () => {
+        setFile([]);
+        setDocType("");
+        setInputKey((k) => k + 1); // recreate input
+    };
 
 
     const documentTypes = [
@@ -244,20 +173,14 @@ const handleCancel = () => {
                     <div
                         onDrop={handleDrop}
                         onDragOver={(e) => e.preventDefault()}
-                        // className="relative rounded-xl border border-dashed border-[#7dd3fc]bg-[#f3fbff] px-6 py-14 text-center"
-                        className="relative rounded-xl border border-dashed border-[#7dd3fc] bg-[#f3fbff] px-6 py-14 text-center"
-
-
-                    >
+                        className="relative rounded-xl border border-dashed border-[#7dd3fc] bg-[#f3fbff] px-6 py-14 text-center" >
                         <Upload className="mx-auto text-gray-600 mb-4" size={36} />
-
                         <p className="text-sm font-medium text-gray-700">
                             Drag & drop files here
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
                             or click to browse
                         </p>
-
                         <button
                             onClick={handleBrowse}
                             className="mt-4 px-5 py-2 text-sm rounded-md bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white"
@@ -267,7 +190,7 @@ const handleCancel = () => {
 
                         <input
                             ref={fileInputRef}
-                              key={inputKey}
+                            key={inputKey}
                             type="file"
                             hidden
                             multiple
@@ -294,22 +217,9 @@ const handleCancel = () => {
                                 </div>
                             </div>
 
-                            {/* <button
-                                onClick={() => {
-                                    setFile(null);
-                                    setDocType("");
-
-                                    // 🔑 RESET the file input
-                                    if (fileInputRef.current) {
-                                        fileInputRef.current.value = "";
-                                    }
-                                }} className="text-gray-400 hover:text-red-500 text-lg"
-                            >
-                                <X className="text-red-500 hover:scale-110 transition" size={18} />
-                            </button> */}
                             <button
                                 aria-label="Remove file"
-                              onClick={() => handleRemoveFile(_index)} className="cursor-pointer"
+                                onClick={() => handleRemoveFile(_index)} className="cursor-pointer"
                             >
                                 <X className="text-red-500 hover:scale-110 transition" size={18} />
                             </button>
@@ -320,7 +230,7 @@ const handleCancel = () => {
                 <div className="flex justify-end gap-4">
                     <button
                         className="px-6 py-2 rounded-lg text-sm bg-white text-gray-600 shadow-sm"
-                          onClick={handleCancel}  >
+                        onClick={handleCancel}  >
                         Cancel
                     </button>
 

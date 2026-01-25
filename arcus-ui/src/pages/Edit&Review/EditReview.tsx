@@ -15,10 +15,6 @@ import axios from "axios";
 export default function EditReview() {
   const navigate = useNavigate();
 
-  // const [text, setText] = useState(
-  //   "The proposed HVAC system meets ENERGY STAR certification requirements with a SEER rating of 18.2, exceeding the minimum requirement of 16.0 for the specified region."
-  // );
-
   const { docId, id } = useParams<{ docId: string; id: string }>();
 
   const [loading, setLoading] = useState(true);
@@ -41,8 +37,6 @@ export default function EditReview() {
         const res = await axios.get(endpoint, {
           headers: { "ngrok-skip-browser-warning": "true" },
         });
-
-        // const questions = res.data?.questions ?? [];
         const questions =
           res.data?.questions ||
           res.data?.data?.questions ||
@@ -58,7 +52,7 @@ export default function EditReview() {
           return;
         }
 
-        setQuestion(found); // ✅ store full question object
+        setQuestion(found);
         setText(found.modified_answer ?? found.answer ?? "");
         setFileName(res.data?.file_name ?? null);
 
@@ -155,34 +149,10 @@ export default function EditReview() {
             </button>
           </div>
 
-          {/* Textarea */}
-          {/* <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="
-              w-full h-[160px]
-              rounded-2xl p-4
-              bg-[#F6FFFB]
-              border border-[#4ADE80]
-              text-sm text-gray-700
-              focus:outline-none focus:ring-2 focus:ring-green-400
-              resize-none
-            "
-          /> */}
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
-            className="
-    w-full h-[160px]
-    rounded-2xl p-4
-    bg-[#F6FFFB]
-    border border-[#4ADE80]
-    text-sm text-gray-700
-    focus:outline-none focus:ring-2 focus:ring-green-400
-    resize-none
-  "
-          />
-
+            className="w-full h-[160px] rounded-2xl p-4 bg-[#F6FFFB] border border-[#4ADE80] text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 resize-none" />
 
           {/* ===== CONFIDENCE SCORE ===== */}
           <div className="mt-8 bg-[#eef8fd] rounded-2xl p-5">
@@ -190,9 +160,6 @@ export default function EditReview() {
               <span className="text-sm font-medium text-gray-700">
                 {question?.confidence_score ?? 95}%
               </span>
-              {/* <span className="text-sm font-semibold text-blue-600">
-                95%
-              </span> */}
             </div>
 
             <div className="w-full h-[6px] bg-gray-200 rounded-full overflow-hidden">
@@ -219,9 +186,7 @@ export default function EditReview() {
                 text-white font-medium
                 shadow-md
                 flex items-center justify-center gap-2
-                hover:scale-[1.02] transition
-              "
-            >
+                hover:scale-[1.02] transition" >
               <X size={16} />
               Reset
             </button>
@@ -255,7 +220,6 @@ export default function EditReview() {
             <li>Verify all measurements and certifications are accurate</li>
           </ul>
         </div>
-
       </div>
     </div>
   );

@@ -8,9 +8,9 @@ import { useNavigate, useParams } from "react-router-dom";
 type ResultRow = {
   id: number;
   file_name: string;
-  clause: string;      
-  response: string;    
-  score: number;       
+  clause: string;
+  response: string;
+  score: number;
 };
 
 function chunk<T>(array: T[], size: number): T[][] {
@@ -20,11 +20,11 @@ function chunk<T>(array: T[], size: number): T[][] {
   return [head, ...chunk(tail, size)];
 }
 
-// const getColor = (score: number) => {
-//   if (score >= 80) return "bg-green-500";
-//   if (score >= 50) return "bg-yellow-400";
-//   return "bg-red-500";
-// };
+const getColor = (score: number) => {
+  if (score >= 80) return "bg-green-500";
+  if (score >= 50) return "bg-yellow-400";
+  return "bg-red-500";
+};
 
 export default function TrainingDocumentsResult() {
   const navigate = useNavigate();
@@ -49,26 +49,16 @@ export default function TrainingDocumentsResult() {
         });
 
         const fileName = res.data?.file_name ?? "Unknown File";
-        // const extractedData = res.data?.data ?? "";
-        // const lines = extractedData.split("\n").filter(Boolean);
-const chunks = res.data?.data?.chunks ?? [];
-
-        // const mappedRows: ResultRow[] = extractedData.map((line:any, index:any) => ({
-        //   id: index + 1,
-        //   file_name: fileName,
-        //   clause: extractedData.chunks.text,
-        //   response: "-", // Placeholder since API has no response
-        //   score: 0,      // Placeholder
-        // }));
-const mappedRows: ResultRow[] = chunks.map(
-  (chunk: any, index: number) => ({
-    id: index + 1,
-    file_name: fileName,
-    clause: chunk.text,   
-    response: "-",        
-    score: 0,             
-  })
-);
+        const chunks = res.data?.data?.chunks ?? [];
+        const mappedRows: ResultRow[] = chunks.map(
+          (chunk: any, index: number) => ({
+            id: index + 1,
+            file_name: fileName,
+            clause: chunk.text,
+            response: "-",
+            score: 0,
+          })
+        );
 
         setRows(mappedRows);
         setPage(1);
@@ -113,7 +103,7 @@ const mappedRows: ResultRow[] = chunks.map(
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
-Training Documents            </h1>
+              Training Documents            </h1>
             <p className="text-sm text-gray-500 mt-1">
               Review AI-generated compliance responses
             </p>
@@ -142,9 +132,6 @@ Training Documents            </h1>
               <tr className="text-left text-gray-600 ">
                 <th className="py-3 px-2 w-[60px]">S.No</th>
                 <th className="py-3 px-2 w-[500px]">Chunk</th>
-                {/* <th className="py-3 px-5">AI Response</th> */}
-                {/* <th className="py-3 px-2 w-[180px]">Confidence</th> */}
-                {/* <th className="py-3 px-2 w-[120px] text-center">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -152,36 +139,6 @@ Training Documents            </h1>
                 <tr key={row.id}>
                   <td className="py-4 px-2">{row.id}</td>
                   <td className="py-4 px-2">{row.clause}</td>
-                  {/* <td className="py-4 px-5">{row.response}</td> */}
-                  {/* <td className="py-4 px-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-green-600">
-                        {row.score}%
-                      </span>
-                      <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${getColor(
-                            row.score
-                          )}`}
-                          style={{ width: `${row.score}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 text-center">
-                    <div className="flex items-center justify-center gap-3">
-                      <Pencil
-                        size={16}
-                        className="text-blue-600 cursor-pointer hover:text-blue-800"
-                        onClick={() => handleEdit(row.id)}
-                      />
-                      <Trash2
-                        size={16}
-                        className="text-red-500 cursor-pointer hover:text-red-700"
-                        onClick={() => handleDelete(row.id)}
-                      />
-                    </div>
-                  </td> */}
                 </tr>
               ))}
               {paginatedRows.length === 0 && (
