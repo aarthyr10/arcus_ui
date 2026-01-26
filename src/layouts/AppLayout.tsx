@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Header from "../components/Header/Header";
+import Footer from "../components/Footer/Footer";
 
 export default function AppLayout() {
     return (
@@ -7,9 +8,10 @@ export default function AppLayout() {
             <div className="relative z-10">
                 <Header />
             </div>
-                  <main className="flex-1 overflow-y-auto px-6 py-6">
-                  <Outlet />
+            <main className="flex-1 overflow-y-auto px-6 py-6">
+                <Outlet />
             </main>
+            <Footer />
         </div>
     );
 }
