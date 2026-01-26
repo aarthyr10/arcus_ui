@@ -94,7 +94,7 @@ const Start = () => {
           <span>Copyright</span>
         </div>
       </div>
-    </footer>    
+    </footer>
     </div>
   );
 };
