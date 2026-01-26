@@ -1,24 +1,22 @@
-FROM ubuntu:latest
-LABEL authors="narendrakumar"
-
-ENTRYPOINT ["top", "-b"]
-
-FROM node:20-alpine AS build
+FROM node:lts-alpine AS build
 
 WORKDIR /app
+COPY package*.json ./
 
-COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
+
 RUN npm run build
 
-FROM nginx:alpine
+FROM node:lts-alpine
 
-RUN rm -rf /usr/share/nginx/html/*
+WORKDIR /app
 
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN npm install -g serve
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+COPY --from=build /app/dist ./build
+
+EXPOSE 5173
+
+CMD ["serve", "-s", "build", "-l", "5173"]

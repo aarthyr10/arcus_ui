@@ -10,7 +10,6 @@ export default defineConfig({
      proxy: {
       "/api": {  
         target: "https://20.193.149.193",
-        //target:"https://robbi-ungouty-babette.ngrok-free.dev",
         changeOrigin: true,
         secure: false,
       },},
