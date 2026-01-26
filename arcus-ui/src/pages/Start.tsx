@@ -5,7 +5,7 @@ const Start = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="h-screen w-full bg-[#eaf6fb] relative overflow-hidden">
+<div className="h-screen w-full bg-[#eaf6fb] flex flex-col">
 
       <div className="absolute top-10 left-10">
         <img src={logo} alt="Daikin logo" className="h-7" />
@@ -84,6 +84,17 @@ const Start = () => {
         </div>
 
       </div>
+    <footer className="w-full">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex justify-center items-center text-xs text-gray-500 gap-2">
+          <a href="#" className="hover:text-gray-700 transition">Terms & conditions</a>
+          <span>|</span>
+          <a href="#" className="hover:text-gray-700 transition">Privacy Policy</a>
+          <span>|</span>
+          <span>Copyright</span>
+        </div>
+      </div>
+    </footer>    
     </div>
   );
 };
