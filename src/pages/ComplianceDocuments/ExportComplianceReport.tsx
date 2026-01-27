@@ -20,6 +20,7 @@ type Question = {
 interface Props {
   opened: boolean;
   onClose: () => void;
+  filename: string;
   questions: Question[];
 }
 

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { FiLogOut } from "react-icons/fi";
 import { LuBookOpen } from "react-icons/lu";
 import { BsFileText } from "react-icons/bs";
-import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
+// import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
 import React from "react";
 
 type Props = {
@@ -54,8 +54,8 @@ const SideMenuModal = ({ onClose }: Props) => {
           p-4
           z-50 " >
         {menuItem("Compliance Form", "/compliance", <BsFileText />)}
-         {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)} 
-        {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)} 
+        {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)} 
+        {/* {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)}  */}
 
         <hr className="my-3 border-gray-300" />
 

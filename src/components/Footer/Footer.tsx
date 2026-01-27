@@ -8,7 +8,7 @@ export default function Footer() {
           <span>|</span>
           <a href="#" className="hover:text-gray-700 transition">Privacy Policy</a>
           <span>|</span>
-          <span>Copyright</span>
+          <span>© 2026 Tarkasha Labs LLP. All rights reserved.</span>
         </div>
       </div>
     </footer>
