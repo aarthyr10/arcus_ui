@@ -26,6 +26,7 @@ interface Props {
 export default function ExportComplianceReportModal({
   opened,
   onClose,
+  filename,
   questions,
 }: Props) {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export default function ExportComplianceReportModal({
       },
     });
 
-    doc.save("Compliance-Report.pdf");
+    doc.save(filename + ".pdf");
   };
 
   /* ---------- EXCEL ---------- */
@@ -87,7 +88,7 @@ export default function ExportComplianceReportModal({
       new Blob([buffer], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
-      "Compliance-Report.xlsx"
+      filename + ".xlsx"
     );
   };
 
@@ -118,9 +119,9 @@ export default function ExportComplianceReportModal({
       <div className="text-center">
         {status !== "success" && (
           <>
-            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center mb-4">
+            {/* <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center mb-4">
               <FileText className="text-white" />
-            </div>
+            </div> */}
             <h2 className="text-xl font-semibold text-gray-800">
               Export Report
             </h2>

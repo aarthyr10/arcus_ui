@@ -39,7 +39,7 @@ export default function ComplianceResults() {
   const [rows, setRows] = useState<ResultRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-
+  const [filename, setFilename] = useState<string>("");
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -58,16 +58,22 @@ export default function ComplianceResults() {
           headers: { "ngrok-skip-browser-warning": "true" },
         });
 
+        setFilename(res.data?.file_name ?? "");
+
         const questions = res.data?.data?.questions ?? [];
         const mappedRows: ResultRow[] = questions.map((q: any) => {
-          const rawScore =
-            q.confidence_score ??
-            getScoreFromAnswer(q.answer);
+          const sourceScore =
+            q.confidence_score !== undefined && q.confidence_score !== null
+              ? q.confidence_score
+              : getScoreFromAnswer(q.answer);
 
-          const score = Math.max(
-            0,
-            Math.min(100, Number(rawScore) || 0)
-          );
+          let score = Number(sourceScore) || 0;
+
+          if (score > 0 && score <= 1) {
+            score = score * 100;
+          }
+
+          score = Math.max(0, Math.min(100, score));
 
           return {
             id: q.question_no,
@@ -121,8 +127,6 @@ export default function ComplianceResults() {
     <>
       <div className="z-10 px-6 py-6 mt-13">
         <div className="max-w-[1200px] mx-auto">
-
-          {/* HEADER */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
@@ -134,26 +138,18 @@ export default function ComplianceResults() {
             </div>
 
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer" onClick={() => navigate("/compliance")}>
+              <button
+                className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer"
+                onClick={() => navigate("/compliance")}
+              >
                 <ChevronLeft size={16} />
                 Back
               </button>
 
-              <button className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer"
-                onClick={() =>
-                  // navigate("/compliancereport", {
-                  //   state: {
-                  //     questions: rows.map(r => ({
-                  //       question_no: r.id,
-                  //       question: r.clause,
-                  //       answer: r.response,
-                  //       reference: r.reference ?? "-", 
-                  //       score: r.score
-                  //     }))
-                  //   }
-                  // })
-                  setOpen(true)
-                }>
+              <button
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer"
+                onClick={() => setOpen(true)}
+              >
                 <Download size={14} />
                 Export Report
               </button>
@@ -180,19 +176,22 @@ export default function ComplianceResults() {
                     <td className="py-4 px-2">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-sm font-medium ${row.score >= 80
-                            ? "text-green-600"
-                            : row.score >= 50
+                          className={`text-sm font-medium ${
+                            row.score >= 80
+                              ? "text-green-600"
+                              : row.score >= 50
                               ? "text-yellow-600"
                               : "text-red-600"
-                            }`} >
+                          }`}
+                        >
                           {row.score}%
                         </span>
-                        {/* Progress bar container */}
                         <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full ${getColor(row.score)}`}
+                              className={`h-full rounded-full ${getColor(
+                                row.score
+                              )}`}
                               style={{ width: `${row.score}%` }}
                             />
                           </div>
@@ -213,7 +212,6 @@ export default function ComplianceResults() {
                         />
                       </div>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -222,8 +220,6 @@ export default function ComplianceResults() {
         </div>
         <div className="max-w-[1200px] mx-auto mt-10 px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-
-            {/* LEFT */}
             <div className="flex items-center gap-2 text-sm whitespace-nowrap">
               <Text size="sm">Showing</Text>
               <Select
@@ -254,7 +250,6 @@ export default function ComplianceResults() {
               </Text>
             </div>
 
-            {/* RIGHT */}
             {totalPages > 1 && (
               <Pagination
                 total={totalPages}
@@ -286,14 +281,14 @@ export default function ComplianceResults() {
       <ExportComplianceReportModal
         opened={open}
         onClose={() => setOpen(false)}
-        questions={rows.map(r => ({
+        filename={filename}
+        questions={rows.map((r) => ({
           question_no: r.id,
           question: r.clause,
           answer: r.response,
           score: r.score,
         }))}
       />
-
     </>
   );
 }
