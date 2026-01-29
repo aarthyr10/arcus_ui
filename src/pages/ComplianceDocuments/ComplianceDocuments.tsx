@@ -151,7 +151,7 @@ export default function ComplianceDocuments() {
               return (
                 <div
                   key={doc.doc_id}
-                  onClick={() => navigate(`/complianceresult/${doc.doc_id}`)}
+                  onClick={() => doc.status === "SUCCESS" && navigate(`/complianceresult/${doc.doc_id}`)}
                   className={`
                   flex items-center justify-between
                 bg-white/30 border border-white/40  backdrop-blur-md
