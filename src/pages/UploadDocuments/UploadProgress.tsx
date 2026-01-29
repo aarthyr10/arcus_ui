@@ -42,7 +42,7 @@ const UploadProgress = () => {
 
       await uploadDocument(
         file,
-        "TEST123",
+        "RXQ-ARYFK",
         (percent) => setProgress(percent)
       );
 

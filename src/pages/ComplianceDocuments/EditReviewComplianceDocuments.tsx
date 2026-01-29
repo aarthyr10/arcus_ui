@@ -16,15 +16,19 @@ import { Textarea, Group, Button } from "@mantine/core";
 import ExportComplianceReportModal from "../ComplianceDocuments/ExportComplianceReport";
 
 const getColor = (score: number) => {
-  if (score >= 80) return "bg-green-500";
-  if (score >= 50) return "bg-yellow-400";
-  return "bg-red-500";
-};
+  if (score === 0)
+    return "bg-gray-500";
 
-const getScoreFromAnswer = (answer: string) => {
-  if (answer?.toLowerCase() === "partial") return 70;
-  if (answer?.toLowerCase() === "compliant") return 95;
-  return 40;
+  if (score > 90)
+    return "bg-green-500";
+
+  if (score >= 70)
+    return "bg-yellow-500";
+
+  if (score >= 40)
+    return "bg-orange-500";
+
+  return "bg-red-500";
 };
 
 export default function EditReviewComplianceDocuments() {
@@ -89,17 +93,14 @@ export default function EditReviewComplianceDocuments() {
 
     fetchQuestion();
   }, [docId, id]);
-  const rawScore =
-    question?.confidence_score !== undefined &&
-      question?.confidence_score !== null
-      ? question.confidence_score
-      : getScoreFromAnswer(
-        question?.modified_answer ?? question?.answer ?? ""
-      );
+  const rawScore = question?.confidence_score;
+
   const score =
-    rawScore > 0 && rawScore <= 1
-      ? Math.round(rawScore * 100)
-      : Math.max(0, Math.min(100, rawScore));
+    typeof rawScore === "number"
+      ? rawScore > 0 && rawScore <= 1
+        ? Math.round(rawScore * 100)
+        : Math.max(0, Math.min(100, rawScore))
+      : 0; // ← NO confidence from backend → 0
 
 
   if (loading) {
