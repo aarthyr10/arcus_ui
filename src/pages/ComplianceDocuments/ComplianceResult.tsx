@@ -16,15 +16,6 @@ type ResultRow = {
   remarks?: string | null;   // ✅ ADD THIS
 };
 
-const getConfidenceTagStyle = (score: number) => {
-  if (score === 0) return "bg-gray-500";
-  if (score > 90) return "bg-green-500";
-  if (score >= 70) return "bg-yellow-500";
-  if (score >= 40) return "bg-orange-500";
-  return "bg-red-500";
-};
-
-// ✅ ADD THIS NEW FUNCTION
 const getConfidenceColorHex = (score: number) => {
   if (score === 0) return "#6b7280"; // gray-500
   if (score > 90) return "#22c55e"; // green-500
@@ -32,9 +23,6 @@ const getConfidenceColorHex = (score: number) => {
   if (score >= 40) return "#f97316"; // orange-500
   return "#ef4444"; // red-500
 };
-
-const getRingColorClass = (score: number) =>
-  getConfidenceTagStyle(score).replace("bg-", "text-");
 
 function chunk<T>(array: T[], size: number): T[][] {
   if (!array.length) return [];

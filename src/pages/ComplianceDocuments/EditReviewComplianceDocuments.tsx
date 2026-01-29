@@ -12,14 +12,6 @@ import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
 import { Textarea, Group, Button } from "@mantine/core";
 
-const getConfidenceTagStyle = (score: number) => {
-  if (score === 0) return "bg-gray-500";
-  if (score > 90) return "bg-green-500";
-  if (score >= 70) return "bg-yellow-500";
-  if (score >= 40) return "bg-orange-500";
-  return "bg-red-500";
-};
-
 // ✅ ADD THIS NEW FUNCTION
 const getConfidenceColorHex = (score: number) => {
   if (score === 0) return "#6b7280"; // gray-500
@@ -28,9 +20,6 @@ const getConfidenceColorHex = (score: number) => {
   if (score >= 40) return "#f97316"; // orange-500
   return "#ef4444"; // red-500
 };
-
-const getRingColorClass = (score: number) =>
-  getConfidenceTagStyle(score).replace("bg-", "text-");
 
 const formatRemarkLabel = (tag: string) =>
   tag
@@ -98,10 +87,8 @@ export default function EditReviewComplianceDocuments() {
           headers: { "ngrok-skip-browser-warning": "true" },
         });
         const questions =
-          res.data?.questions ||
-          res.data?.data?.questions ||
-          res.data?.document?.questions ||
-          [];
+          res.data?.data?.questions 
+          // || [];
         const found = questions.find(
           (q: any) => q.question_no === Number(id)
         );
@@ -136,7 +123,7 @@ export default function EditReviewComplianceDocuments() {
         ? Math.round(rawScore * 100)
         : Math.max(0, Math.min(100, rawScore))
       : 0; // ← NO confidence from backend → 0
-      
+
 const remarkTags: string[] = question?.remarks
   ? Array.isArray(question.remarks)
     ? question.remarks
@@ -210,7 +197,7 @@ const remarkTags: string[] = question?.remarks
 
           {/* Clause */}
           <div className="relative text-sm mt-4 border border-[#9AD8FB] rounded-xl bg-white/60 px-4 py-4">
-            <span className="font-semibold text-md text-blue-500"> Clause </span>
+            <span className="font-semibold text-md text-blue-500"> Clause : {questionNumber} </span>
             <div className="mt-2 text-md font-normal text-gray-800">
               {question?.question || "No question text available"}
             </div>
