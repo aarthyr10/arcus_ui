@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import logo from "../../../public/Images/daikin.png"
+import logo from "../../../Images/daikin.png"
 
 const Logo = () => {
     const navigate = useNavigate();
