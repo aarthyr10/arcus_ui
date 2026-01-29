@@ -7,13 +7,13 @@ import UploadDocuments from './pages/UploadDocuments/UploadDocuments';
 import AppLayout from './layouts/AppLayout';
 import UploadProgress from './pages/UploadDocuments/UploadProgress';
 import ComplianceDocuments from './pages/ComplianceDocuments/ComplianceDocuments';
-import EditReview from './pages/Edit&Review/EditReview';
 import TrainingDocuments from './pages/Training Documents/TrainingDocuments';
 import ComplianceResults from './pages/ComplianceDocuments/ComplianceResult';
 import TrainingDocumentsResult from './pages/Training Documents/TrainingDocumentsResult';
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
 import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
 import { useEffect } from 'react';
+import EditReviewComplianceDocuments from './pages/ComplianceDocuments/EditReviewComplianceDocuments';
 
 function App() {
   useEffect(() => {
@@ -53,7 +53,7 @@ function App() {
               <Route path='/uploadsprogess' element={<UploadProgress />} />
               <Route path="/compliance" element={<ComplianceDocuments />} />
               <Route path="/complianceresult/:docId" element={<ComplianceResults />} />
-              <Route path="/compliance/edit/:docId/:id" element={<EditReview />} />
+              <Route path="/compliance/edit/:docId/:id" element={<EditReviewComplianceDocuments/>} />
               <Route path="/knowledge" element={<TrainingDocuments />} />
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />

@@ -82,7 +82,7 @@ export default function ComplianceDocuments() {
         created_at: doc.created_at,
         status: doc.status,
         file_url: doc.path,
-        clauses: Math.floor(Math.random() * 20) + 5,
+        clauses: doc.questions_count,
       }))
       .sort(
         (a: UploadedDoc, b: UploadedDoc) =>
@@ -97,7 +97,7 @@ export default function ComplianceDocuments() {
       .catch(() => setDocs([]));
   }, []);
 
-  const rows = docs; 
+  const rows = docs;
 
   const pages = useMemo(() => {
     return chunk(rows, pageSize);
