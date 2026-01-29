@@ -17,20 +17,24 @@ type ResultRow = {
 };
 
 const getConfidenceTagStyle = (score: number) => {
-  if (score === 0)
-    return "bg-gray-500";
-
-  if (score > 90)
-    return "bg-green-500";
-
-  if (score >= 70)
-    return "bg-yellow-500";
-
-  if (score >= 40)
-    return "bg-orange-500";
-
+  if (score === 0) return "bg-gray-500";
+  if (score > 90) return "bg-green-500";
+  if (score >= 70) return "bg-yellow-500";
+  if (score >= 40) return "bg-orange-500";
   return "bg-red-500";
 };
+
+// ✅ ADD THIS NEW FUNCTION
+const getConfidenceColorHex = (score: number) => {
+  if (score === 0) return "#6b7280"; // gray-500
+  if (score > 90) return "#22c55e"; // green-500
+  if (score >= 70) return "#eab308"; // yellow-500
+  if (score >= 40) return "#f97316"; // orange-500
+  return "#ef4444"; // red-500
+};
+
+const getRingColorClass = (score: number) =>
+  getConfidenceTagStyle(score).replace("bg-", "text-");
 
 function chunk<T>(array: T[], size: number): T[][] {
   if (!array.length) return [];
@@ -47,21 +51,32 @@ const formatRemarkLabel = (tag: string) =>
 const getRemarkStyle = (tag: string) => {
   const value = tag.toLowerCase();
 
+  // NOT EVALUATED
   if (value.includes("not evaluated"))
     return "bg-yellow-100 text-yellow-800 border-yellow-300";
 
+  // CONTRACTOR RELATED / SPECIFIC
   if (value.includes("contractor"))
     return "bg-blue-100 text-blue-800 border-blue-300";
 
+  // PARTIALLY COMPLIANT
+  if (value.includes("partially compliant"))
+    return "bg-orange-100 text-orange-800 border-orange-300";
+
+  // NON COMPLIANT
   if (value.includes("non compliant"))
     return "bg-red-100 text-red-800 border-red-300";
 
+  // COMPLIANT
   if (value.includes("compliant"))
     return "bg-green-100 text-green-800 border-green-300";
 
+  // PRODUCT SPECIFIC (fallback)
+  if (value.includes("product"))
+    return "bg-indigo-100 text-indigo-800 border-indigo-300";
+
   return "bg-gray-100 text-gray-700 border-gray-300";
 };
-
 
 export default function ComplianceResults() {
   const navigate = useNavigate();
@@ -234,31 +249,38 @@ export default function ComplianceResults() {
                         </div>
 
                         {row.answer_modified && (
-                          <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-emerald-700 rounded-full">
+                          <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-emerald-700 rounded-full bg-emerald-100 border border-emerald-300">
                             <PencilLine className="w-3.5 h-3.5" />
                             <span className="uppercase tracking-wide">Modified</span>
                           </div>
                         )}
-                        
                       </td>
                       <td className="py-4 px-5">{row.reference}</td>
-                      <td className="py-4 text-center">
-                           <div
-                            className={`w-3 h-3 rounded-full shrink-0 ${getConfidenceTagStyle(
-                              row.score
-                            )}`}
-                            title={`Confidence: ${row.score}%`}
-                          />
-                        <div className="flex items-center justify-center gap-3">
-                          <Pencil
-                            size={16}
-                            className="text-blue-600 cursor-pointer hover:text-blue-800"
-                            onClick={() => handleEdit(row.id)}
-                          />
-                          <Trash2
-                            size={16}
-                            className="text-red-500 cursor-pointer hover:text-red-700"
-                          />
+                      <td className="py-4 px-2">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <div
+                            className="w-12 h-12 rounded-full relative shrink-0"
+                            style={{
+                              background: `conic-gradient(${getConfidenceColorHex(row.score)} ${row.score * 3.6}deg, #e5e7eb 0deg)`,
+                            }}
+                          >
+                            <div className="absolute inset-[4px] bg-white rounded-full flex items-center justify-center">
+                              <span className="text-xs font-bold text-gray-800">
+                                {Math.round(row.score)}%
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-center gap-3">
+                            <Pencil
+                              size={16}
+                              className="text-blue-600 cursor-pointer hover:text-blue-800 transition"
+                              onClick={() => handleEdit(row.id)}
+                            />
+                            <Trash2
+                              size={16}
+                              className="text-red-500 cursor-pointer hover:text-red-700 transition"
+                            />
+                          </div>
                         </div>
                       </td>
                     </tr>

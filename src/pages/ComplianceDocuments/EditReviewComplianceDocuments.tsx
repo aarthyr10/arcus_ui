@@ -1,34 +1,70 @@
 import {
   ArrowLeft,
-  Download,
   Sparkles,
   Check,
   X,
   FileText,
   Loader,
-  TrendingUp,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
 import { Textarea, Group, Button } from "@mantine/core";
-import ExportComplianceReportModal from "../ComplianceDocuments/ExportComplianceReport";
 
-const getColor = (score: number) => {
-  if (score === 0)
-    return "bg-gray-500";
-
-  if (score > 90)
-    return "bg-green-500";
-
-  if (score >= 70)
-    return "bg-yellow-500";
-
-  if (score >= 40)
-    return "bg-orange-500";
-
+const getConfidenceTagStyle = (score: number) => {
+  if (score === 0) return "bg-gray-500";
+  if (score > 90) return "bg-green-500";
+  if (score >= 70) return "bg-yellow-500";
+  if (score >= 40) return "bg-orange-500";
   return "bg-red-500";
+};
+
+// ✅ ADD THIS NEW FUNCTION
+const getConfidenceColorHex = (score: number) => {
+  if (score === 0) return "#6b7280"; // gray-500
+  if (score > 90) return "#22c55e"; // green-500
+  if (score >= 70) return "#eab308"; // yellow-500
+  if (score >= 40) return "#f97316"; // orange-500
+  return "#ef4444"; // red-500
+};
+
+const getRingColorClass = (score: number) =>
+  getConfidenceTagStyle(score).replace("bg-", "text-");
+
+const formatRemarkLabel = (tag: string) =>
+  tag
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+const getRemarkStyle = (tag: string) => {
+  const value = tag.toLowerCase();
+
+  // NOT EVALUATED
+  if (value.includes("not evaluated"))
+    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+
+  // CONTRACTOR RELATED / SPECIFIC
+  if (value.includes("contractor"))
+    return "bg-blue-100 text-blue-800 border-blue-300";
+
+  // PARTIALLY COMPLIANT
+  if (value.includes("partially compliant"))
+    return "bg-orange-100 text-orange-800 border-orange-300";
+
+  // NON COMPLIANT
+  if (value.includes("non compliant"))
+    return "bg-red-100 text-red-800 border-red-300";
+
+  // COMPLIANT
+  if (value.includes("compliant"))
+    return "bg-green-100 text-green-800 border-green-300";
+
+  // PRODUCT SPECIFIC (fallback)
+  if (value.includes("product"))
+    return "bg-indigo-100 text-indigo-800 border-indigo-300";
+
+  return "bg-gray-100 text-gray-700 border-gray-300";
 };
 
 export default function EditReviewComplianceDocuments() {
@@ -38,7 +74,6 @@ export default function EditReviewComplianceDocuments() {
   const { docId, id } = useParams<{ docId: string; id: string }>();
 
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState<any>(null);
   const [questionNumber, setQuestionNumber] = useState<any>(null);
   const [text, setText] = useState("");
@@ -83,7 +118,7 @@ export default function EditReviewComplianceDocuments() {
         setOriginalText(found.modified_answer ?? found.answer ?? "");
         setFileName(res.data?.file_name ?? null);
         setReference(found.reference ?? null);
-
+        // remarks: q.remarks,
       } catch (err) {
         console.error("Failed to load question", err);
       } finally {
@@ -101,6 +136,13 @@ export default function EditReviewComplianceDocuments() {
         ? Math.round(rawScore * 100)
         : Math.max(0, Math.min(100, rawScore))
       : 0; // ← NO confidence from backend → 0
+      
+const remarkTags: string[] = question?.remarks
+  ? Array.isArray(question.remarks)
+    ? question.remarks
+    : question.remarks.split("|").map((r: string) => r.trim())
+  : [];
+
 
 
   if (loading) {
@@ -167,10 +209,12 @@ export default function EditReviewComplianceDocuments() {
           </h1>
 
           {/* Clause */}
-          <p className="text-sm text-gray-500 mt-1">
-            {/* Clause 1: Energy Efficiency Standards */}
-            {question?.question || "No question text available"}
-          </p>
+          <div className="relative text-sm mt-4 border border-[#9AD8FB] rounded-xl bg-white/60 px-4 py-4">
+            <span className="font-semibold text-md text-blue-500"> Clause </span>
+            <div className="mt-2 text-md font-normal text-gray-800">
+              {question?.question || "No question text available"}
+            </div>
+          </div>
 
           {/* Reference */}
           <div className="mt-4 bg-white/60 rounded-xl px-4 py-3 text-sm border border-[#9AD8FB]">
@@ -194,18 +238,42 @@ export default function EditReviewComplianceDocuments() {
             <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
               <Sparkles size={16} />
               AI Generated Response
-              {question?.answer_modified && (
-                <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700">
-                  Modified Answer </span>
-              )}
             </div>
-
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm shadow hover:scale-[1.03] transition" onClick={() => setOpen(true)}>
-              <Download size={14} />
-              Export Report
-            </button>
+            {remarkTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {remarkTags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full border 
+              ${getRemarkStyle(tag)}`}
+                  >
+                    {formatRemarkLabel(tag)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div /> // keeps spacing consistent
+            )}
+            <div
+              className="w-10 h-10 rounded-full relative shrink-0"
+              style={{
+                background: `conic-gradient(${getConfidenceColorHex(score)} ${score * 3.6}deg, #e5e7eb 0deg)`,
+              }}
+            >
+              <div className="absolute inset-[4px] bg-white rounded-full flex items-center justify-center">
+                <span className="text-xs font-bold text-gray-800">
+                  {Math.round(score)}%
+                </span>
+              </div>
+            </div>
           </div>
-
+          <p>{question.answer}</p>
+          <div className="py-4">
+            {question?.answer_modified && (
+              <span className="py-2 text-sm font-medium text-blue-600">
+                Modified Answer </span>
+            )}
+          </div>
           <Textarea
             value={text}
             onChange={(e) => setText(e.currentTarget.value)}
@@ -229,47 +297,6 @@ export default function EditReviewComplianceDocuments() {
               },
             }}
           />
-
-
-          {/* ===== CONFIDENCE SCORE ===== */}
-          {/* ===== CONFIDENCE SCORE ===== */}
-          <div className="mt-8 bg-white/30 border border-white/40  backdrop-blur-md rounded-2xl p-5">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2 text-sm font-semibold text-gray-800">
-                <span className="text-lg"><TrendingUp /></span>
-                Confidence Score
-              </div>
-
-              <span className="text-lg font-bold text-blue-500">
-                {score}%
-              </span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-700 ease-out ${getColor(score)}`}
-                style={{
-                  width: `${score}%`,
-                }}
-              />
-            </div>
-
-            {/* Scale labels */}
-            <div className="flex justify-between mt-2 text-xs text-gray-500">
-              <span>Low</span>
-              <span>High</span>
-            </div>
-            <div className="bg-white/30 border border-white/40  backdrop-blur-md">
-              AI Suggestions
-              <div className="mt-4 space-y-2 text-sm  text-gray-600">
-                <p>+ Add mention of zoning capabilities</p>
-                <p>+ Include warranty information</p>
-              </div>
-            </div>
-          </div>
-
           {/* ===== ACTION BUTTONS ===== */}
           <div className="mt-10">
             <Group mt={32} gap="lg">
@@ -326,18 +353,6 @@ export default function EditReviewComplianceDocuments() {
 
         </div>
       </div>
-      <ExportComplianceReportModal
-        opened={open}
-        onClose={() => setOpen(false)}
-        filename={fileName || "Compliance_Report"}
-        questions={question ? [{
-          question_no: questionNumber,
-          question: question.question,
-          answer: text,
-          score: question.confidence_score ?? 95
-        }] : []}
-      />
-
     </div>
   );
 }
