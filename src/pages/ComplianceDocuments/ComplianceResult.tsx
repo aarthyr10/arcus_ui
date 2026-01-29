@@ -84,6 +84,7 @@ export default function ComplianceResults() {
                 ? q.modified_answer
                 : q.answer, score,
             reference: q.reference,
+            remarks:q.remarks,
             answer_modified: q.answer_modified, // ✅ THIS WAS MISSING
 
           };
@@ -192,7 +193,7 @@ export default function ComplianceResults() {
                     </td>
 
                     <td className="py-4 px-5">{row.reference}</td>
-                    <td className="py-4 px-5">categorization </td>
+                    <td className="py-4 px-5">{row.remarks} </td>
                     <td className="py-4 px-2">
                       <div className="flex items-center gap-2">
                         <span

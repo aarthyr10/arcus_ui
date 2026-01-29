@@ -21,6 +21,11 @@ const getColor = (score: number) => {
   return "bg-red-500";
 };
 
+const getScoreFromAnswer = (answer: string) => {
+  if (answer?.toLowerCase() === "partial") return 70;
+  if (answer?.toLowerCase() === "compliant") return 95;
+  return 40;
+};
 
 export default function EditReviewComplianceDocuments() {
   const navigate = useNavigate();
@@ -84,6 +89,18 @@ export default function EditReviewComplianceDocuments() {
 
     fetchQuestion();
   }, [docId, id]);
+  const rawScore =
+    question?.confidence_score !== undefined &&
+      question?.confidence_score !== null
+      ? question.confidence_score
+      : getScoreFromAnswer(
+        question?.modified_answer ?? question?.answer ?? ""
+      );
+  const score =
+    rawScore > 0 && rawScore <= 1
+      ? Math.round(rawScore * 100)
+      : Math.max(0, Math.min(100, rawScore));
+
 
   if (loading) {
     return (
@@ -224,18 +241,16 @@ export default function EditReviewComplianceDocuments() {
               </div>
 
               <span className="text-lg font-bold text-blue-500">
-                {question?.confidence_score ?? 95}%
+                {score}%
               </span>
             </div>
 
             {/* Progress bar */}
             <div className="relative w-full h-3 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-700 ease-out ${getColor(
-                  question?.confidence_score ?? 0
-                )}`}
+                className={`h-full rounded-full transition-all duration-700 ease-out ${getColor(score)}`}
                 style={{
-                  width: `${question?.confidence_score ?? 95}%`,
+                  width: `${score}%`,
                 }}
               />
             </div>
