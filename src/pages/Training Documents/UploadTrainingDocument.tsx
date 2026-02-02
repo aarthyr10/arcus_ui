@@ -48,7 +48,7 @@ export default function UploadTrainingDocument() {
 
         const formData = new FormData();
         files.forEach((file) => formData.append("files", file));
-        formData.append("product_code", "TEST123");
+        formData.append("product_code", "RXQ-ARYFK");
 
         try {
             setLoading(true);
