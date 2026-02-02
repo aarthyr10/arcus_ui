@@ -9,8 +9,7 @@ export default defineConfig({
   server: {
      proxy: {
       "/api": {
-        // target: "https://20.193.149.193",
-                target: "https://contractional-napoleon-superblessed.ngrok-free.dev",
+        target: "https://20.193.149.193",
         changeOrigin: true,
         secure: false,
       },},
