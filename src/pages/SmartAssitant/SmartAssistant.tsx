@@ -131,7 +131,6 @@ export default function SmartAssistant() {
           conversation_id: conversationId,
           history,
           // Optional knobs (backend has defaults if omitted)
-          // model_name: undefined,
           model_name: "llama3.2:latest",
           metadata_filters: {
             product_code: "RXQ-ARYFK",
@@ -237,13 +236,9 @@ export default function SmartAssistant() {
                           : "max-w-[75%] rounded-2xl rounded-tl-md bg-white/80 text-gray-800 px-4 py-3 shadow"
                       }
                     >
-                      {/* <div className="text-sm leading-relaxed whitespace-pre-wrap">{m.content}</div> */}
                       <div className="text-sm leading-relaxed whitespace-pre-wrap">
                         {m.content === "__typing__" ? <TypingDots /> : m.content}
                       </div>
-                      {/* <div className={`mt-2 text-[10px] ${isUser ? "text-white/80" : "text-gray-400"}`}> */}
-                      {/* {formatTime(m.ts)} */}
-                      {/* </div> */}
                       {m.content !== "__typing__" && (
                         <div className={`mt-2 mb-2 text-[10px] ${isUser ? "text-white/80" : "text-gray-400"}`}>
                           {formatTime(m.ts)}
@@ -308,7 +303,6 @@ export default function SmartAssistant() {
                 type="button"
                 onClick={() => sendMessage(input)}
                 disabled={isSending || !input.trim()}
-                // disabled={true} // always disabled
                 className="h-10 w-10 rounded-xl bg-[#05b4e6] disabled:bg-gray-300 text-white flex items-center justify-center shadow"
                 aria-label="Send"
               >
