@@ -14,6 +14,7 @@ import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDoc
 import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
 import { useEffect } from 'react';
 import EditReviewComplianceDocuments from './pages/ComplianceDocuments/EditReviewComplianceDocuments';
+import SmartAssistant from './pages/SmartAssitant/SmartAssistant';
 
 function App() {
   useEffect(() => {
@@ -53,11 +54,12 @@ function App() {
               <Route path='/uploadsprogess' element={<UploadProgress />} />
               <Route path="/compliance" element={<ComplianceDocuments />} />
               <Route path="/complianceresult/:docId" element={<ComplianceResults />} />
-              <Route path="/compliance/edit/:docId/:id" element={<EditReviewComplianceDocuments/>} />
+              <Route path="/compliance/edit/:docId/:id" element={<EditReviewComplianceDocuments />} />
               <Route path="/knowledge" element={<TrainingDocuments />} />
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />
               <Route path="/knowledge/edit/:docId/:id" element={<EditReviewTrainingDocument />} />
+              <Route path='/assistant' element={<SmartAssistant />} />
             </Route>
           </Routes>
         </BrowserRouter>
