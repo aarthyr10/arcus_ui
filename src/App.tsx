@@ -11,7 +11,6 @@ import TrainingDocuments from './pages/Training Documents/TrainingDocuments';
 import ComplianceResults from './pages/ComplianceDocuments/ComplianceResult';
 import TrainingDocumentsResult from './pages/Training Documents/TrainingDocumentsResult';
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
-import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
 import EditReviewComplianceDocuments from './pages/ComplianceDocuments/EditReviewComplianceDocuments';
 import SmartAssistant from './pages/SmartAssitant/SmartAssistant';
 
@@ -32,7 +31,6 @@ function App() {
               <Route path="/knowledge" element={<TrainingDocuments />} />
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />
-              <Route path="/knowledge/edit/:docId/:id" element={<EditReviewTrainingDocument />} />
               <Route path='/assistant' element={<SmartAssistant />} />
             </Route>
           </Routes>
