@@ -1,24 +1,24 @@
 import {
-  ArrowLeft,
   Sparkles,
   Check,
   X,
   FileText,
   Loader,
+  ChevronLeft,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { Textarea, Group, Button } from "@mantine/core";
+import { Textarea, Group, Button, Switch } from "@mantine/core";
 
 // ✅ ADD THIS NEW FUNCTION
 const getConfidenceColorHex = (score: number) => {
-  if (score === 0) return "#6b7280"; // gray-500
-  if (score > 90) return "#22c55e"; // green-500
-  if (score >= 70) return "#eab308"; // yellow-500
-  if (score >= 40) return "#f97316"; // orange-500
-  return "#ef4444"; // red-500
+  if (score === 0) return "#6b7280"; 
+  if (score > 90) return "#22c55e"; 
+  if (score >= 70) return "#eab308"; 
+  if (score >= 40) return "#f97316"; 
+  return "#ef4444"; 
 };
 
 const formatRemarkLabel = (tag: string) =>
@@ -29,31 +29,34 @@ const formatRemarkLabel = (tag: string) =>
 const getRemarkStyle = (tag: string) => {
   const value = tag.toLowerCase();
 
-  // NOT EVALUATED
   if (value.includes("not evaluated"))
-    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    return "bg-gray-100 text-gray-900 border border-gray-500";
 
-  // CONTRACTOR RELATED / SPECIFIC
+  if (value.includes("non comply"))
+    return "bg-yellow-100 text-yellow-900 border border-yellow-500";
+
+  if (value.includes("not applicable"))
+    return "bg-teal-100 text-teal-900 border border-teal-400";
+
   if (value.includes("contractor"))
-    return "bg-blue-100 text-blue-800 border-blue-300";
+    return "bg-blue-100 text-blue-900 border border-blue-500";
 
-  // PARTIALLY COMPLIANT
-  if (value.includes("partially compliant"))
-    return "bg-orange-100 text-orange-800 border-orange-300";
+  if (value.includes("partially compliant") || value.includes("partial"))
+    return "bg-orange-100 text-orange-900 border border-amber-500";
 
-  // NON COMPLIANT
-  if (value.includes("non compliant"))
-    return "bg-red-100 text-red-800 border-red-300";
+  if (value.includes("non compliant") || value.includes("non-compliant"))
+    return "bg-red-100 text-red-900 border border-red-500";
 
-  // COMPLIANT
-  if (value.includes("compliant"))
-    return "bg-green-100 text-green-800 border-green-300";
+  if (value.includes("compliant") || value.includes("comply"))
+    return "bg-green-100 text-green-900 border border-green-500";
 
-  // PRODUCT SPECIFIC (fallback)
   if (value.includes("product"))
-    return "bg-indigo-100 text-indigo-800 border-indigo-300";
+    return "bg-indigo-100 text-indigo-900 border border-indigo-500";
 
-  return "bg-gray-100 text-gray-700 border-gray-300";
+  if (value.includes("project_specific"))
+    return "bg-purple-100 text-purple-900 border border-purple-500";
+
+  return "bg-gray-100 text-gray-800 border border-gray-400";
 };
 
 export default function EditReviewComplianceDocuments() {
@@ -71,6 +74,7 @@ export default function EditReviewComplianceDocuments() {
   const [reference, setReference] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const showReset = text !== originalText;
+  const [retrainLLM, setRetrainLLM] = useState(false);
 
   useEffect(() => {
     if (!docId || !id) return;
@@ -87,8 +91,8 @@ export default function EditReviewComplianceDocuments() {
           headers: { "ngrok-skip-browser-warning": "true" },
         });
         const questions =
-          res.data?.data?.questions 
-          // || [];
+          res.data?.data?.questions
+        // || [];
         const found = questions.find(
           (q: any) => q.question_no === Number(id)
         );
@@ -124,11 +128,11 @@ export default function EditReviewComplianceDocuments() {
         : Math.max(0, Math.min(100, rawScore))
       : 0; // ← NO confidence from backend → 0
 
-const remarkTags: string[] = question?.remarks
-  ? Array.isArray(question.remarks)
-    ? question.remarks
-    : question.remarks.split("|").map((r: string) => r.trim())
-  : [];
+  const remarkTags: string[] = question?.remarks
+    ? Array.isArray(question.remarks)
+      ? question.remarks
+      : question.remarks.split("|").map((r: string) => r.trim())
+    : [];
 
 
 
@@ -141,6 +145,7 @@ const remarkTags: string[] = question?.remarks
   }
   const handleReset = () => {
     setText(originalText);
+    setRetrainLLM(false);
   };
   const handleback = () => {
     if (window.history.length > 1) {
@@ -159,10 +164,11 @@ const remarkTags: string[] = question?.remarks
         ServiceEndpoint.apiBaseUrl +
         ServiceEndpoint.uploadedDocuments.updateAnswer(docId, id);
 
-      await axios.post(
+      await axios.put(
         endpoint,
         {
           modified_answer: text, // use the field backend expects
+          retrain_llm: retrainLLM, // 👈 true / false
         },
         { headers: { "ngrok-skip-browser-warning": "true" } }
       );
@@ -186,7 +192,7 @@ const remarkTags: string[] = question?.remarks
             onClick={handleback}
             className="absolute top-5 right-6 flex items-center gap-1 text-sm text-blue-600 font-medium cursor-pointer"
           >
-            <ArrowLeft size={16} />
+            <ChevronLeft size={20} />
             Back
           </button>
 
@@ -241,6 +247,18 @@ const remarkTags: string[] = question?.remarks
             ) : (
               <div /> // keeps spacing consistent
             )}
+            <div className="flex items-center justify-end gap-3 mb-3">
+              <span className="text-sm font-medium text-gray-700">
+                Retrain AI Model
+              </span>
+
+              <Switch
+                checked={retrainLLM}
+                onChange={(event) => setRetrainLLM(event.currentTarget.checked)}
+                size="md"
+                color="blue"
+              />
+            </div>
             <div
               className="w-10 h-10 rounded-full relative shrink-0"
               style={{
@@ -261,6 +279,7 @@ const remarkTags: string[] = question?.remarks
                 Modified Answer </span>
             )}
           </div>
+
           <Textarea
             value={text}
             onChange={(e) => setText(e.currentTarget.value)}
@@ -322,6 +341,7 @@ const remarkTags: string[] = question?.remarks
                 gradient={{ from: "#2f80ff", to: "#12c2e9" }}
                 onClick={handleSubmit}
                 loading={submitting}
+                disabled={!showReset || submitting}   // 👈 KEY LINE
                 leftSection={!submitting ? <Check size={16} /> : undefined}
                 styles={{
                   root: {

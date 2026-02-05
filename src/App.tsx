@@ -12,36 +12,10 @@ import ComplianceResults from './pages/ComplianceDocuments/ComplianceResult';
 import TrainingDocumentsResult from './pages/Training Documents/TrainingDocumentsResult';
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
 import EditReviewTrainingDocument from './pages/Training Documents/EditReviewTrainingDocument';
-import { useEffect } from 'react';
 import EditReviewComplianceDocuments from './pages/ComplianceDocuments/EditReviewComplianceDocuments';
 import SmartAssistant from './pages/SmartAssitant/SmartAssistant';
 
 function App() {
-  useEffect(() => {
-    const handlePopState = () => {
-      // alert("Upload in progress. Please wait until it completes.");
-      window.history.pushState(null, "", window.location.href);
-    };
-
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
-  useEffect(() => {
-    const blockRefresh = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ""; // REQUIRED
-    };
-
-    window.addEventListener("beforeunload", blockRefresh);
-
-    return () => {
-      window.removeEventListener("beforeunload", blockRefresh);
-    };
-  }, []);
 
   return (
     <>
