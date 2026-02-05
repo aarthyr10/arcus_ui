@@ -39,31 +39,34 @@ const formatRemarkLabel = (tag: string) =>
 const getRemarkStyle = (tag: string) => {
   const value = tag.toLowerCase();
 
-  // NOT EVALUATED
   if (value.includes("not evaluated"))
-    return "bg-yellow-100 text-yellow-800 border-yellow-300";
+    return "bg-gray-100 text-gray-900 border border-gray-500";
 
-  // CONTRACTOR RELATED / SPECIFIC
+  if (value.includes("non comply"))
+    return "bg-yellow-100 text-yellow-900 border border-yellow-500";
+
+  if (value.includes("not applicable"))
+    return "bg-teal-100 text-teal-900 border border-teal-400";
+
   if (value.includes("contractor"))
-    return "bg-blue-100 text-blue-800 border-blue-300";
+    return "bg-blue-100 text-blue-900 border border-blue-500";
 
-  // PARTIALLY COMPLIANT
-  if (value.includes("partially compliant"))
-    return "bg-orange-100 text-orange-800 border-orange-300";
+  if (value.includes("partially compliant") || value.includes("partial"))
+    return "bg-orange-100 text-orange-900 border border-amber-500";
 
-  // NON COMPLIANT
-  if (value.includes("non compliant"))
-    return "bg-red-100 text-red-800 border-red-300";
+  if (value.includes("non compliant") || value.includes("non-compliant"))
+    return "bg-red-100 text-red-900 border border-red-500";
 
-  // COMPLIANT
-  if (value.includes("compliant"))
-    return "bg-green-100 text-green-800 border-green-300";
+  if (value.includes("compliant") || value.includes("comply"))
+    return "bg-green-100 text-green-900 border border-green-500";
 
-  // PRODUCT SPECIFIC (fallback)
   if (value.includes("product"))
-    return "bg-indigo-100 text-indigo-800 border-indigo-300";
+    return "bg-indigo-100 text-indigo-900 border border-indigo-500";
 
-  return "bg-gray-100 text-gray-700 border-gray-300";
+  if (value.includes("project_specific"))
+    return "bg-purple-100 text-purple-900 border border-purple-500";
+
+  return "bg-gray-100 text-gray-800 border border-gray-400";
 };
 
 export default function ComplianceResults() {
@@ -112,7 +115,7 @@ export default function ComplianceResults() {
                 : q.answer, score,
             reference: q.reference,
             remarks: q.remarks,
-            answer_modified: q.answer_modified, // ✅ THIS WAS MISSING
+            answer_modified: q.answer_modified,
 
           };
         });
@@ -172,15 +175,15 @@ export default function ComplianceResults() {
 
             <div className="flex items-center gap-3">
               <button
-                className="flex items-center gap-1 text-sm text-blue-600 cursor-pointer"
+                className="flex items-center gap-1 text-sm text-blue-600 font-medium cursor-pointer"
                 onClick={() => navigate("/compliance")}
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={20} />
                 Back
               </button>
 
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer shadow-lg hover:scale-[1.03] transition"
                 onClick={() => setOpen(true)}
               >
                 <Download size={14} />
@@ -220,14 +223,14 @@ export default function ComplianceResults() {
                                 <span
                                   key={index}
                                   className={`px-3 py-1 text-xs font-semibold rounded-full border 
-              ${getRemarkStyle(tag)}`}
+                                 ${getRemarkStyle(tag)}`}
                                 >
                                   {formatRemarkLabel(tag)}
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <div /> // keeps spacing consistent
+                            <div /> 
                           )}
                         </div>
                       </td>
