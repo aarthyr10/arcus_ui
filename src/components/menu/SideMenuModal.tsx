@@ -3,6 +3,7 @@ import { FiLogOut } from "react-icons/fi";
 import { LuBookOpen } from "react-icons/lu";
 import { BsFileText } from "react-icons/bs";
 import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
+import { IoSearch } from "react-icons/io5";
 import React from "react";
 
 type Props = {
@@ -41,7 +42,7 @@ const SideMenuModal = ({ onClose }: Props) => {
     <>
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/20 z-40"
+        className="fixed inset-0"
       />
 
       <div
@@ -56,6 +57,7 @@ const SideMenuModal = ({ onClose }: Props) => {
         {menuItem("Compliance Form", "/compliance", <BsFileText />)}
         {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)} 
         {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)} 
+        {menuItem("Search Docs", "/searchdocs", <IoSearch />)} 
 
         <hr className="my-3 border-gray-300" />
 

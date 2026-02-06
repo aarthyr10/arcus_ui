@@ -13,6 +13,7 @@ import TrainingDocumentsResult from './pages/Training Documents/TrainingDocument
 import UploadTrainingDocument from './pages/Training Documents/UploadTrainingDocument';
 import EditReviewComplianceDocuments from './pages/ComplianceDocuments/EditReviewComplianceDocuments';
 import SmartAssistant from './pages/SmartAssitant/SmartAssistant';
+import Searchdocs from './pages/SearchDocs/Searchdocs';
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
               <Route path="/uploadknowledge" element={<UploadTrainingDocument />} />
               <Route path="/knowledgeresult/:docId" element={<TrainingDocumentsResult />} />
               <Route path='/assistant' element={<SmartAssistant />} />
+              <Route path='/searchdocs' element={<Searchdocs />} />
             </Route>
           </Routes>
         </BrowserRouter>

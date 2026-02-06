@@ -3,7 +3,17 @@ import UploadCard from './UploadCard';
 
 const UploadDocuments = () => {
   return (
-    <div className="h-full w-full overflow-hidden flex flex-col lg:flex-row gap-6 items-center justify-center align-middle">
+     <div
+      className="
+      w-full 
+      min-h-[calc(100vh-200px)]
+      flex 
+      flex-col lg:flex-row 
+      gap-6 lg:gap-10 sm:mt-10 mt-10
+      items-center 
+      justify-center
+    "
+    >
       <UploadCard />
       <PreviousUploads />
     </div>
