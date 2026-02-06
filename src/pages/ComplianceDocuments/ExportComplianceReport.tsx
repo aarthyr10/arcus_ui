@@ -15,6 +15,7 @@ type Question = {
   question: string;
   answer: string;
   score: number;
+  reference: string;
 };
 
 interface Props {
@@ -50,11 +51,12 @@ export default function ExportComplianceReportModal({
 
     autoTable(doc, {
       startY: 70,
-      head: [["Q No", "Question", "Answer", "Confidence (%)"]],
+      head: [["Q No", "Question", "Answer", "Reference", "Confidence (%)"]],
       body: questions.map(q => [
         q.question_no,
         q.question,
         q.answer,
+        q.reference,
         `${q.score}%`,
       ]),
       styles: { fontSize: 8, cellPadding: 7, overflow: "linebreak" },

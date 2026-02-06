@@ -247,7 +247,7 @@ export default function TrainingDocuments() {
                     }}
                     styles={{
                       control: {
-                        "&[data-active]": {
+                        "&[dataActive]": {
                           backgroundColor: "#0B63E5",
                           color: "white",
                           borderColor: "#0B63E5",

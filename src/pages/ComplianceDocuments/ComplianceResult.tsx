@@ -11,7 +11,7 @@ type ResultRow = {
   clause: string;
   response: string;
   score: number;
-  reference?: string;
+  reference: string;
   answer_modified?: boolean;
   remarks?: string | null;   // ✅ ADD THIS
 };
@@ -230,12 +230,21 @@ export default function ComplianceResults() {
                               ))}
                             </div>
                           ) : (
-                            <div /> 
+                            <div />
                           )}
                         </div>
                       </td>
                       <td className="py-4 px-5">
                         <div className="mt-2 text-gray-800 leading-relaxed">
+                          {remarkTags.map((tag, index) => (
+                            <span
+                              key={index}
+                            // className={`px-3 py-1 text-xs font-semibold rounded-full border 
+                            // `}
+                            >
+                              {formatRemarkLabel(tag)}.
+                            </span>
+                          ))}
                           {row.response}
                         </div>
 
@@ -330,7 +339,7 @@ export default function ComplianceResults() {
                 }}
                 styles={{
                   control: {
-                    "&[data-active]": {
+                    "&[dataActive]": {
                       backgroundColor: "#0B63E5",
                       color: "white",
                       borderColor: "#0B63E5",
@@ -350,6 +359,7 @@ export default function ComplianceResults() {
           question_no: r.id,
           question: r.clause,
           answer: r.response,
+          reference: r.reference,
           score: r.score,
         }))}
       />

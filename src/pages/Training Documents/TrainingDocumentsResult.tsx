@@ -76,6 +76,25 @@ const BORDERS = {
   level2: "#cfe9ff",
   default: "#e5e7eb",
 };
+const BRANCH_COLORS = [
+  GRADIENT_COLORS.blue,
+  GRADIENT_COLORS.sky,
+  GRADIENT_COLORS.azure,
+  GRADIENT_COLORS.lightCyan,
+  GRADIENT_COLORS.cyan,
+];
+
+const lighten = (hex: string, percent = 70) => {
+  const num = parseInt(hex.replace("#", ""), 16);
+  const r = Math.min(255, (num >> 16) + percent);
+  const g = Math.min(255, ((num >> 8) & 0x00ff) + percent);
+  const b = Math.min(255, (num & 0x0000ff) + percent);
+  return `rgb(${r}, ${g}, ${b})`;
+};
+
+const makeGradient = (color: string) =>
+  `linear-gradient(90deg, ${color}, ${lighten(color, 40)})`;
+
 
 export function buildMindmapGraph(
   mindmap: any
@@ -86,7 +105,7 @@ export function buildMindmapGraph(
   const edges: Edge[] = [];
 
   const X_GAP = 460;
-  const Y_GAP = 120;
+  const Y_GAP = 520;
   let currentY = 0;
 
   /* ---------------- Utils ---------------- */
@@ -162,8 +181,12 @@ export function buildMindmapGraph(
 
   /* ---------------- Style ---------------- */
 
-const getStyle = (depth: number): CSSProperties => {
-  if (depth === 0)
+  const getStyle = (
+  depth: number,
+  branchColor?: string
+): CSSProperties => {
+  // ROOT
+  if (depth === 0) {
     return {
       background: GRADIENTS.root,
       color: "#fff",
@@ -172,74 +195,70 @@ const getStyle = (depth: number): CSSProperties => {
       width: 380,
       border: `1px solid ${BORDERS.root}`,
     };
+  }
 
-  if (depth === 1)
+  // LEVEL 1 – colorful branches
+  if (depth === 1 && branchColor) {
     return {
-      background: GRADIENTS.level1,
-      border: `1px solid ${BORDERS.level1}`,
+      background: makeGradient(branchColor),
+      border: `1px solid ${branchColor}`,
       borderRadius: 16,
       padding: 14,
       width: 340,
+      color: "#0f172a",
     };
+  }
+
+  // LEVEL 2+ – soft tint of branch
+  if (branchColor) {
+    return {
+      background: lighten(branchColor, 90),
+      border: `1px solid ${lighten(branchColor, 40)}`,
+      borderRadius: 14,
+      padding: 12,
+      width: 420,
+    };
+  }
 
   return {
     background: GRADIENTS.level2,
-    border: `1px solid ${BORDERS.level2}`,
+    border: `1px solid ${BORDERS.default}`,
     borderRadius: 14,
     padding: 12,
     width: 420,
   };
 };
 
-
   /* ---------------- Traverse ---------------- */
 
-  const traverse = (
-    node: any,
-    depth: number,
-    parentId?: string
-  ): number => {
-    const id = makeId(
-      node.id || node.title || node.key || `node-${depth}`
-    );
+ const traverse = (
+  node: any,
+  depth: number,
+  parentId?: string,
+  branchColor?: string
+): number => {
+  const id = makeId(
+    node.id || node.title || node.key || `node-${depth}`
+  );
 
-    const children = extractChildren(node);
+  const children = extractChildren(node);
 
-    // 🌿 Leaf
-    if (!children.length) {
-      const y = currentY;
-      currentY += Y_GAP;
+  // assign color at first level
+  const currentBranchColor =
+    depth === 1
+      ? BRANCH_COLORS[nodes.length % BRANCH_COLORS.length]
+      : branchColor;
 
-      nodes.push({
-        id,
-        position: { x: depth * X_GAP, y },
-        data: { label: getLabel(node) },
-        style: getStyle(depth),
-      });
-
-      if (parentId) {
-        edges.push({
-          id: makeId(`e-${parentId}-${id}`),
-          source: parentId,
-          target: id,
-        });
-      }
-      return y;
-    }
-
-    // 🌳 Parent
-    const childYs = children.map((c) =>
-      traverse(c, depth + 1, id)
-    );
-
-    const centerY =
-      childYs.reduce((a, b) => a + b, 0) / childYs.length;
+  // 🌿 Leaf
+  if (!children.length) {
+    const y = currentY;
+    currentY += Y_GAP;
 
     nodes.push({
       id,
-      position: { x: depth * X_GAP, y: centerY },
+      position: { x: depth * X_GAP, y },
       data: { label: getLabel(node) },
-      style: getStyle(depth),
+      style: getStyle(depth, currentBranchColor),
     });
 
     if (parentId) {
@@ -250,8 +269,34 @@ const getStyle = (depth: number): CSSProperties => {
       });
     }
 
-    return centerY;
-  };
+    return y;
+  }
+
+  // 🌳 Parent
+  const childYs = children.map((c) =>
+    traverse(c, depth + 1, id, currentBranchColor)
+  );
+
+  const centerY =
+    childYs.reduce((a, b) => a + b, 0) / childYs.length;
+
+  nodes.push({
+    id,
+    position: { x: depth * X_GAP, y: centerY },
+    data: { label: getLabel(node) },
+    style: getStyle(depth, currentBranchColor),
+  });
+
+  if (parentId) {
+    edges.push({
+      id: makeId(`e-${parentId}-${id}`),
+      source: parentId,
+      target: id,
+    });
+  }
+
+  return centerY;
+};
 
   /* ---------------- ROOT NORMALIZATION (🔥 THIS FIXES YOUR JSON) ---------------- */
 
@@ -265,10 +310,10 @@ const getStyle = (depth: number): CSSProperties => {
 
   traverse(root, 0);
   // 🔥 normalize Y positions (critical)
-const minY = Math.min(...nodes.map(n => n.position.y));
-nodes.forEach(n => {
-  n.position.y -= minY;
-});
+  const minY = Math.min(...nodes.map(n => n.position.y));
+  nodes.forEach(n => {
+    n.position.y -= minY;
+  });
   return { nodes, edges };
 }
 
@@ -321,7 +366,7 @@ export default function TrainingDocumentsResult() {
         setRows(mappedRows);
         setMindmap(res.data?.data?.mindmap_json);
         setExtractedText(extracted ? JSON.stringify(extracted, null, 2) : "");
-        setImages(res.data?.image_assets ?? []);
+        setImages(res.data?.data?.image_assets ?? []);
         setPage(1);
       } catch (err) {
         console.error("Failed to load results", err);
@@ -348,39 +393,83 @@ export default function TrainingDocumentsResult() {
   // const handleDelete = (id: number) => {
   //   console.log("Delete row:", id);
   // };
-const mindmapHeight = useMemo(() => {
-  if (!rfNodes.length) return 260;
+  const mindmapHeight = useMemo(() => {
+    if (!rfNodes.length) return 260;
 
-  let minY = Infinity;
-  let maxY = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
 
-  rfNodes.forEach((node) => {
-    const estimatedHeight =
-      node.style?.width === 380 ? 140 :
-      node.style?.width === 340 ? 120 :
-      110;
+    rfNodes.forEach((node) => {
+      const estimatedHeight =
+        node.style?.width === 380 ? 140 :
+          node.style?.width === 340 ? 120 :
+            110;
 
-    minY = Math.min(minY, node.position.y);
-    maxY = Math.max(maxY, node.position.y + estimatedHeight);
-  });
+      minY = Math.min(minY, node.position.y);
+      maxY = Math.max(maxY, node.position.y + estimatedHeight);
+    });
 
-  const height = maxY - minY + 32;
+    const height = maxY - minY + 32;
 
-  // 🔥 key line
-  return rfNodes.length <= 6 ? height : Math.max(height, 260);
-}, [rfNodes]);
+    // 🔥 key line
+    return rfNodes.length <= 6 ? height : Math.max(height, 260);
+  }, [rfNodes]);
 
   const mindmapGraph = useMemo(() => {
     const graph = buildMindmapGraph(mindmap);
     return graph;
   }, [mindmap]);
 
-  const getImageUrl = (path: string) => {
-    return (
-      ServiceEndpoint.apiBaseUrl.replace("/api/v1", "") +
-      path.replace("/app", "")
-    );
-  };
+// Utility to generate full image URL
+// Utility to generate full image URL
+const getImageUrl = (path: string) => {
+  if (!path) return "";
+
+  // Ensure no trailing slash in base URL
+  const baseUrl = ServiceEndpoint.apiBaseUrl.replace(/\/$/, '');
+
+  // Ensure path starts with a slash
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  return `${baseUrl}${normalizedPath}`;
+};
+
+// Download image from URL with proper MIME and filename
+const downloadImage = async (path: string, imageId?: string) => {
+  const url = getImageUrl(path);
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { "ngrok-skip-browser-warning": "true" },
+    });
+
+    if (!response.ok) throw new Error("Failed to fetch image");
+
+    // Convert to blob
+    const blob = await response.blob();
+    const ext = blob.type.split("/")[1] || "jpg"; // Get extension from MIME type
+
+    // Create a temporary blob URL
+    const blobUrl = URL.createObjectURL(blob);
+
+    // Create a temporary link and trigger download
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = imageId ? `${imageId}.${ext}` : `${path.split("/").pop() || "image"}.${ext}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Revoke blob URL after download
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    console.error("Failed to download image:", err);
+    alert("Failed to download image. Please try again.");
+  }
+};
+
+
   useEffect(() => {
     const graph = buildMindmapGraph(mindmap);
     if (graph) {
@@ -478,18 +567,18 @@ const mindmapHeight = useMemo(() => {
               (mindmapGraph.nodes.length > 0 ? (
                 <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-10 mt-4 overflow-visible">
                   <div style={{ width: "100%", height: mindmapHeight, overflow: "auto" }}>
-<ReactFlow
-  nodes={rfNodes}
-  edges={rfEdges}
-  fitView={shouldFitView}
-  fitViewOptions={{
-    padding: 0.2,
-  }}
-  zoomOnScroll={!shouldFitView}
-  panOnScroll={!shouldFitView}
-  minZoom={0.4}
-  maxZoom={1.2}
->
+                    <ReactFlow
+                      nodes={rfNodes}
+                      edges={rfEdges}
+                      fitView={shouldFitView}
+                      fitViewOptions={{
+                        padding: 0.2,
+                      }}
+                      zoomOnScroll={!shouldFitView}
+                      panOnScroll={!shouldFitView}
+                      minZoom={0.4}
+                      maxZoom={1.2}
+                    >
 
                       <Background gap={22} color="#e5e7eb" />
                       <Controls />
@@ -503,43 +592,49 @@ const mindmapHeight = useMemo(() => {
           </div>
         )}
 
-        {activeTab === "images" && (
-          images.length > 0 ? (
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-8">
-              <Text fw={600} size="md" mb="sm">
-                Document Pages
-              </Text>
+       {activeTab === "images" && (
+  images.length > 0 ? (
+    <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-8">
+      <Text fw={600} size="md" mb="sm">
+        Document Pages
+      </Text>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {images.map((img, index) => (
-                  <div
-                    key={index}
-                    className="rounded-xl border border-gray-200 overflow-hidden shadow-sm"
-                  >
-                    <img
-                      src={getImageUrl(img.path)}
-                      alt={`Page ${img.page_number}`}
-                      className="w-full h-auto object-contain bg-gray-50"
-                      loading="lazy"
-                    />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+       {images.map((img, index) => (
+  <div
+    key={index}
+    className="relative rounded-xl border overflow-hidden group"
+  >
+    <img
+      src={getImageUrl(img.path)}
+      alt={`Image ${img.page_no ?? index + 1}`}
+      className="w-full h-auto object-contain bg-gray-50"
+    />
 
-                    <div className="text-xs text-gray-500 text-center py-2">
-                      Page {img.page_number}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <NoData label="Images" />
-          )
-        )}
+    <button
+      onClick={() => downloadImage(img.path, img.image_id)}
+      className="absolute top-2 right-2 p-2 rounded-full 
+                 bg-black/60 text-white opacity-0 
+                 group-hover:opacity-100 transition"
+    >
+      ⬇
+    </button>
+  </div>
+))}
+
+      </div>
+    </div>
+  ) : (
+    <NoData label="Images" />
+  )
+)}
+
         <div className="">
           {activeTab === "extracted" && extractedText && (
             extractedText.length > 0 ? (
               <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-8">
                 <h3 className="text-md font-semibold mb-3">Extracted Text</h3>
-                <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto max-h-[600px]">
+                <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto">
                   {extractedText}
                 </pre>
               </div>
