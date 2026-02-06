@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
 import { ChevronDown, ChevronLeft, Loader } from "lucide-react";
@@ -33,127 +33,244 @@ function NoData({ label }: { label: string }) {
   );
 }
 
-function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
+const GRADIENT_COLORS = {
+  blue: "#2f80ff",      // 0% Deep Blue
+  sky: "#4aa3f7",       // ~25% Sky Blue
+  azure: "#6fbfe8",     // ~50% Soft Azure
+  lightCyan: "#3fd0e8", // ~75% Light Cyan
+  cyan: "#12c2e9",      // 100% Cyan
+};
+const GRADIENTS = {
+  root: `
+    linear-gradient(
+      90deg,
+      ${GRADIENT_COLORS.blue},
+      ${GRADIENT_COLORS.sky},
+      ${GRADIENT_COLORS.azure},
+      ${GRADIENT_COLORS.lightCyan},
+      ${GRADIENT_COLORS.cyan}
+    )
+  `,
+
+  level1: `
+    linear-gradient(
+      90deg,
+      #e6f4ff,
+      #dff3fb,
+      #eaf9ff
+    )
+  `,
+
+  level2: `
+    linear-gradient(
+      90deg,
+      #f7fbff,
+      #ffffff
+    )
+  `,
+};
+
+const BORDERS = {
+  root: "#2f80ff",
+  level1: "#90cdf4",
+  level2: "#cfe9ff",
+  default: "#e5e7eb",
+};
+
+export function buildMindmapGraph(
+  mindmap: any
+): { nodes: Node[]; edges: Edge[] } {
   if (!mindmap) return { nodes: [], edges: [] };
 
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
-  const X_GAP = 300;
-  const Y_GAP = 70;
+  const X_GAP = 460;
+  const Y_GAP = 120;
+  let currentY = 0;
 
-  /* ---------------- ROOT ---------------- */
-  const rootId = "root";
-  nodes.push({
-    id: rootId,
-    position: { x: 0, y: 0 },
-    data: {
-      label: (
-        <div className="font-semibold text-sm text-white">
-          {mindmap.root.title}
-          <div className="text-xs opacity-80">
-            {mindmap.root.product_code}
-          </div>
+  /* ---------------- Utils ---------------- */
+
+  const usedIds = new Set<string>();
+  const makeId = (base = "node") => {
+    let id = base.toString().replace(/\s+/g, "-");
+    let i = 1;
+    while (usedIds.has(id)) id = `${base}-${i++}`;
+    usedIds.add(id);
+    return id;
+  };
+
+  const safe = (v: any): string => {
+    if (v === null || v === undefined) return "";
+    if (typeof v === "string") return v;
+    if (typeof v === "number" || typeof v === "boolean")
+      return String(v);
+    try {
+      return JSON.stringify(v);
+    } catch {
+      return String(v);
+    }
+  };
+
+  /* ---------------- CHILD EXTRACTION (KEY FIX) ---------------- */
+
+  const extractChildren = (node: any): any[] => {
+    if (!node || typeof node !== "object") return [];
+
+    // 1️⃣ Explicit known keys
+    if (Array.isArray(node.children)) return node.children;
+    if (Array.isArray(node.items))
+      return node.items.map((i: any) => ({
+        title: i.key,
+        ...i,
+      }));
+    if (Array.isArray(node.nodes)) return node.nodes;
+
+    // 2️⃣ ANY array fallback
+    for (const value of Object.values(node)) {
+      if (Array.isArray(value)) {
+        return value.map((v) =>
+          typeof v === "object" ? v : { value: v }
+        );
+      }
+    }
+
+    return [];
+  };
+
+  /* ---------------- Label ---------------- */
+
+  const getLabel = (node: any) => (
+    <div className="space-y-1 text-xs">
+      {node.title && (
+        <div className="font-semibold text-slate-800">
+          {safe(node.title)}
         </div>
-      ),
-    },
-    style: {
-      background: "#2563eb",
-      padding: 12,
-      borderRadius: 12,
-    },
-  });
+      )}
+      {node.value && (
+        <div className="text-slate-600 whitespace-pre-wrap">
+          {safe(node.value)}
+        </div>
+      )}
+      {node.source && (
+        <div className="text-[10px] text-slate-400">
+          Source: {node.source}
+        </div>
+      )}
+    </div>
+  );
 
-  /* ---------------- SECTIONS ---------------- */
-  mindmap.nodes.forEach((section: any, sIndex: number) => {
-    const sectionId = `section-${sIndex}`;
+  /* ---------------- Style ---------------- */
+
+const getStyle = (depth: number): CSSProperties => {
+  if (depth === 0)
+    return {
+      background: GRADIENTS.root,
+      color: "#fff",
+      borderRadius: 18,
+      padding: 16,
+      width: 380,
+      border: `1px solid ${BORDERS.root}`,
+    };
+
+  if (depth === 1)
+    return {
+      background: GRADIENTS.level1,
+      border: `1px solid ${BORDERS.level1}`,
+      borderRadius: 16,
+      padding: 14,
+      width: 340,
+    };
+
+  return {
+    background: GRADIENTS.level2,
+    border: `1px solid ${BORDERS.level2}`,
+    borderRadius: 14,
+    padding: 12,
+    width: 420,
+  };
+};
+
+
+  /* ---------------- Traverse ---------------- */
+
+  const traverse = (
+    node: any,
+    depth: number,
+    parentId?: string
+  ): number => {
+    const id = makeId(
+      node.id || node.title || node.key || `node-${depth}`
+    );
+
+    const children = extractChildren(node);
+
+    // 🌿 Leaf
+    if (!children.length) {
+      const y = currentY;
+      currentY += Y_GAP;
+
+      nodes.push({
+        id,
+        position: { x: depth * X_GAP, y },
+        data: { label: getLabel(node) },
+        style: getStyle(depth),
+      });
+
+      if (parentId) {
+        edges.push({
+          id: makeId(`e-${parentId}-${id}`),
+          source: parentId,
+          target: id,
+        });
+      }
+      return y;
+    }
+
+    // 🌳 Parent
+    const childYs = children.map((c) =>
+      traverse(c, depth + 1, id)
+    );
+
+    const centerY =
+      childYs.reduce((a, b) => a + b, 0) / childYs.length;
 
     nodes.push({
-      id: sectionId,
-      position: { x: X_GAP, y: sIndex * 350 },
-      data: { label: <strong>{section.title}</strong> },
-      style: {
-        background: "#e0f2fe",
-        padding: 10,
-        borderRadius: 10,
-      },
+      id,
+      position: { x: depth * X_GAP, y: centerY },
+      data: { label: getLabel(node) },
+      style: getStyle(depth),
     });
 
-    edges.push({
-      id: `edge-root-${sectionId}`,
-      source: rootId,
-      target: sectionId,
-    });
-
-    /* ---------- KEY VALUE SPECS ---------- */
-    const kv = section.items?.key_value_specs ?? [];
-
-    kv.forEach((item: any, i: number) => {
-      const id = `${sectionId}-kv-${i}`;
-
-      nodes.push({
-        id,
-        position: {
-          x: X_GAP * 2,
-          y: sIndex * 350 + i * Y_GAP,
-        },
-        data: {
-          label: (
-            <div className="text-xs">
-              <strong>{item.key}</strong>
-              <div className="text-gray-600">{item.value}</div>
-            </div>
-          ),
-        },
-        style: {
-          background: "#ffffff",
-          border: "1px solid #e5e7eb",
-          borderRadius: 8,
-          padding: 8,
-          width: 240,
-        },
-      });
-
+    if (parentId) {
       edges.push({
-        id: `edge-${sectionId}-${id}`,
-        source: sectionId,
+        id: makeId(`e-${parentId}-${id}`),
+        source: parentId,
         target: id,
       });
-    });
+    }
 
-    /* ---------- NUMERIC VALUES ---------- */
-    const nums = section.items?.numeric_values_with_units ?? [];
+    return centerY;
+  };
 
-    nums.forEach((val: string, i: number) => {
-      const id = `${sectionId}-num-${i}`;
+  /* ---------------- ROOT NORMALIZATION (🔥 THIS FIXES YOUR JSON) ---------------- */
 
-      nodes.push({
-        id,
-        position: {
-          x: X_GAP * 3,
-          y: sIndex * 350 + i * Y_GAP,
-        },
-        data: {
-          label: <span className="text-xs font-medium">{val}</span>,
-        },
-        style: {
-          background: "#fef3c7",
-          borderRadius: 8,
-          padding: 6,
-        },
-      });
+  const root = {
+    ...(mindmap.root ?? {}),
+    children:
+      mindmap.root?.children ??
+      mindmap.nodes ??
+      [],
+  };
 
-      edges.push({
-        id: `edge-${sectionId}-${id}`,
-        source: sectionId,
-        target: id,
-      });
-    });
-  });
-
+  traverse(root, 0);
+  // 🔥 normalize Y positions (critical)
+const minY = Math.min(...nodes.map(n => n.position.y));
+nodes.forEach(n => {
+  n.position.y -= minY;
+});
   return { nodes, edges };
 }
-
 
 export default function TrainingDocumentsResult() {
   const navigate = useNavigate();
@@ -169,6 +286,8 @@ export default function TrainingDocumentsResult() {
   const [extractedText, setExtractedText] = useState<string>("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("table");
   const [showMindmap, setShowMindmap] = useState(false);
+  const shouldFitView = rfNodes.length <= 6;
+
 
 
   useEffect(() => {
@@ -196,14 +315,12 @@ export default function TrainingDocumentsResult() {
             score: 0,
           })
         );
+        const extracted = res.data?.data?.extracted_json;
+
 
         setRows(mappedRows);
         setMindmap(res.data?.data?.mindmap_json);
-        setExtractedText(
-          res.data?.data?.extracted_json?.raw_text
-          // ?? res.data?.data?.extracted_data
-          ?? ""
-        );
+        setExtractedText(extracted ? JSON.stringify(extracted, null, 2) : "");
         setImages(res.data?.image_assets ?? []);
         setPage(1);
       } catch (err) {
@@ -231,6 +348,27 @@ export default function TrainingDocumentsResult() {
   // const handleDelete = (id: number) => {
   //   console.log("Delete row:", id);
   // };
+const mindmapHeight = useMemo(() => {
+  if (!rfNodes.length) return 260;
+
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  rfNodes.forEach((node) => {
+    const estimatedHeight =
+      node.style?.width === 380 ? 140 :
+      node.style?.width === 340 ? 120 :
+      110;
+
+    minY = Math.min(minY, node.position.y);
+    maxY = Math.max(maxY, node.position.y + estimatedHeight);
+  });
+
+  const height = maxY - minY + 32;
+
+  // 🔥 key line
+  return rfNodes.length <= 6 ? height : Math.max(height, 260);
+}, [rfNodes]);
 
   const mindmapGraph = useMemo(() => {
     const graph = buildMindmapGraph(mindmap);
@@ -284,7 +422,7 @@ export default function TrainingDocumentsResult() {
         <div className="flex gap-2 border-b pb-3 mb-6">
           {[
             mindmapGraph.nodes.length > 0 && { k: "mindmap", l: "Mindmap" },
-            extractedText?.trim().length > 0 && { k: "extracted", l: "Extracted JSON" },
+            extractedText.length > 0 && { k: "extracted", l: "Extracted JSON" },
             { k: "table", l: "ID & Chunks" },
             images.length > 0 && { k: "images", l: "Images" },
           ]
@@ -336,20 +474,32 @@ export default function TrainingDocumentsResult() {
             </div>
 
             {/* CONTENT */}
-            {showMindmap && (
-              mindmapGraph.nodes.length > 0 ? (
+            {showMindmap &&
+              (mindmapGraph.nodes.length > 0 ? (
                 <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-10 mt-4 overflow-visible">
-                  <div style={{ width: "100%", height: "4000px" }}>
-                    <ReactFlow nodes={rfNodes} edges={rfEdges} fitView>
-                      <Background />
+                  <div style={{ width: "100%", height: mindmapHeight, overflow: "auto" }}>
+<ReactFlow
+  nodes={rfNodes}
+  edges={rfEdges}
+  fitView={shouldFitView}
+  fitViewOptions={{
+    padding: 0.2,
+  }}
+  zoomOnScroll={!shouldFitView}
+  panOnScroll={!shouldFitView}
+  minZoom={0.4}
+  maxZoom={1.2}
+>
+
+                      <Background gap={22} color="#e5e7eb" />
                       <Controls />
                     </ReactFlow>
                   </div>
                 </div>
               ) : (
                 <NoData label="Mindmap" />
-              )
-            )}
+              ))}
+
           </div>
         )}
 
@@ -389,7 +539,9 @@ export default function TrainingDocumentsResult() {
             extractedText.length > 0 ? (
               <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6 mb-8">
                 <h3 className="text-md font-semibold mb-3">Extracted Text</h3>
-                <div className="whitespace-pre-line">{extractedText}</div>
+                <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto max-h-[600px]">
+                  {extractedText}
+                </pre>
               </div>
             ) : (
               <NoData label="Extracted Text" />
