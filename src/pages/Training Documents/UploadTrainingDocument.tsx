@@ -329,16 +329,16 @@ export default function UploadTrainingDocument() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-3 sm:px-6 py-6 mt-6 sm:mt-4">
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-6 py-6 mt-2 sm:mt-10">
       <div className="w-full max-w-[1100px]">
 
         {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+        <div className="flex sm:flex-row sm:items-center sm:justify-between gap-15 sm:gap-3 mb-6">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+            <h1 className="text-sm sm:text-2xl font-semibold text-gray-800">
               Upload Training Document
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+            <p className="text-[10px] sm:text-sm text-gray-500 mt-1">
               Add documents to enhance AI knowledge base
             </p>
           </div>

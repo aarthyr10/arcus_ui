@@ -39,7 +39,6 @@ export default function AppLayout() {
   className="
   flex-1 
   w-full 
-  max-w-[1400px]
   mx-auto
   px-4 sm:px-6 lg:px-10 
   py-4 sm:py-6

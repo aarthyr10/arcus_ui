@@ -510,7 +510,7 @@ export default function SmartAssistant() {
           {/* Chat messages */}
           <div
             ref={scrollRef}
-            className="px-3 sm:px-6 py-4 sm:py-5 h-[45vh] sm:h-[250px] lg:h-[350px] overflow-y-auto"
+            className="px-3 sm:px-6 py-4 sm:py-5 h-[50vh] sm:h-[250px] lg:h-[350px] overflow-y-auto"
           >
             <div className="space-y-4">
               {messages.map((m) => {

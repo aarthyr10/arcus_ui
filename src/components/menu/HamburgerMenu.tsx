@@ -60,6 +60,15 @@
 
 // export default HamburgerMenu;
 
+
+
+
+
+
+
+
+
+
 import { useState } from "react";
 import SideMenuModal from "./SideMenuModal";
 
@@ -73,8 +82,7 @@ const HamburgerMenu = () => {
         aria-label="Toggle menu"
         title="Menu"
         className="
-          w-11 h-11 top-6 right-10
-          rounded-xl
+          w-11 h-11 fixed top-6 right-10 sm:right-25  rounded-xl
           bg-[#eef6f8]
           flex items-center justify-center
           hover:scale-105 transition cursor-pointer

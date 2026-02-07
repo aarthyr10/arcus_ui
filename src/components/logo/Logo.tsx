@@ -26,7 +26,7 @@ const Logo = () => {
       className="cursor-pointer"
       title="Go home"
     >
-      <img src={logo} alt="Daikin logo" className="h-7 w-auto" />
+      <img src={logo} alt="Daikin logo" className="h-6 w-auto fixed top-10 left-6 sm:left-15" />
     </div>
   );
 };
