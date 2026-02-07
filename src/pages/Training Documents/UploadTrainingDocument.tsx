@@ -253,7 +253,7 @@
 // }
 
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Group,
   Text,
@@ -274,10 +274,11 @@ export default function UploadTrainingDocument() {
 
   const [files, setFiles] = useState<File[]>([]);
   const [docType, setDocType] = useState("");
+  const [productCode, setProductCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const canUpload = files.length > 0 && !!docType && !loading;
+  const canUpload = files.length > 0 && !!docType && !!productCode && !loading;
 
   const endPoint =
     ServiceEndpoint.apiBaseUrl +
@@ -290,6 +291,33 @@ export default function UploadTrainingDocument() {
     { title: "Specification", desc: "Product specifications" },
     { title: "Standard", desc: "Industry standards" },
   ];
+
+  useEffect(() => {
+    const handlePopState = () => {
+      alert("Upload in progress. Please wait until it completes.");
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const blockRefresh = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // REQUIRED
+    };
+
+    window.addEventListener("beforeunload", blockRefresh);
+
+    return () => {
+      window.removeEventListener("beforeunload", blockRefresh);
+    };
+  }, []);
 
   const handleUpload = async () => {
     if (!docType) {
@@ -304,7 +332,8 @@ export default function UploadTrainingDocument() {
 
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
-    formData.append("product_code", "RXQ-ARYFK");
+    formData.append("document_type", docType);
+    formData.append("product_code", productCode);
 
     try {
       setLoading(true);
@@ -347,9 +376,8 @@ export default function UploadTrainingDocument() {
             disabled={loading}
             aria-label="Go back"
             title="Go back"
-            className={`flex items-center gap-1 text-sm ${
-              loading ? "text-gray-400 cursor-not-allowed" : "text-blue-600"
-            }`}
+            className={`flex items-center gap-1 text-sm ${loading ? "text-gray-400 cursor-not-allowed" : "text-blue-600"
+              }`}
             onClick={() => !loading && navigate("/knowledge")}
           >
             <ChevronLeft size={16} />
@@ -359,6 +387,35 @@ export default function UploadTrainingDocument() {
 
         {/* DOCUMENT TYPE */}
         <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-5 sm:p-8 mb-8">
+          {/* PRODUCT CODE */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-5 sm:p-8 mb-8">
+            <h2 className="text-sm font-medium text-gray-700 mb-3">
+              Product Code <span className="text-red-500">*</span>
+            </h2>
+
+            <input
+              type="text"
+              value={productCode}
+              onChange={(e) => setProductCode(e.target.value)}
+              // onChange={(e) => setProductCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+              placeholder="Enter product code (e.g. RXQ-ARYFK)"
+              className="
+                  w-full  
+                  h-12
+                  px-4
+                  rounded-xl
+                  border border-gray-200
+                  bg-white
+                  text-sm
+                  focus:outline-none
+                  focus:ring-2 focus:ring-blue-400
+                  focus:border-blue-400 transition" />
+
+            <p className="text-xs text-gray-500 mt-2">
+              Product code is required to associate documents correctly
+            </p>
+          </div>
+
           <h2 className="text-sm font-medium text-gray-700 mb-6">
             Select Document Type
           </h2>
@@ -371,11 +428,10 @@ export default function UploadTrainingDocument() {
                 <div
                   key={type.title}
                   onClick={() => setDocType(type.title)}
-                  className={`cursor-pointer rounded-xl border px-4 py-4 transition-all ${
-                    active
-                      ? "border-[#2f80ff] bg-[#e9f6ff]"
-                      : "border-gray-200 bg-white hover:border-blue-300"
-                  }`}
+                  className={`cursor-pointer rounded-xl border px-4 py-4 transition-all ${active
+                    ? "border-[#2f80ff] bg-[#e9f6ff]"
+                    : "border-gray-200 bg-white hover:border-blue-300"
+                    }`}
                 >
                   <p className="text-sm font-semibold">{type.title}</p>
                   <p className="text-xs text-gray-500 mt-1">{type.desc}</p>
@@ -476,6 +532,7 @@ export default function UploadTrainingDocument() {
               setFiles([]);
               setDocType("");
               setProgress(0);
+              setProductCode("");
             }}
             className="px-6 py-2 rounded-xl text-sm bg-white text-gray-600 shadow-sm w-full sm:w-auto"
           >
@@ -487,11 +544,10 @@ export default function UploadTrainingDocument() {
             disabled={!canUpload}
             aria-label="Upload documents"
             title="Upload documents"
-            className={`px-6 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all w-full sm:w-auto ${
-              canUpload
-                ? "bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
+            className={`px-6 py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all w-full sm:w-auto ${canUpload
+              ? "bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+              }`}
           >
             {loading ? <Loader size="xs" /> : <LiaCheckCircleSolid size={18} />}
             Upload Documents

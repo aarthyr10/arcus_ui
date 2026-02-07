@@ -80,15 +80,49 @@
 
 // export default UploadCard;
 
-import { Input } from "@mantine/core";
-import { useRef } from "react";
+import { Input, TextInput } from "@mantine/core";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
 const UploadCard = () => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
+  const [productCode, setProductCode] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const handlePopState = () => {
+      // alert("Upload in progress. Please wait until it completes.");
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    const blockRefresh = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // REQUIRED
+    };
+
+    window.addEventListener("beforeunload", blockRefresh);
+
+    return () => {
+      window.removeEventListener("beforeunload", blockRefresh);
+    };
+  }, []);
 
   const openPicker = () => {
+    if (!productCode.trim()) {
+      setError("Product code is required");
+      return;
+    }
+    setError("");
     inputRef.current?.click();
   };
 
@@ -98,7 +132,10 @@ const UploadCard = () => {
     const files = Array.from(e.target.files);
 
     navigate("/uploadsprogess", {
-      state: { file: files },
+      state: {
+        files,
+        productCode, // ✅ sending product code
+      },
     });
     e.target.value = "";
   };
@@ -109,7 +146,6 @@ const UploadCard = () => {
         className="
         w-full lg:w-[600px]
         max-w-[600px]
-        h-auto lg:h-[430px]
         bg-[#eef8fd]
         rounded-3xl
         shadow-[0_20px_40px_rgba(0,0,0,0.18)]
@@ -124,6 +160,25 @@ const UploadCard = () => {
         <p className="text-gray-500 text-center mt-1 mb-4 sm:mb-6 text-sm sm:text-base">
           Drop your compliance forms and specification documents
         </p>
+        {/* PRODUCT CODE INPUT */}
+        <div className="mb-8">
+          <div className="min-h-[86px]"> {/* 🔒 locks height */}
+            <TextInput
+              label="Product Code"
+              placeholder="Enter product code"
+              value={productCode}
+              onChange={(e) => setProductCode(e.target.value)}
+              // onChange={(e) =>  setProductCode(e.target.value.toUpperCase().replace(/\s/g, ""))}
+              error={error}
+              radius="md"
+              size="md"
+              required
+              styles={{
+                root: { marginBottom: 32 }, // 🔥 fixed spacing
+              }}
+            />
+          </div>
+        </div>
 
         <Input
           ref={inputRef}

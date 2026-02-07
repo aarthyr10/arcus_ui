@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-import { Loader, Search } from "lucide-react";
+import { Loader, Search, X } from "lucide-react";
 import { TextInput, Button } from "@mantine/core";
 
 interface SearchResult {
@@ -21,6 +21,12 @@ const Searchdocs = () => {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+
+  const handleReset = () => {
+    setQuery("");
+    setResults([]);
+    setSearched(false);
+  };
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -50,51 +56,106 @@ const Searchdocs = () => {
 
   return (
     <>
-      {/* LOADER */}
+      {/* FULL SCREEN LOADER */}
       {loading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
           <Loader className="animate-spin" />
         </div>
       )}
-      <div className="z-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 mt-4 sm:mt-14">
-        {/* <div className="px-6 py-10 max-w-7xl mx-auto"> */}
-        {/* PAGE TITLE */}
-        <h1 className="text-2xl font-semibold text-gray-800 text-center mb-8">
-          Search Documents
-        </h1>
 
-        {/* SEARCH BAR */}
-        <div className="flex justify-center mb-8">
+      <div className="px-3 sm:px-6 lg:px-8 py-6 mt-6 sm:mt-14">
+        <div className="max-w-[1200px] mx-auto w-full">
+
+          {/* PAGE TITLE */}
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+            Search Documents
+          </h1>
+
           {/* SEARCH BAR */}
-          <div className="flex justify-center mb-8">
-            <div className="flex gap-3 w-full max-w-[720px]">
-              <TextInput
-                placeholder="Type keyword to search documents..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                leftSection={<Search size={18} />}
-                size="lg"                 // 🔥 increases height
-                radius="xl"
-                className="flex-1"
-                styles={{
-                  input: {
-                    height: 76,           // 🔥 custom height
-                    fontSize: 16,
-                  },
-                }}
-              />
+          <div className="flex justify-center mb-10 mt-4">
+            <div className="flex items-center gap-4 w-full max-w-[1200px]">
 
+              {/* SEARCH INPUT CARD */}
+              <div
+                className="
+                  group flex items-center gap-3 flex-1
+                  rounded-2xl
+                  bg-white/70 backdrop-blur-xl
+                  border border-white/40
+                  shadow-lg
+                  px-5
+                  transition-all duration-300
+                  hover:shadow-xl hover:-translate-y-[1px]
+                  focus-within:ring-4 focus-within:ring-blue-500/30
+                "
+                style={{ height: 68 }}
+              >
+                {/* ICON (🔍 or ❌) */}
+                <div className="w-6 h-6 flex items-center justify-center">
+                  {!query ? (
+                    <Search
+                      size={22}
+                      className="
+                        text-gray-400
+                        transition-all duration-300
+                        group-focus-within:text-blue-600
+                        group-focus-within:scale-110
+                      "
+                    />
+                  ) : (
+                    <button
+                      onClick={handleReset}
+                      className="
+                        text-gray-400
+                        hover:text-red-500
+                        transition
+                        p-1
+                        rounded-full
+                        hover:bg-gray-100
+                      "
+                      aria-label="Clear search"
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
+
+                {/* INPUT */}
+                <TextInput
+                  variant="unstyled"
+                  placeholder="Search documents, files, keywords..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="flex-1"
+                  styles={{
+                    input: {
+                      height: 68,
+                      fontSize: 17,
+                      fontWeight: 500,
+                      color: "#1f2937",
+                    },
+                  }}
+                />
+              </div>
+
+              {/* SEARCH BUTTON */}
               <Button
-                size="lg"                 // 🔥 matches input height
-                radius="xl"
                 onClick={handleSearch}
                 loading={loading}
-                className="px-6"
+                radius="md"
+                size="lg"
+                disabled={!query.trim()}
+                styles={{
+                  root: {
+                    height: 64,
+                    background:
+                      "linear-gradient(135deg, #2f80ff, #12c2e9)",
+                  },
+                }}
               >
                 Search
               </Button>
-            </div>
             </div>
           </div>
 
@@ -156,8 +217,9 @@ const Searchdocs = () => {
             </div>
           )}
         </div>
-      </>
-      );
+      </div>
+    </>
+  );
 };
 
-      export default Searchdocs;
+export default Searchdocs;

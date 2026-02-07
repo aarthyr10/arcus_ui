@@ -4,7 +4,7 @@ import axios from "axios";
 import { ChevronDown, ChevronLeft, Eye, Loader, X } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls } from "reactflow";
+import ReactFlow, { Background, Controls, MarkerType } from "reactflow";
 import "reactflow/dist/style.css";
 import type { Node, Edge } from "reactflow";
 
@@ -60,7 +60,6 @@ const GRADIENTS = {
       #eaf9ff
     )
   `,
-
   level2: `
     linear-gradient(
       90deg,
@@ -94,7 +93,6 @@ const lighten = (hex: string, percent = 70) => {
 
 const makeGradient = (color: string) =>
   `linear-gradient(90deg, ${color}, ${lighten(color, 40)})`;
-
 
 export function buildMindmapGraph(
   mindmap: any
@@ -262,13 +260,25 @@ export function buildMindmapGraph(
       });
 
       if (parentId) {
-        edges.push({
-          id: makeId(`e-${parentId}-${id}`),
-          source: parentId,
-          target: id,
-        });
-      }
+      edges.push({
+        id: makeId(`e-${parentId}-${id}`),
+        source: parentId,
+        target: id,
+        type: "smoothstep",
+        animated: false,
+        style: {
+          stroke: currentBranchColor,
+          strokeWidth: 2,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 14,
+          height: 14,
+          color: currentBranchColor,
+        },
+      });
 
+      }
       return y;
     }
 
@@ -288,11 +298,23 @@ export function buildMindmapGraph(
     });
 
     if (parentId) {
-      edges.push({
-        id: makeId(`e-${parentId}-${id}`),
-        source: parentId,
-        target: id,
-      });
+     edges.push({
+      id: makeId(`e-${parentId}-${id}`),
+      source: parentId,
+      target: id,
+      type: "smoothstep",
+      animated: false,
+      style: {
+        stroke: currentBranchColor,
+        strokeWidth: 2,
+      },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 14,
+        height: 14,
+        color: currentBranchColor,
+      },
+    });
     }
 
     return centerY;
@@ -599,6 +621,12 @@ export default function TrainingDocumentsResult() {
                       fitViewOptions={{
                         padding: 0.2,
                       }}
+                      defaultEdgeOptions={{
+    type: "bezier",
+    style: {
+      strokeWidth: 2,
+    },
+  }}
                       zoomOnScroll={!shouldFitView}
                       panOnScroll={!shouldFitView}
                       minZoom={0.4}

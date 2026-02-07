@@ -207,11 +207,9 @@ if (loading) {
           <th className="py-3 px-2 w-[120px] text-center">Actions</th>
         </tr>
       </thead>
-
       <tbody>
         {paginatedRows.map((row: ResultRow) => {
           const remarkTags = row.remarks?.split("|") ?? [];
-
           return (
             <tr key={row.id}>
               <td className="py-4 px-2">{row.id}</td>
@@ -240,7 +238,7 @@ if (loading) {
               <td className="py-4 px-5">
                 <div className="mt-2 text-gray-800 leading-relaxed">
                   {remarkTags.map((tag, index) => (
-                    <span key={index}>
+                    <span key={index} className="font-bold">
                       {formatRemarkLabel(tag)}.
                     </span>
                   ))}
