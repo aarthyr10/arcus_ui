@@ -63,8 +63,9 @@ export default function ExportComplianceReportModal({
       headStyles: { fillColor: [11, 99, 229], textColor: 255 },
       columnStyles: {
         0: { cellWidth: 40 },
-        1: { cellWidth: 550 },
-        2: { cellWidth: 120 },
+        1: { cellWidth: 250 },
+        2: { cellWidth: 220 },
+        3: { cellWidth: 220 },
         4: { cellWidth: 50 },
       },
     });
@@ -122,9 +123,6 @@ export default function ExportComplianceReportModal({
       <div className="text-center">
         {status !== "success" && (
           <>
-            {/* <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center mb-4">
-              <FileText className="text-white" />
-            </div> */}
             <h2 className="text-xl font-semibold text-gray-800">
               Export Report
             </h2>
