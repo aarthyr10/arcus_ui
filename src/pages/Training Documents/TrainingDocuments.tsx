@@ -147,7 +147,7 @@ useEffect(() => {
  }
   return (
     <>
-      <div className="w-full flex justify-center px-3 sm:px-6 py-4 sm:py-6 mt-4 md:mt-10 lg:mt-15 xl:mt-30">
+      <div className="w-full flex justify-center px-3 sm:px-6 py-4 sm:py-6 mt-4 md:mt-10 lg:mt-15">
         <div className="w-full max-w-6xl">
 
           {/* HEADER */}
