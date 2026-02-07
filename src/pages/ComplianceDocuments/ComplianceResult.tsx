@@ -200,13 +200,13 @@ export default function ComplianceResults() {
 
             {/* mobile scroll enable */}
             <div className="w-full overflow-x-auto">
-              <table className="w-full text-sm min-w-[950px]">
+            <table className="w-full text-sm min-w-[950px] table-fixed">
                 <thead>
                   <tr className="text-left text-gray-600">
                     <th className="py-3 px-2 w-[60px]">S.No</th>
-                    <th className="py-3 px-2 w-[600px]">Compliance Clause</th>
-                    <th className="py-3 px-5 w-[600px]">AI Response</th>
-                    <th className="py-3 px-5 w-[600px]">Reference</th>
+                    <th className="py-3 px-2 w-[200px]">Compliance Clause</th>
+                    <th className="py-3 px-5 w-[200px]">AI Response</th>
+                    <th className="py-3 px-5 w-[200px]">Reference</th>
                     <th className="py-3 px-2 w-[120px] text-center">Actions</th>
                   </tr>
                 </thead>
@@ -258,9 +258,11 @@ export default function ComplianceResults() {
                           )}
                         </td>
 
-                        <td className="py-4 px-5 whitespace-nowrap">
-                          {row.reference}
-                        </td>
+                        <td className="py-4 px-5 w-[200px]">
+  <div className="w-[200px] truncate">
+    {row.reference}
+  </div>
+</td>
 
                         <td className="py-4 px-2">
                           <div className="flex flex-col items-center justify-center gap-2">
@@ -369,6 +371,8 @@ export default function ComplianceResults() {
           question_no: r.id,
           question: r.clause,
           answer: r.response,
+          answer_modified: !!r.answer_modified, // ✅ FIX
+          remarks: r.remarks ?? null,
           reference: r.reference,
           score: r.score,
         }))}

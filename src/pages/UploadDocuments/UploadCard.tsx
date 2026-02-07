@@ -10,7 +10,7 @@ const UploadCard = () => {
 
   useEffect(() => {
     const handlePopState = () => {
-      // alert("Upload in progress. Please wait until it completes.");
+      alert("Upload in progress. Please wait until it completes.");
       window.history.pushState(null, "", window.location.href);
     };
 
@@ -62,15 +62,13 @@ const UploadCard = () => {
     <>
       <div
         className="
-        w-full lg:w-[600px]
-        max-w-[600px]
-        bg-[#eef8fd]
-        rounded-3xl
-        shadow-[0_20px_40px_rgba(0,0,0,0.18)]
-        p-5 sm:p-6 lg:p-8
-        mx-auto
-      "
-      >
+w-full lg:w-[600px]
+max-w-[600px]
+bg-[#eef8fd]
+rounded-3xl
+shadow-[0_20px_40px_rgba(0,0,0,0.18)]
+p-5 sm:p-6 lg:p-8
+" >
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 text-center">
           Upload Documents
         </h2>

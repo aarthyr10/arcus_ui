@@ -16,6 +16,8 @@ type Question = {
   answer: string;
   score: number;
   reference: string;
+  answer_modified: boolean;
+  remarks: string | null;
 };
 
 interface Props {
@@ -41,6 +43,13 @@ export default function ExportComplianceReportModal({
       setExportType(null);
     }
   }, [opened]);
+  const formatAnswer = (q: Question) => {
+  if (q.answer_modified && q.remarks) {
+    return `${q.answer}\n\n[Modified Answer]\n${q.remarks}`;
+  }
+  return q.answer;
+};
+
 
   /* ---------- PDF ---------- */
   const generatePDF = () => {
@@ -55,7 +64,7 @@ export default function ExportComplianceReportModal({
       body: questions.map(q => [
         q.question_no,
         q.question,
-        q.answer,
+        formatAnswer(q),   // 👈 UPDATED
         q.reference,
         `${q.score}%`,
       ]),
@@ -78,7 +87,8 @@ export default function ExportComplianceReportModal({
     const rows = questions.map(q => ({
       "Question No": q.question_no,
       Question: q.question,
-      Answer: q.answer,
+      Answer: formatAnswer(q), // 👈 UPDATED
+      Reference: q.reference,
       "Confidence (%)": q.score,
     }));
 
@@ -186,8 +196,7 @@ export default function ExportComplianceReportModal({
               shadow-[0_10px_25px_rgba(47,128,255,0.4)]
               hover:scale-105
               transition
-              cursor-pointer "
-            >
+              cursor-pointer " >
               Start New Analysis
             </button>
             <div className="flex items-center gap-3">

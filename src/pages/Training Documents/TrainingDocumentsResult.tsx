@@ -4,7 +4,7 @@ import axios from "axios";
 import { ChevronDown, ChevronLeft, Eye, Loader2, X } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls, MarkerType } from "reactflow";
+import ReactFlow, { Background, Controls } from "reactflow";
 import "reactflow/dist/style.css";
 import type { Node, Edge } from "reactflow";
 
@@ -33,95 +33,26 @@ function NoData({ label }: { label: string }) {
   );
 }
 
-const GRADIENT_COLORS = {
-  blue: "#2f80ff",      // 0% Deep Blue
-  sky: "#4aa3f7",       // ~25% Sky Blue
-  azure: "#6fbfe8",     // ~50% Soft Azure
-  lightCyan: "#3fd0e8", // ~75% Light Cyan
-  cyan: "#12c2e9",      // 100% Cyan
-};
-const GRADIENTS = {
-  root: `
-    linear-gradient(
-      90deg,
-      ${GRADIENT_COLORS.blue},
-      ${GRADIENT_COLORS.sky},
-      ${GRADIENT_COLORS.azure},
-      ${GRADIENT_COLORS.lightCyan},
-      ${GRADIENT_COLORS.cyan}
-    )
-  `,
-
-  level1: `
-    linear-gradient(
-      90deg,
-      #e6f4ff,
-      #dff3fb,
-      #eaf9ff
-    )
-  `,
-  level2: `
-    linear-gradient(
-      90deg,
-      #f7fbff,
-      #ffffff
-    )
-  `,
-};
-
-const BORDERS = {
-  root: "#2f80ff",
-  level1: "#90cdf4",
-  level2: "#cfe9ff",
-  default: "#e5e7eb",
-};
-const BRANCH_COLORS = [
-  GRADIENT_COLORS.blue,
-  GRADIENT_COLORS.sky,
-  GRADIENT_COLORS.azure,
-  GRADIENT_COLORS.lightCyan,
-  GRADIENT_COLORS.cyan,
-];
-
-const lighten = (hex: string, percent = 70) => {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, (num >> 16) + percent);
-  const g = Math.min(255, ((num >> 8) & 0x00ff) + percent);
-  const b = Math.min(255, (num & 0x0000ff) + percent);
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
-const makeGradient = (color: string) =>
-  `linear-gradient(90deg, ${color}, ${lighten(color, 40)})`;
-
-export function buildMindmapGraph(
-  mindmap: any
-): { nodes: Node[]; edges: Edge[] } {
+function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
   if (!mindmap) return { nodes: [], edges: [] };
 
+  /**
+   * Supports *dynamic* mindmaps.
+   *
+   * Expected formats:
+   * 1) Tree format (preferred): { root: { title, id?, type?, children?: [...] } }
+   * 2) Legacy format (older): { root: {...}, nodes: [...] }
+   */
   const nodes: Node[] = [];
   const edges: Edge[] = [];
 
   const X_GAP = 460;
   const Y_GAP = 520;
-  let currentY = 0;
 
-  /* ---------------- Utils ---------------- */
-
-  const usedIds = new Set<string>();
-  const makeId = (base = "node") => {
-    let id = base.toString().replace(/\s+/g, "-");
-    let i = 1;
-    while (usedIds.has(id)) id = `${base}-${i++}`;
-    usedIds.add(id);
-    return id;
-  };
-
-  const safe = (v: any): string => {
+  const safeString = (v: any): string => {
     if (v === null || v === undefined) return "";
     if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean")
-      return String(v);
+    if (typeof v === "number" || typeof v === "boolean") return String(v);
     try {
       return JSON.stringify(v);
     } catch {
@@ -129,212 +60,259 @@ export function buildMindmapGraph(
     }
   };
 
-  /* ---------------- CHILD EXTRACTION (KEY FIX) ---------------- */
+  // const getTitle = (n: any): string => {
+  //   // Try common fields; fall back to stringified object
+  //   return (
+  //     safeString(n?.title) ||
+  //     safeString(n?.name) ||
+  //     safeString(n?.label) ||
+  //     safeString(n?.key) ||
+  //     safeString(n?.value)
+  //   );
+  // };
 
-  const extractChildren = (node: any): any[] => {
-    if (!node || typeof node !== "object") return [];
+const getChildren = (n: any): any[] => {
+  if (!n || typeof n !== "object") return [];
 
-    // 1️⃣ Explicit known keys
-    if (Array.isArray(node.children)) return node.children;
-    if (Array.isArray(node.items))
-      return node.items.map((i: any) => ({
-        title: i.key,
-        ...i,
-      }));
-    if (Array.isArray(node.nodes)) return node.nodes;
+  // ROOT → sections
+  if (Array.isArray(n.nodes)) return n.nodes;
 
-    // 2️⃣ ANY array fallback
-    for (const value of Object.values(node)) {
-      if (Array.isArray(value)) {
-        return value.map((v) =>
-          typeof v === "object" ? v : { value: v }
-        );
-      }
+  // SECTION → group items by key
+  if (Array.isArray(n.items)) {
+    const grouped: Record<string, any[]> = {};
+
+    n.items.forEach((item: any) => {
+      if (!grouped[item.key]) grouped[item.key] = [];
+      grouped[item.key].push({
+        value: item.value,
+        source: item.source,
+      });
+    });
+
+    return Object.entries(grouped).map(([key, values]) => ({
+      title: key,
+      children: values,
+    }));
+  }
+
+  // KEY NODE → values
+  if (Array.isArray(n.children)) return n.children;
+
+  return [];
+};
+
+  const isTreeFormat =
+    typeof mindmap === "object" &&
+    mindmap?.root &&
+    (Array.isArray(mindmap.root.children) || !Array.isArray(mindmap.nodes));
+
+  // Generate stable ids without hardcoding any schema
+  const usedIds = new Set<string>();
+  const makeId = (candidate: string) => {
+    const base = candidate?.trim() || "node";
+    let id = base;
+    let i = 1;
+    while (usedIds.has(id)) {
+      id = `${base}-${i++}`;
     }
-
-    return [];
+    usedIds.add(id);
+    return id;
   };
 
-  /* ---------------- Label ---------------- */
+  const getNodeId = (n: any, path: string) => {
+    // Prefer explicit ids (if present), otherwise build from path.
+    const explicit = safeString(n?.id) || safeString(n?.node_id);
+    return makeId(explicit || path);
+  };
 
-  const getLabel = (node: any) => (
+  const depthStyle = (depth: number): CSSProperties => {
+  if (depth === 0) {
+    return {
+      width: 380,
+      minHeight: 120,
+      background:
+        "linear-gradient(135deg, #2563eb 0%, #12c2e9 100%)",
+      color: "#ffffff",
+      padding: 16,
+      borderRadius: 18,
+      border: "1px solid rgba(255,255,255,0.35)",
+      boxShadow: "0 20px 40px rgba(37,99,235,0.35)",
+    };
+  }
+
+  if (depth === 1) {
+    return {
+      width: 340,
+      minHeight: 110,
+      background:
+        "linear-gradient(135deg, #e0f2fe, #f0f9ff)",
+      padding: 14,
+      borderRadius: 16,
+      border: "1px solid #bae6fd",
+      boxShadow: "0 12px 28px rgba(59,130,246,0.15)",
+    };
+  }
+
+  return {
+    width: 420,
+    minHeight: 100,
+    background: "rgba(255,255,255,0.9)",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
+  };
+};
+
+const labelFor = (n: any, depth: number) => {
+  // LEAF NODE → value + source on ONE line
+  if (!n.title && n.value) {
+    return (
+      <div className="text-xs text-gray-700 font-medium">
+        {safeString(n.value)}
+        {n.source && (
+          <span className="text-[10px] text-gray-400">
+            {", " + safeString(n.source)}
+          </span>
+        )}
+      </div>
+    );
+  }
+
+  // NORMAL NODE
+  return (
     <div className="space-y-1 text-xs">
-      {node.title && (
-        <div className="font-semibold text-slate-800">
-          {safe(node.title)}
-        </div>
-      )}
-      {node.value && (
-        <div className="text-slate-600 whitespace-pre-wrap">
-          {safe(node.value)}
-        </div>
-      )}
-      {node.source && (
-        <div className="text-[10px] text-slate-400">
-          Source: {node.source}
-        </div>
-      )}
+      <div
+        className={
+          depth === 0
+            ? "font-semibold text-sm tracking-wide"
+            : "font-semibold"
+        }
+      >
+        {n.title}
+      </div>
     </div>
   );
+};
 
-  /* ---------------- Style ---------------- */
 
-  const getStyle = (
-    depth: number,
-    branchColor?: string
-  ): CSSProperties => {
-    // ROOT
-    if (depth === 0) {
-      return {
-        background: GRADIENTS.root,
-        color: "#fff",
-        borderRadius: 18,
-        padding: 16,
-        width: 380,
-        border: `1px solid ${BORDERS.root}`,
-      };
+
+
+  // --- Tree layout (tidy-ish) ---
+  let nextLeafY = 0;
+  const visited = new Set<string>();
+
+  const layout = (n: any, depth: number, path: string): number => {
+    const id = getNodeId(n, path);
+    if (visited.has(id)) {
+      // Avoid accidental cycles / duplicate ids creating loops
+      return 0;
     }
+    visited.add(id);
 
-    // LEVEL 1 – colorful branches
-    if (depth === 1 && branchColor) {
-      return {
-        background: makeGradient(branchColor),
-        border: `1px solid ${branchColor}`,
-        borderRadius: 16,
-        padding: 14,
-        width: 340,
-        color: "#0f172a",
-      };
-    }
+    const children = getChildren(n);
+    let yCenter = 0;
 
-    // LEVEL 2+ – soft tint of branch
-    if (branchColor) {
-      return {
-        background: lighten(branchColor, 90),
-        border: `1px solid ${lighten(branchColor, 40)}`,
-        borderRadius: 14,
-        padding: 12,
-        width: 420,
-      };
-    }
-
-    return {
-      background: GRADIENTS.level2,
-      border: `1px solid ${BORDERS.default}`,
-      borderRadius: 14,
-      padding: 12,
-      width: 420,
-    };
-  };
-
-  /* ---------------- Traverse ---------------- */
-
-  const traverse = (
-    node: any,
-    depth: number,
-    parentId?: string,
-    branchColor?: string
-  ): number => {
-    const id = makeId(
-      node.id || node.title || node.key || `node-${depth}`
-    );
-
-    const children = extractChildren(node);
-
-    // assign color at first level
-    const currentBranchColor =
-      depth === 1
-        ? BRANCH_COLORS[nodes.length % BRANCH_COLORS.length]
-        : branchColor;
-
-    // 🌿 Leaf
     if (!children.length) {
-      const y = currentY;
-      currentY += Y_GAP;
-
-      nodes.push({
-        id,
-        position: { x: depth * X_GAP, y },
-        data: { label: getLabel(node) },
-        style: getStyle(depth, currentBranchColor),
-      });
-
-      if (parentId) {
-        edges.push({
-        id: makeId(`e-${parentId}-${id}`),
-        source: parentId,
-        target: id,
-        type: "bezier", // 🔥 KEY CHANGE
-        style: {
-          stroke: currentBranchColor,
-          strokeWidth: 2,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 10,
-          height: 10,
-          color: currentBranchColor,
-        },
-      });
-
-      }
-      return y;
+      yCenter = nextLeafY;
+      nextLeafY += 1;
+    } else {
+      const childCenters = children
+        .map((c, idx) => layout(c, depth + 1, `${path}/${idx}`))
+        .filter((v) => Number.isFinite(v));
+      yCenter =
+        childCenters.length > 0
+          ? childCenters.reduce((a, b) => a + b, 0) / childCenters.length
+          : nextLeafY++;
     }
-
-    // 🌳 Parent
-    const childYs = children.map((c) =>
-      traverse(c, depth + 1, id, currentBranchColor)
-    );
-
-    const centerY =
-      childYs.reduce((a, b) => a + b, 0) / childYs.length;
 
     nodes.push({
-        id,
-        position: { x: depth * X_GAP, y:centerY },
-        data: { label: getLabel(node) },
-        style: getStyle(depth, currentBranchColor),
-      });
+      id,
+      position: { x: depth * X_GAP, y: yCenter * Y_GAP },
+      data: { label: labelFor(n, depth) },
+      style: depthStyle(depth),
+    });
 
-    if (parentId) {
-       edges.push({
-        id: makeId(`e-${parentId}-${id}`),
-        source: parentId,
-        target: id,
-        type: "bezier", // 🔥 KEY CHANGE
-        style: {
-          stroke: currentBranchColor,
-          strokeWidth: 2,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          width: 10,
-          height: 10,
-          color: currentBranchColor,
-        },
-      });
-          }
+    children.forEach((c, idx) => {
+      const childId = getNodeId(c, `${path}/${idx}`);
+      if (id !== childId) {
+        edges.push({
+          id: makeId(`edge-${id}-${childId}`),
+          source: id,
+          target: childId,
+        });
+      }
+    });
 
-    return centerY;
+    return yCenter;
   };
 
-  /* ---------------- ROOT NORMALIZATION (🔥 THIS FIXES YOUR JSON) ---------------- */
+  if (isTreeFormat) {
+    layout(mindmap.root, 0, "root");
+    return { nodes, edges };
+  }
 
-  const root = {
-    ...(mindmap.root ?? {}),
-    children:
-      mindmap.root?.children ??
-      mindmap.nodes ??
-      [],
-  };
+  // --- Legacy fallback (keeps existing behavior if older mindmap structure is returned) ---
+  try {
+    const legacy = mindmap;
+    const rootId = makeId("root");
 
-  traverse(root, 0);
-  // 🔥 normalize Y positions (critical)
-  const minY = Math.min(...nodes.map(n => n.position.y));
-  nodes.forEach(n => {
-    n.position.y -= minY;
-  });
-  return { nodes, edges };
+    nodes.push({
+      id: rootId,
+      position: { x: 0, y: 0 },
+      data: { label: labelFor(legacy.root ?? { title: "Mindmap" }, 0) },
+      style: depthStyle(0),
+    });
+
+    (legacy.nodes ?? []).forEach((section: any, sIndex: number) => {
+      const sectionId = makeId(`section-${sIndex}`);
+      nodes.push({
+        id: sectionId,
+        position: { x: X_GAP, y: sIndex * 350 },
+        data: { label: labelFor(section, 1) },
+        style: depthStyle(1),
+      });
+      edges.push({
+        id: makeId(`edge-${rootId}-${sectionId}`),
+        source: rootId,
+        target: sectionId,
+      });
+
+      // If the legacy structure contains nested content, still render it generically.
+      const items = section?.items;
+      if (items && typeof items === "object") {
+        const entries = Object.entries(items);
+        entries.forEach(([k, v], i) => {
+          const childId = makeId(`${sectionId}-${k}-${i}`);
+          nodes.push({
+            id: childId,
+            position: { x: X_GAP * 2, y: sIndex * 350 + i * Y_GAP },
+            data: {
+              label: (
+                <div className="text-xs leading-snug">
+                  <div className="font-semibold">{k}</div>
+                  <div className="text-gray-600 whitespace-pre-wrap">
+                    {safeString(v)}
+                  </div>
+                </div>
+              ),
+            },
+            style: depthStyle(2),
+          });
+          edges.push({
+            id: makeId(`edge-${sectionId}-${childId}`),
+            source: sectionId,
+            target: childId,
+          });
+        });
+      }
+    });
+
+    return { nodes, edges };
+  } catch (e) {
+    console.error("Failed to build mindmap graph", e);
+    return { nodes: [], edges: [] };
+  }
 }
 
 export default function TrainingDocumentsResult() {
