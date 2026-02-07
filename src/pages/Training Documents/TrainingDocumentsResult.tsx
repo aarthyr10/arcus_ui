@@ -258,7 +258,6 @@ export function buildMindmapGraph(
         data: { label: getLabel(node) },
         style: getStyle(depth, currentBranchColor),
       });
-
       if (parentId) {
       edges.push({
         id: makeId(`e-${parentId}-${id}`),
