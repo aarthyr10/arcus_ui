@@ -342,9 +342,7 @@ export default function TrainingDocumentsResult() {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        const endpoint =
-          ServiceEndpoint.apiBaseUrl +
-          ServiceEndpoint.trainDocuments.getById(docId);
+        const endpoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.trainDocuments.getById(docId);
         const res = await axios.get(endpoint, {
           headers: { "ngrok-skip-browser-warning": "true" },
         });

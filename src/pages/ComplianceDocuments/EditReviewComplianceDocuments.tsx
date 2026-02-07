@@ -13,11 +13,11 @@ import axios from "axios";
 import { Textarea, Group, Button, Switch } from "@mantine/core";
 
 const getConfidenceColorHex = (score: number) => {
-  if (score === 0) return "#6b7280"; 
-  if (score > 90) return "#22c55e"; 
-  if (score >= 70) return "#eab308"; 
-  if (score >= 40) return "#f97316"; 
-  return "#ef4444"; 
+  if (score === 0) return "#6b7280";
+  if (score > 90) return "#22c55e";
+  if (score >= 70) return "#eab308";
+  if (score >= 40) return "#f97316";
+  return "#ef4444";
 };
 
 const formatRemarkLabel = (tag: string) =>
@@ -167,7 +167,9 @@ export default function EditReviewComplianceDocuments() {
         endpoint,
         {
           modified_answer: text, // use the field backend expects
-          retrain_llm: retrainLLM, // 👈 true / false
+          train_modified_answer: retrainLLM, // 👈 true / false
+          remarks: "This is a modified answer",
+          product_code: "RXQ-ARYFK",
         },
         { headers: { "ngrok-skip-browser-warning": "true" } }
       );
@@ -181,7 +183,7 @@ export default function EditReviewComplianceDocuments() {
 
 
   return (
-   <div className="min-h-[calc(100vh-90px)] flex items-center justify-center px-3 sm:px-6 lg:px-10 py-6 mt-[40px]">
+    <div className="min-h-[calc(100vh-90px)] flex items-center justify-center px-3 sm:px-6 lg:px-10 py-6 mt-[40px]">
       <div className="max-w-6xl w-full space-y-6">
         {/* ===== HEADER CARD ===== */}
         <div className="bg-[#eef8fd] rounded-2xl px-4 sm:px-6 py-5 relative">
@@ -196,13 +198,13 @@ export default function EditReviewComplianceDocuments() {
           </button>
 
           {/* Title */}
-           <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
+          <h1 className="text-lg sm:text-xl font-semibold text-gray-800">
             Edit & Review
           </h1>
 
           {/* Clause */}
-         <div className="text-sm mt-4 border border-[#9AD8FB] rounded-xl bg-white/60 px-4 py-4">
-             <span className="font-semibold text-blue-500"> Clause : {questionNumber} </span>
+          <div className="text-sm mt-4 border border-[#9AD8FB] rounded-xl bg-white/60 px-4 py-4">
+            <span className="font-semibold text-blue-500"> Clause : {questionNumber} </span>
             <div className="mt-2 text-gray-800">
               {question?.question || "No question text available"}
             </div>
@@ -227,8 +229,8 @@ export default function EditReviewComplianceDocuments() {
 
           {/* Header */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
-           
-              <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
+
+            <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
               <Sparkles size={16} />
               AI Generated Response
             </div>
@@ -237,7 +239,7 @@ export default function EditReviewComplianceDocuments() {
                 {remarkTags.map((tag, index) => (
                   <span
                     key={index}
-                   className={`px-3 py-1 text-xs font-semibold rounded-full border ${getRemarkStyle(tag)}`}
+                    className={`px-3 py-1 text-xs font-semibold rounded-full border ${getRemarkStyle(tag)}`}
                   >
                     {formatRemarkLabel(tag)}
                   </span>
@@ -246,7 +248,7 @@ export default function EditReviewComplianceDocuments() {
             ) : (
               <div /> // keeps spacing consistent
             )}
-           <div className="flex items-center gap-4 flex-wrap justify-end">
+            <div className="flex items-center gap-4 flex-wrap justify-end">
               <span className="text-sm text-gray-700">
                 Retrain AI Model
               </span>

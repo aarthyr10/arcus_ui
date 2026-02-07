@@ -39,7 +39,7 @@ const ServiceEndpoint = {
     getAll: "/trained-documents", // GET
     getById: (id: string) => `/trained-documents/${id}`, // GET
   },
-  
+
   trainDocumentsimage: {
     getById: (id: string) => `/image-assets/${id}`, // GET
   },
@@ -56,6 +56,9 @@ const ServiceEndpoint = {
   // CHAT
   chat: {
     send: "/chat", // POST
+  },
+  documentSearch: {
+    search: "/docs-search", // POST
   },
 };
 
