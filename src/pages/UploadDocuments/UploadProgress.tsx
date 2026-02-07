@@ -9,40 +9,67 @@ import { uploadDocument } from "../../services/upload.service";
 const UploadProgress = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [file, setFile] = useState<File[]>(location.state?.file ?? []);
+  const [files, setFiles] = useState<File[]>(location.state?.files ?? []);
+  const [productCode, _setProductCode] = useState<string>(location.state?.productCode ?? "");
 
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showAnalyzing, setShowAnalyzing] = useState(false);
+  useEffect(() => {
+    const handlePopState = () => {
+      // alert("Upload in progress. Please wait until it completes.");
+      window.history.pushState(null, "", window.location.href);
+    };
+
+    window.history.pushState(null, "", window.location.href);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+  
+  useEffect(() => {
+    const blockRefresh = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = ""; // REQUIRED
+    };
+
+    window.addEventListener("beforeunload", blockRefresh);
+
+    return () => {
+      window.removeEventListener("beforeunload", blockRefresh);
+    };
+  }, []);
 
   useEffect(() => {
-    if (!file.length) {
+    if (!files.length) {
       const stored = sessionStorage.getItem("uploadedFiles");
       if (stored) {
         const parsed = JSON.parse(stored);
-        setFile(parsed);
+        setFiles(parsed);
       } else {
         navigate("/uploads");
       }
     }
   }, []);
   useEffect(() => {
-    if (!file.length) {
+    if (!files.length) {
       sessionStorage.removeItem("uploadedFiles");
       navigate("/uploads", { replace: true });
     }
-  }, [file, navigate]);
+  }, [files, navigate]);
 
   const handleProcess = async () => {
-    if (!file) return;
+    if (!files.length) return;
 
     try {
       setLoading(true);
       setProgress(0);
 
       await uploadDocument(
-        file,
-        "RXQ-ARYFK",
+        files,
+        productCode,
         (percent) => setProgress(percent)
       );
 
@@ -51,7 +78,6 @@ const UploadProgress = () => {
       }, 300);
 
     } catch (error) {
-      console.error("Upload failed", error);
       alert("Upload failed. Please try again.");
       setLoading(false);
     }
@@ -167,7 +193,7 @@ const UploadProgress = () => {
           </div>
 
           {/* Uploaded File */}
-          {file.map((file, index) => (
+          {files.map((file, index) => (
             <div
               key={index} className="mt-6 rounded-xl border border-gray-200 bg-white/70 px-5 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -186,7 +212,7 @@ const UploadProgress = () => {
               <button
                 aria-label="Remove file"
                 onClick={() => {
-                  setFile((prev) => {
+                  setFiles((prev) => {
                     const updated = prev.filter((_, i) => i !== index);
                     if (!updated.length) {
                       sessionStorage.removeItem("uploadedFiles");

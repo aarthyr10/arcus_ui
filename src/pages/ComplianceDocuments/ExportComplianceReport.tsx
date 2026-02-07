@@ -15,6 +15,7 @@ type Question = {
   question: string;
   answer: string;
   score: number;
+  reference: string;
 };
 
 interface Props {
@@ -50,19 +51,21 @@ export default function ExportComplianceReportModal({
 
     autoTable(doc, {
       startY: 70,
-      head: [["Q No", "Question", "Answer", "Confidence (%)"]],
+      head: [["Q No", "Question", "Answer", "Reference", "Confidence (%)"]],
       body: questions.map(q => [
         q.question_no,
         q.question,
         q.answer,
+        q.reference,
         `${q.score}%`,
       ]),
       styles: { fontSize: 8, cellPadding: 7, overflow: "linebreak" },
       headStyles: { fillColor: [11, 99, 229], textColor: 255 },
       columnStyles: {
         0: { cellWidth: 40 },
-        1: { cellWidth: 550 },
-        2: { cellWidth: 120 },
+        1: { cellWidth: 250 },
+        2: { cellWidth: 220 },
+        3: { cellWidth: 220 },
         4: { cellWidth: 50 },
       },
     });
@@ -120,9 +123,6 @@ export default function ExportComplianceReportModal({
       <div className="text-center">
         {status !== "success" && (
           <>
-            {/* <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center mb-4">
-              <FileText className="text-white" />
-            </div> */}
             <h2 className="text-xl font-semibold text-gray-800">
               Export Report
             </h2>

@@ -9,13 +9,14 @@ export interface UploadedDoc {
   doc_id: string;
   file_name: string;
   created_at: string;
-  status:  "UPLOADED"
-  | "PROCESSING"
-  | "SUCCESS"
-  | "FAILED"
-  | "ERROR"
-  | "PENDING"
-  | "NOT_FOUND";
+  status:
+    | "UPLOADED"
+    | "PROCESSING"
+    | "SUCCESS"
+    | "FAILED"
+    | "ERROR"
+    | "PENDING"
+    | "NOT_FOUND";
   file_url?: string;
 }
 
@@ -24,7 +25,9 @@ const PreviousUploads = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const endPoint = ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.getAll;
+  const endPoint =
+    ServiceEndpoint.apiBaseUrl + ServiceEndpoint.uploadedDocuments.getAll;
+
   const handleView = async (id: string) => {
     try {
       const res = await axios.get(`${endPoint}/${id}`, {
@@ -33,37 +36,32 @@ const PreviousUploads = () => {
         },
       });
 
-
       navigate(`/complianceresult/${id}`, {
         state: { document: res.data },
       });
-
     } catch (err: any) {
-  
       alert("Failed to view document. Please try again.");
     }
   };
 
-  const mapStatus = (
-    apiStatus: string
-  ): UploadedDoc["status"] => {
+  const mapStatus = (apiStatus: string): UploadedDoc["status"] => {
     switch (apiStatus) {
-        case "UPLOADED":
-      return "UPLOADED";
-    case "PROCESSING":
-      return "PROCESSING";
-    case "SUCCESS":
-      return "SUCCESS";
-    case "FAILED":
-      return "FAILED";
-    case "ERROR":
-      return "ERROR";
-    case "PENDING":
-      return "PENDING";
-    case "NOT_FOUND":
-      return "NOT_FOUND";
-    default:
-      return "NOT_FOUND";
+      case "UPLOADED":
+        return "UPLOADED";
+      case "PROCESSING":
+        return "PROCESSING";
+      case "SUCCESS":
+        return "SUCCESS";
+      case "FAILED":
+        return "FAILED";
+      case "ERROR":
+        return "ERROR";
+      case "PENDING":
+        return "PENDING";
+      case "NOT_FOUND":
+        return "NOT_FOUND";
+      default:
+        return "NOT_FOUND";
     }
   };
 
@@ -83,8 +81,13 @@ const PreviousUploads = () => {
           status: mapStatus(doc.status),
           file_url: doc.path || undefined,
         }));
+
         const sortedDocs = mappedDocs
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
           .slice(0, 3);
 
         return sortedDocs;
@@ -93,7 +96,10 @@ const PreviousUploads = () => {
         return [];
       }
     } catch (err: any) {
-      console.error("Failed to fetch documents", err.response?.data || err.message);
+      console.error(
+        "Failed to fetch documents",
+        err.response?.data || err.message
+      );
       throw err;
     }
   };
@@ -109,23 +115,37 @@ const PreviousUploads = () => {
   }, []);
 
   return (
-    <div className="w-full lg:w-[420px] bg-[#eef8fd] rounded-3xl p-6">
-      <h3 className="flex items-center gap-2 mb-4 font-semibold">
-        <FileText className="w-5 h-5 text-[#2f80ff]" />
+    <div
+      className="
+      w-full lg:w-[420px]
+      max-w-[420px]
+      bg-[#eef8fd] 
+      rounded-3xl 
+      p-4 sm:p-5 lg:p-6
+      mx-auto
+      h-auto
+    "
+    >
+      <h3 className="flex items-center gap-2 mb-3 sm:mb-4 font-semibold text-sm sm:text-base">
+        <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#2f80ff]" />
         Previous Uploads
       </h3>
 
-      {loading && <p className="text-gray-500 text-sm">Loading…</p>}
-
-      {!loading && docs.length === 0 && (
-        <p className="text-gray-400 text-sm">No documents uploaded</p>
+      {loading && (
+        <p className="text-gray-500 text-xs sm:text-sm">Loading…</p>
       )}
 
-      <div className="space-y-4">
+      {!loading && docs.length === 0 && (
+        <p className="text-gray-400 text-xs sm:text-sm">
+          No documents uploaded
+        </p>
+      )}
+
+      <div className="space-y-3 sm:space-y-4">
         {docs.map((doc) => (
           <UploadItem
             key={doc.doc_id}
-            id={doc.doc_id}               
+            id={doc.doc_id}
             name={doc.file_name}
             date={new Date(doc.created_at).toLocaleString()}
             status={doc.status}

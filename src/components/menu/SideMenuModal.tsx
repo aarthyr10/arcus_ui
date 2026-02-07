@@ -3,6 +3,7 @@ import { FiLogOut } from "react-icons/fi";
 import { LuBookOpen } from "react-icons/lu";
 import { BsFileText } from "react-icons/bs";
 import { HiOutlineChatBubbleLeft } from "react-icons/hi2";
+import { IoSearch } from "react-icons/io5";
 import React from "react";
 
 type Props = {
@@ -39,28 +40,36 @@ const SideMenuModal = ({ onClose }: Props) => {
 
   return (
     <>
+      {/* overlay */}
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-black/20 z-40"
+        className="fixed inset-0 z-40"
       />
 
+      {/* modal */}
       <div
         className="
-          fixed top-20 right-15
-          w-64
+          fixed z-50
+          top-18 sm:top-18
+          right-7 sm:right-6 md:right-25 lg:right-25
+          w-[50vw] sm:w-64
+          max-w-xs
           bg-[#eaf7fb]
           rounded-2xl
           shadow-2xl
-          p-4
-          z-50 " >
+          p-3 sm:p-4
+          animate-in fade-in slide-in-from-top-2 duration-200
+        "
+      >
         {menuItem("Compliance Form", "/compliance", <BsFileText />)}
-        {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)} 
-        {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)} 
+        {menuItem("Knowledge base", "/knowledge", <LuBookOpen />)}
+        {menuItem("Smart Assistant", "/assistant", <HiOutlineChatBubbleLeft />)}
+        {menuItem("Search Docs", "/searchdocs", <IoSearch />)}
 
         <hr className="my-3 border-gray-300" />
 
         <button
-          onClick={() =>(navigate("/"))}
+          onClick={() => navigate("/")}
           className="
             w-full flex items-center gap-3
             px-4 py-3 rounded-lg

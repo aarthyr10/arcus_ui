@@ -9,44 +9,36 @@ const HamburgerMenu = () => {
       <button
         onClick={() => setOpen(!open)}
         aria-label="Toggle menu"
+        title="Menu"
         className="
-          fixed top-6 right-10 z-[9999]
-          w-11 h-11
-          rounded-xl
+          w-11 h-11 fixed top-6 right-10 sm:right-12  rounded-xl
           bg-[#eef6f8]
-          shadow-lg
-          flex items-center justify-center cursor-pointer
-          hover:scale-105 transition
+          flex items-center justify-center
+          hover:scale-105 transition cursor-pointer
         "
       >
         <div className="relative w-6 h-6 flex items-center justify-center">
 
           <span
             className={`
-              absolute
-              w-6 h-0.5
-              bg-gray-800
-              transition-all duration-300 ease-in-out
+              absolute w-6 h-0.5 bg-gray-800
+              transition-all duration-300
               ${open ? "rotate-45" : "-translate-y-2"}
             `}
           />
 
           <span
             className={`
-              absolute
-              w-6 h-0.5
-              bg-gray-800
-              transition-all duration-300 ease-in-out
+              absolute w-6 h-0.5 bg-gray-800
+              transition-all duration-300
               ${open ? "opacity-0 scale-0" : ""}
             `}
           />
 
           <span
             className={`
-              absolute
-              w-6 h-0.5
-              bg-gray-800
-              transition-all duration-300 ease-in-out
+              absolute w-6 h-0.5 bg-gray-800
+              transition-all duration-300
               ${open ? "-rotate-45" : "translate-y-2"}
             `}
           />

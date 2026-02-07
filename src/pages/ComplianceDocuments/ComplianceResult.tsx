@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronLeft, Download, Loader, Pencil, PencilLine, Trash2 } from "lucide-react";
+import { ChevronLeft, Download, Loader2, Pencil, PencilLine } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import ExportComplianceReportModal from "./ExportComplianceReport";
@@ -11,7 +11,7 @@ type ResultRow = {
   clause: string;
   response: string;
   score: number;
-  reference?: string;
+  reference: string;
   answer_modified?: boolean;
   remarks?: string | null;   // ✅ ADD THIS
 };
@@ -65,6 +65,9 @@ const getRemarkStyle = (tag: string) => {
 
   if (value.includes("project_specific"))
     return "bg-purple-100 text-purple-900 border border-purple-500";
+
+  if (value.includes("this is a modified answer"))
+    return "bg-sky-50 text-sky-900 border border-sky-400";
 
   return "bg-gray-100 text-gray-800 border border-gray-400";
 };
@@ -153,22 +156,22 @@ export default function ComplianceResults() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-10">
-        <Loader />
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
+        <Loader2 className="animate-spin text-blue-500" size={50} />
       </div>
     );
   }
 
   return (
     <>
-      <div className="z-10 px-6 py-6 mt-13">
+      <div className="z-10 px-3 sm:px-6 py-4 sm:py-6 mt-2 md:mt-7 lg:mt-12">
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-800">
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
                 Compliance Results
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Review AI-generated compliance responses
               </p>
             </div>
@@ -183,7 +186,7 @@ export default function ComplianceResults() {
               </button>
 
               <button
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm cursor-pointer shadow-lg hover:scale-[1.03] transition"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm shadow-lg hover:scale-[1.03] transition cursor-pointer"
                 onClick={() => setOpen(true)}
               >
                 <Download size={14} />
@@ -192,95 +195,111 @@ export default function ComplianceResults() {
             </div>
           </div>
 
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-6">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-600 ">
-                  <th className="py-3 px-2 w-[60px]">S.No</th>
-                  <th className="py-3 px-2 w-[600px]">Compliance Clause</th>
-                  <th className="py-3 px-5 w-[600px]">AI Response</th>
-                  <th className="py-3 px-5 w-[600px]">Reference</th>
-                  <th className="py-3 px-2 w-[120px] text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedRows.map((row: ResultRow) => {
-                  const remarkTags = row.remarks?.split("|") ?? [];
+          {/* TABLE CARD */}
+          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-3 sm:p-6 overflow-hidden">
 
-                  return (
-                    <tr key={row.id}>
-                      <td className="py-4 px-2">{row.id}</td>
+            {/* mobile scroll enable */}
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-sm min-w-[950px]">
+                <thead>
+                  <tr className="text-left text-gray-600">
+                    <th className="py-3 px-2 w-[60px]">S.No</th>
+                    <th className="py-3 px-2 w-[600px]">Compliance Clause</th>
+                    <th className="py-3 px-5 w-[600px]">AI Response</th>
+                    <th className="py-3 px-5 w-[600px]">Reference</th>
+                    <th className="py-3 px-2 w-[120px] text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedRows.map((row: ResultRow) => {
+                    const remarkTags = row.remarks?.split("|") ?? [];
+                    return (
+                      <tr key={row.id}>
+                        <td className="py-4 px-2">{row.id}</td>
 
-                      <td className="py-4 px-2">
-                        <div className="text-gray-800 leading-relaxed">
-                          {row.clause}
-                        </div>
-                        <div className="mt-2 flex items-center justify-evenly gap-4">
-                          {/* Remark tags */}
-                          {remarkTags.length > 0 ? (
-                            <div className="flex flex-wrap gap-2">
-                              {remarkTags.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className={`px-3 py-1 text-xs font-semibold rounded-full border 
-                                 ${getRemarkStyle(tag)}`}
-                                >
-                                  {formatRemarkLabel(tag)}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <div /> 
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-5">
-                        <div className="mt-2 text-gray-800 leading-relaxed">
-                          {row.response}
-                        </div>
-
-                        {row.answer_modified && (
-                          <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-emerald-700 rounded-full bg-emerald-100 border border-emerald-300">
-                            <PencilLine className="w-3.5 h-3.5" />
-                            <span className="uppercase tracking-wide">Modified</span>
+                        <td className="py-4 px-2">
+                          <div className="text-gray-800 leading-relaxed">
+                            {row.clause}
                           </div>
-                        )}
-                      </td>
-                      <td className="py-4 px-5">{row.reference}</td>
-                      <td className="py-4 px-2">
-                        <div className="flex flex-col items-center justify-center gap-2">
-                          <div
-                            className="w-12 h-12 rounded-full relative shrink-0"
-                            style={{
-                              background: `conic-gradient(${getConfidenceColorHex(row.score)} ${row.score * 3.6}deg, #e5e7eb 0deg)`,
-                            }}
-                          >
-                            <div className="absolute inset-[4px] bg-white rounded-full flex items-center justify-center">
-                              <span className="text-xs font-bold text-gray-800">
-                                {Math.round(row.score)}%
+
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            {remarkTags.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {remarkTags.map((tag, index) => (
+                                  <span
+                                    key={index}
+                                    className={`px-3 py-1 text-xs font-semibold rounded-full border ${getRemarkStyle(tag)}`}
+                                  >
+                                    {formatRemarkLabel(tag)}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="py-4 px-5">
+                          <div className="mt-2 text-gray-800 leading-relaxed">
+                            {remarkTags.map((tag, index) => (
+                              <span key={index} className="font-bold">
+                                {formatRemarkLabel(tag)}.
+                              </span>
+                            ))}
+                            {row.response}
+                          </div>
+
+                          {row.answer_modified && (
+                            <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold text-emerald-700 rounded-full bg-emerald-100 border border-emerald-300 mt-2">
+                              <PencilLine className="w-3.5 h-3.5" />
+                              <span className="uppercase tracking-wide">
+                                Modified
                               </span>
                             </div>
-                          </div>
-                          <div className="flex items-center justify-center gap-3">
-                            <Pencil
-                              size={16}
-                              className="text-blue-600 cursor-pointer hover:text-blue-800 transition"
-                              onClick={() => handleEdit(row.id)}
-                            />
-                            <Trash2
-                              size={16}
-                              className="text-red-500 cursor-pointer hover:text-red-700 transition"
-                            />
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+                          )}
+                        </td>
 
-            </table>
+                        <td className="py-4 px-5 whitespace-nowrap">
+                          {row.reference}
+                        </td>
+
+                        <td className="py-4 px-2">
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <div
+                              className="w-12 h-12 rounded-full relative shrink-0"
+                              style={{
+                                background: `conic-gradient(${getConfidenceColorHex(
+                                  row.score
+                                )} ${row.score * 3.6}deg, #e5e7eb 0deg)`,
+                              }}
+                            >
+                              <div className="absolute inset-[4px] bg-white rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-gray-800">
+                                  {Math.round(row.score)}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-3">
+                              <Pencil
+                                size={16}
+                                className="text-blue-600 cursor-pointer hover:text-blue-800 transition"
+                                onClick={() => handleEdit(row.id)}
+                              />
+                              {/* <Trash2
+                                size={16}
+                                className="text-red-500 cursor-pointer hover:text-red-700 transition"
+                              /> */}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+
         </div>
         <div className="max-w-[1200px] mx-auto mt-10 px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -330,7 +349,7 @@ export default function ComplianceResults() {
                 }}
                 styles={{
                   control: {
-                    "&[data-active]": {
+                    "&[dataActive]": {
                       backgroundColor: "#0B63E5",
                       color: "white",
                       borderColor: "#0B63E5",
@@ -350,6 +369,7 @@ export default function ComplianceResults() {
           question_no: r.id,
           question: r.clause,
           answer: r.response,
+          reference: r.reference,
           score: r.score,
         }))}
       />
