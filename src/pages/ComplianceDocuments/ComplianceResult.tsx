@@ -165,7 +165,7 @@ export default function ComplianceResults() {
   return (
     <>
       <div className="z-10 px-3 sm:px-6 py-4 sm:py-6 mt-2 md:mt-7 lg:mt-12">
-        <div className="max-w-[1200px] mx-auto">
+        <div className="max-w-[2000px] mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
@@ -200,7 +200,7 @@ export default function ComplianceResults() {
 
             {/* mobile scroll enable */}
             <div className="w-full overflow-x-auto">
-            <table className="w-full text-sm min-w-[950px] table-fixed">
+              <table className="w-full text-sm min-w-[950px] table-fixed">
                 <thead>
                   <tr className="text-left text-gray-600">
                     <th className="py-3 px-2 w-[60px]">S.No</th>
@@ -258,11 +258,9 @@ export default function ComplianceResults() {
                           )}
                         </td>
 
-                        <td className="py-4 px-5 w-[200px]">
-  <div className="w-[200px] truncate">
-    {row.reference}
-  </div>
-</td>
+                        <td className="py-4 px-5">
+                            {row.reference}
+                        </td>
 
                         <td className="py-4 px-2">
                           <div className="flex flex-col items-center justify-center gap-2">

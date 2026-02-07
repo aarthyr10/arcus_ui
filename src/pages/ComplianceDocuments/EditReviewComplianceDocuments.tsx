@@ -187,7 +187,7 @@ export default function EditReviewComplianceDocuments() {
 
 
   return (
-    <div className="min-h-[calc(100vh-90px)] flex items-center justify-center px-3 sm:px-6 lg:px-10 py-6 mt-[40px]">
+    <div className="min-h-[calc(100vh-90px)] flex items-center justify-center px-3 sm:px-6 lg:px-10 py-6 mt-[3px] lg:mt-[10px]">
       <div className="max-w-6xl w-full space-y-6">
         {/* ===== HEADER CARD ===== */}
         <div className="bg-[#eef8fd] rounded-2xl px-4 sm:px-6 py-5 relative">
