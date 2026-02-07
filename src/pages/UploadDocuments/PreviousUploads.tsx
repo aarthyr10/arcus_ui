@@ -10,13 +10,13 @@ export interface UploadedDoc {
   file_name: string;
   created_at: string;
   status:
-    | "UPLOADED"
-    | "PROCESSING"
-    | "SUCCESS"
-    | "FAILED"
-    | "ERROR"
-    | "PENDING"
-    | "NOT_FOUND";
+  | "UPLOADED"
+  | "PROCESSING"
+  | "SUCCESS"
+  | "FAILED"
+  | "ERROR"
+  | "PENDING"
+  | "NOT_FOUND";
   file_url?: string;
 }
 
@@ -117,15 +117,13 @@ const PreviousUploads = () => {
   return (
     <div
       className="
-      w-full lg:w-[420px]
-      max-w-[420px]
-      bg-[#eef8fd] 
-      rounded-3xl 
-      p-4 sm:p-5 lg:p-6
-      mx-auto
-      h-auto
-    "
-    >
+w-full lg:w-[420px]
+max-w-[420px]
+bg-[#eef8fd] 
+rounded-3xl 
+p-4 sm:p-5 lg:p-6
+h-auto
+" >
       <h3 className="flex items-center gap-2 mb-3 sm:mb-4 font-semibold text-sm sm:text-base">
         <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-[#2f80ff]" />
         Previous Uploads
