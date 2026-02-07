@@ -494,7 +494,7 @@ export default function SmartAssistant() {
 
   return (
     // 🔥 CENTER FIX ONLY HERE
-    <div className="w-full min-h-[calc(100vh-160px)] flex items-center justify-center px-3 sm:px-6 mt-10 sm:mt-13">
+    <div className="w-full min-h-[calc(100vh-160px)] flex items-center justify-center px-3 sm:px-6 mt-4 md:mt-13 lg:mt-13">
       <div className="w-full max-w-6xl">
         <div className="mb-4 sm:mb-5">
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">

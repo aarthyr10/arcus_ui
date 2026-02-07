@@ -9,7 +9,7 @@ const UploadDocuments = () => {
       min-h-[calc(100vh-200px)]
       flex 
       flex-col lg:flex-row 
-      gap-6 lg:gap-10 sm:mt-10 mt-10
+      gap-6 lg:gap-10 md:mt-13 lg:mt-13 mt-5
       items-center 
       justify-center
     "

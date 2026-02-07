@@ -3,7 +3,7 @@ import {
   Check,
   X,
   FileText,
-  Loader,
+  Loader2,
   ChevronLeft,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -136,12 +136,13 @@ export default function EditReviewComplianceDocuments() {
 
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader />
-      </div>
-    );
-  }
+   return (
+     <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
+       <Loader2 className="animate-spin text-blue-500" size={50} />
+     </div>
+   );
+ }
+
   const handleReset = () => {
     setText(originalText);
     setRetrainLLM(false);
@@ -228,7 +229,7 @@ export default function EditReviewComplianceDocuments() {
         <div className="bg-[#eef8fd] rounded-2xl p-4 sm:p-8 shadow-lg">
 
           {/* Header */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
+          <div className="flex flex-col items-center md:flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
 
             <div className="flex items-center gap-2 text-sm font-medium text-blue-600">
               <Sparkles size={16} />

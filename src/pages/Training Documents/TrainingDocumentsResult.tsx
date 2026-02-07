@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronDown, ChevronLeft, Eye, Loader, X } from "lucide-react";
+import { ChevronDown, ChevronLeft, Eye, Loader2, X } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import ReactFlow, { Background, Controls, MarkerType } from "reactflow";
@@ -504,14 +504,14 @@ export default function TrainingDocumentsResult() {
   }, [mindmap]);
 
  if (loading) {
-     return (
-       <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
-         <Loader />
-       </div>
-     );
-   }
+   return (
+     <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
+       <Loader2 className="animate-spin text-blue-500" size={50} />
+     </div>
+   );
+ }
   return (
-     <div className="z-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 mt-4 sm:mt-8">
+     <div className="z-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 mt-3 md:mt-8 lg:mt-8">
       <div className="max-w-[1200px] mx-auto w-full">
         {/* HEADER */}
         <div className="flex sm:flex-row sm:items-center sm:justify-between mb-6 gap-10 sm:gap-2">

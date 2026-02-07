@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
-import { Loader, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { TextInput, Button } from "@mantine/core";
 
 interface SearchResult {
@@ -59,7 +59,7 @@ const Searchdocs = () => {
       {/* FULL SCREEN LOADER */}
       {loading && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
-          <Loader className="animate-spin" />
+          <Loader2 className="animate-spin text-blue-500" size={50} />
         </div>
       )}
 
@@ -73,7 +73,12 @@ const Searchdocs = () => {
 
           {/* SEARCH BAR */}
           <div className="flex justify-center mb-10 mt-4">
-            <div className="flex items-center gap-4 w-full max-w-[1200px]">
+            <div className="
+              flex flex-col sm:flex-row
+              items-stretch sm:items-center
+              gap-3 sm:gap-4 
+              w-full max-w-[1200px]
+            ">
 
               {/* SEARCH INPUT CARD */}
               <div
@@ -171,15 +176,15 @@ const Searchdocs = () => {
                   No results found
                 </div>
               ) : (
-                <table className="w-full min-w-[900px] text-sm">
+               <table className="w-full min-w-[900px] text-sm table-fixed">
                   <thead>
                     <tr className="text-left text-gray-600 border-b">
-                      <th className="py-3 px-3">#</th>
-                      <th className="py-3 px-3">File</th>
-                      <th className="py-3 px-3">Line</th>
-                      <th className="py-3 px-3">Matched</th>
-                      <th className="py-3 px-3">Context Before</th>
-                      <th className="py-3 px-3">Context After</th>
+                     <th className="py-3 px-3 w-[60px]">#</th>
+      <th className="py-3 px-3 w-[150px]">File</th>
+      <th className="py-3 px-3 w-[100px]">Line</th>
+      <th className="py-3 px-3 w-[200px]">Matched</th>
+      <th className="py-3 px-3 w-[200px]">Context Before</th>
+      <th className="py-3 px-5 lg:px-3 w-[200px]">Context After</th>
                     </tr>
                   </thead>
 
@@ -192,22 +197,28 @@ const Searchdocs = () => {
                         <td className="py-4 px-3 text-gray-500">
                           {index + 1}
                         </td>
-                        <td className="py-4 px-3 break-all">
+                        <td className="py-4 px-3 w-[150px] break-all">
                           {item.file_name}
                         </td>
-                        <td className="py-4 px-3 font-medium">
+                        <td className="py-4 px-7 lg:px-5 font-medium  w-[250px]">
                           {item.line_number}
                         </td>
-                        <td className="py-4 px-3">
-                          <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-700">
-                            {item.match_line}
-                          </span>
+                        <td className="py-4 px-1 lg:px-2 w-[200px]">
+                          <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
+  {item.match_line}
+</span>
                         </td>
-                        <td className="py-4 px-3 text-gray-600">
-                          {item.context_before}
+                        <td className="py-4 px-1 lg:px-2 text-gray-600 w-[200px]">
+                            <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
+   {item.context_before}
+</span>
+                         
                         </td>
-                        <td className="py-4 px-3 text-gray-600">
-                          {item.context_after}
+                        <td className="py-4 px-5 md:px-3 lg:px-2 text-gray-600 w-[200px]">
+                                     <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
+   {item.context_after}
+</span>
+                          
                         </td>
                       </tr>
                     ))}

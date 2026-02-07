@@ -23,7 +23,7 @@ const Header = () => {
     <header
       className="
       fixed top-0 left-0 w-full z-50
-      backdrop-blur-md h-[11vh] sm:h[6vh] md:h-[9vh] lg:h-[10vh]
+      backdrop-blur-md h-[11vh] md:h-[8vh] md:h-[11vh] lg:h-[10vh]
     "
     >
       <div className="w-full mx-auto flex justify-between items-center px-4 py-4 mt-2 sm:mt-1">

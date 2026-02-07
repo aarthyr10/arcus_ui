@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronLeft, Download, Loader, Pencil, PencilLine, Trash2 } from "lucide-react";
+import { ChevronLeft, Download, Loader2, Pencil, PencilLine, Trash2 } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import ExportComplianceReportModal from "./ExportComplianceReport";
@@ -154,7 +154,7 @@ export default function ComplianceResults() {
 if (loading) {
    return (
      <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
-       <Loader />
+       <Loader2 className="animate-spin text-blue-500" size={50} />
      </div>
    );
  }
