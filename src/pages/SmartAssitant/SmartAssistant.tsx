@@ -66,14 +66,14 @@ export default function SmartAssistant() {
     },
   ]);
 
-  const quickPrompts = useMemo(
-    () => [
-      "What are the latest compliance requirements?",
-      "Explain HVAC safety procedures",
-      "Show energy efficiency standards",
-    ],
-    [],
-  );
+  // const quickPrompts = useMemo(
+  //   () => [
+  //     "What are the latest compliance requirements?",
+  //     "Explain HVAC safety procedures",
+  //     "Show energy efficiency standards",
+  //   ],
+  //   [],
+  // );
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -222,7 +222,7 @@ export default function SmartAssistant() {
           </div>
 
           {/* Quick buttons */}
-          <div className="px-3 sm:px-6 pb-3 sm:pb-4">
+          {/* <div className="px-3 sm:px-6 pb-3 sm:pb-4">
             <div className="flex flex-wrap gap-2">
               {quickPrompts.map((p) => (
                 <button
@@ -235,7 +235,7 @@ export default function SmartAssistant() {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Input */}
           <div className="px-3 sm:px-6 pb-4 sm:pb-6">
