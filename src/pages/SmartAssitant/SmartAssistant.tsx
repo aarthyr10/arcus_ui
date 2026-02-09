@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { HiOutlinePaperAirplane } from "react-icons/hi2";
-import { useNavigate } from "react-router-dom";
 import { ChevronLeft, Download, FileText, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -57,8 +56,6 @@ function TypingDots() {
 }
 
 export default function SmartAssistant() {
-
-  const navigate = useNavigate();
 
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
