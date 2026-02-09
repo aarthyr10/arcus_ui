@@ -6,6 +6,8 @@ import { ChevronLeft, Download, FileText, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Modal } from "@mantine/core";
+import * as XLSX from "xlsx";
+
 
 type ChatRole = "assistant" | "user";
 
@@ -228,6 +230,23 @@ export default function SmartAssistant() {
 
     doc.save("Smart-Assistant-Chat.pdf");
   };
+  const generateChatExcel = () => {
+    const rows = messages
+      .filter(m => m.content !== "__typing__")
+      .map(m => ({
+        Role: m.role === "user" ? "User" : "Assistant",
+        Message: m.content,
+        Time: formatTime(m.ts),
+      }));
+
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Chat Report");
+
+    XLSX.writeFile(workbook, "Smart-Assistant-Chat.xlsx");
+  };
+
 
   const handleExport = (type: "pdf" | "excel") => {
     if (!messages.length) return;
@@ -238,6 +257,10 @@ export default function SmartAssistant() {
     setTimeout(() => {
       if (type === "pdf") {
         generateChatPDF();   // 🔥 CHAT PDF
+      }
+
+      if (type === "excel") {
+        generateChatExcel();
       }
       setStatus("success");
     }, 500);
@@ -398,6 +421,17 @@ export default function SmartAssistant() {
                 <p className="font-medium">PDF</p>
                 <p className="text-xs text-gray-500">Standard format</p>
               </button>
+              <button
+                onClick={() => handleExport("excel")}
+                className="rounded-2xl bg-white p-4 hover:shadow-lg transition"
+              >
+                <div className="w-12 h-12 mx-auto rounded-full bg-green-600 flex items-center justify-center mb-2">
+                  <FileText className="text-white" size={20} />
+                </div>
+                <p className="font-medium">Excel</p>
+                <p className="text-xs text-gray-500">Spreadsheet format</p>
+              </button>
+
             </div>
           )}
 
