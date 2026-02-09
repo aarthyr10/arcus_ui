@@ -9,6 +9,8 @@ export default defineConfig({
   server: {
      proxy: {
       "/api": {
+        //target: "http://localhost:8000",
+        //target: "https://robbi-ungouty-babette.ngrok-free.dev",
         target: "https://20.193.149.193",
         changeOrigin: true,
         secure: false,
@@ -17,4 +19,5 @@ export default defineConfig({
     port: 5173,
     host: "0.0.0.0"
   }
+  
 })
