@@ -409,7 +409,7 @@ export default function SmartAssistant() {
 
           {/* FORMAT SELECTION */}
           {status === "idle" && (
-            <div className="grid grid-cols-1 gap-4 mt-6">
+            <div className="grid grid-cols-2 gap-4 mt-6">
 
               <button
                 onClick={() => handleExport("pdf")}
@@ -429,7 +429,7 @@ export default function SmartAssistant() {
                   <FileText className="text-white" size={20} />
                 </div>
                 <p className="font-medium">Excel</p>
-                <p className="text-xs text-gray-500">Spreadsheet format</p>
+                <p className="text-xs text-gray-500">Editable format</p>
               </button>
 
             </div>
