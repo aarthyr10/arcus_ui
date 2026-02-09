@@ -47,7 +47,6 @@ const Searchdocs = () => {
 
       setResults(res.data.results ?? []);
     } catch (error) {
-      console.error("Search API error:", error);
       setResults([]);
     } finally {
       setLoading(false);
@@ -67,10 +66,10 @@ const Searchdocs = () => {
         <div className="max-w-[1200px] mx-auto w-full">
 
           {/* PAGE TITLE */}
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
             Search Documents
           </h1>
-
+      
           {/* SEARCH BAR */}
           <div className="flex justify-center mb-10 mt-4">
             <div className="

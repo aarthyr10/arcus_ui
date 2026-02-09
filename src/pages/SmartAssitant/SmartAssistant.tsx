@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { HiOutlinePaperAirplane } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
+import { ChevronLeft, Download, FileText, Loader2 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Modal } from "@mantine/core";
 
 type ChatRole = "assistant" | "user";
 
@@ -52,6 +57,9 @@ function TypingDots() {
 }
 
 export default function SmartAssistant() {
+
+  const navigate = useNavigate();
+
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [_error, setError] = useState<string | null>(null);
@@ -65,6 +73,9 @@ export default function SmartAssistant() {
         "Hello! I’m your Daikin Smart Compliance Assistant. I can help you with questions about compliance documents, training materials, and regulatory requirements. How can I assist you today?",
     },
   ]);
+  const [opened, setOpened] = useState(false);
+  const [status, setStatus] = useState<"idle" | "generating" | "success">("idle");
+  const [exportType, setExportType] = useState<"pdf" | "excel" | null>(null);
 
   // const quickPrompts = useMemo(
   //   () => [
@@ -74,6 +85,21 @@ export default function SmartAssistant() {
   //   ],
   //   [],
   // );
+  const getChatRows = () => {
+    return messages
+      .filter(m => m.content !== "__typing__")
+      .map(m => [
+        m.role === "user" ? "User" : "Assistant",
+        m.content,
+        formatTime(m.ts),
+      ]);
+  };
+
+  const onClose = () => {
+    setOpened(false);
+    setStatus("idle");
+    setExportType(null);
+  };
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -172,22 +198,93 @@ export default function SmartAssistant() {
       setIsSending(false);
     }
   };
+  const generateChatPDF = () => {
+    const doc = new jsPDF("portrait", "pt", "a4");
+
+    doc.setFontSize(16);
+    doc.text("Smart Assistant Chat Report", 40, 40);
+
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 40, 60);
+
+    autoTable(doc, {
+      startY: 80,
+      head: [["Role", "Message", "Time"]],
+      body: getChatRows(),
+      styles: {
+        fontSize: 9,
+        cellPadding: 6,
+        overflow: "linebreak",
+        valign: "top",
+      },
+      headStyles: {
+        fillColor: [5, 180, 230], // same blue
+        textColor: 255,
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: { cellWidth: 70 },
+        1: { cellWidth: 360 },
+        2: { cellWidth: 90 },
+      },
+    });
+
+    doc.save("Smart-Assistant-Chat.pdf");
+  };
+
+  const handleExport = (type: "pdf" | "excel") => {
+    if (!messages.length) return;
+
+    setExportType(type);
+    setStatus("generating");
+
+    setTimeout(() => {
+      if (type === "pdf") {
+        generateChatPDF();   // 🔥 CHAT PDF
+      }
+      setStatus("success");
+    }, 500);
+  };
+
 
   return (
     // 🔥 CENTER FIX ONLY HERE
     <div className="w-full min-h-[calc(100vh-160px)] flex items-center justify-center px-3 sm:px-6 mt-4 md:mt-13 lg:mt-13">
-      <div className="w-full max-w-6xl">
-        <div className="mb-4 sm:mb-5">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
-            Smart Assistant
-          </h1>
-          <div className="text-[11px] sm:text-xs text-gray-500">
-            Ask questions about compliance and training documents
+      <div className="w-full max-w-[1200px] mx-auto">
+        <div className="mb-4 sm:mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
+              Smart Assistant
+            </h1>
+            <div className="text-[11px] sm:text-xs text-gray-500">
+              Ask questions about compliance and training documents
+            </div>
           </div>
+
+          <button
+            onClick={() => setOpened(true)}
+            className="
+      w-full sm:w-auto
+      flex items-center justify-center gap-2
+      px-4 py-2
+      rounded-full
+      bg-gradient-to-r from-[#2f80ff] to-[#12c2e9]
+      text-white text-sm
+      shadow-lg
+      hover:scale-[1.03]
+      transition
+      cursor-pointer
+    "
+          >
+            <Download size={14} />
+            Export Report
+          </button>
+
         </div>
 
+
         <div className="bg-white/60 backdrop-blur rounded-2xl shadow-md border border-white/60">
-          
+
           {/* Chat messages */}
           <div
             ref={scrollRef}
@@ -250,7 +347,7 @@ export default function SmartAssistant() {
                   }
                 }}
                 placeholder="Ask about compliance or training documents..."
-                className="flex-1 bg-transparent outline-none text-[13px] sm:text-sm text-gray-800 placeholder:text-gray-400"
+                className="flex-1 bg-transparent outline-none text-[13px] sm:text-sm text-gray-800 placeholder:text-gray-400     placeholder:text-[10px] sm:placeholder:text-sm"
                 disabled={isSending}
               />
               <button
@@ -267,6 +364,86 @@ export default function SmartAssistant() {
           </div>
         </div>
       </div>
+      <Modal
+        opened={opened}
+        onClose={onClose}
+        centered
+        radius="xl"
+        size="md"
+        withCloseButton={false}
+        closeOnClickOutside={false}
+        overlayProps={{ blur: 4 }}
+      >
+        <div className="text-center">
+
+          {status !== "success" && (
+            <>
+              <h2 className="text-xl font-semibold text-gray-800">
+                Export Report
+              </h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Choose your preferred format
+              </p>
+            </>
+          )}
+
+          {/* FORMAT SELECTION */}
+          {status === "idle" && (
+            <div className="grid grid-cols-1 gap-4 mt-6">
+
+              <button
+                onClick={() => handleExport("pdf")}
+                className="rounded-2xl bg-white p-4 hover:shadow-lg transition"
+              >
+                <div className="w-12 h-12 mx-auto rounded-full bg-pink-500 flex items-center justify-center mb-2">
+                  <FileText className="text-white" size={20} />
+                </div>
+                <p className="font-medium">PDF</p>
+                <p className="text-xs text-gray-500">Standard format</p>
+              </button>
+            </div>
+          )}
+
+          {/* LOADING */}
+          {status === "generating" && (
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <Loader2 className="animate-spin text-blue-500" size={32} />
+              <p className="text-sm text-gray-600">
+                Generating {exportType?.toUpperCase()} report...
+              </p>
+            </div>
+          )}
+
+          {/* SUCCESS */}
+          {status === "success" && (
+            <div className="flex flex-col items-center">
+              <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center shadow-lg">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+
+              <h3 className="text-xl font-semibold text-gray-800 mt-4">
+                Export Successful!
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Your PDF report is ready
+              </p>
+
+              <button
+                onClick={onClose}
+                className="mt-6 px-6 py-2 flex items-center gap-1 text-sm text-blue-600"
+              >
+                <ChevronLeft size={20} />
+                Back
+              </button>
+            </div>
+          )}
+
+        </div>
+      </Modal>
+
     </div>
   );
 }

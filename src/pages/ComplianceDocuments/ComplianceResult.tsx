@@ -126,7 +126,6 @@ export default function ComplianceResults() {
         setRows(mappedRows);
         setPage(1);
       } catch (err) {
-        console.error("Failed to load compliance results", err);
         setRows([]);
       } finally {
         setLoading(false);
@@ -165,7 +164,7 @@ export default function ComplianceResults() {
   return (
     <>
       <div className="z-10 px-3 sm:px-6 py-4 sm:py-6 mt-2 md:mt-7 lg:mt-12">
-        <div className="max-w-[2000px] mx-auto">
+        <div className="max-w-[1200px] mx-auto w-full">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
@@ -259,7 +258,7 @@ export default function ComplianceResults() {
                         </td>
 
                         <td className="py-4 px-5">
-                            {row.reference}
+                          {row.reference}
                         </td>
 
                         <td className="py-4 px-2">
@@ -299,8 +298,8 @@ export default function ComplianceResults() {
               </table>
             </div>
           </div>
-
         </div>
+
         <div className="max-w-[1200px] mx-auto mt-10 px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
             <div className="flex items-center gap-2 text-sm whitespace-nowrap">
