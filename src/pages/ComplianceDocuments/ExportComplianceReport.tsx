@@ -43,12 +43,27 @@ export default function ExportComplianceReportModal({
       setExportType(null);
     }
   }, [opened]);
-  const formatAnswer = (q: Question) => {
-  if (q.answer_modified && q.remarks) {
-    return `${q.answer}\n\n[Modified Answer]\n${q.remarks}`;
-  }
-  return q.answer;
-};
+
+  const extractComplianceRemark = (remarks: string | null) => {
+    if (!remarks) return "";
+
+    const parts = remarks.split("|").map(r => r.toLowerCase());
+
+    if (parts.includes("comply") || parts.includes("compliant"))
+      return "Comply";
+
+    if (parts.includes("non comply") || parts.includes("non-compliant"))
+      return "Non-Comply";
+
+    if (
+      parts.includes("partially comply") ||
+      parts.includes("partial") ||
+      parts.includes("partially compliant")
+    )
+      return "Partially Comply";
+
+    return "";
+  };
 
 
   /* ---------- PDF ---------- */
@@ -60,11 +75,12 @@ export default function ExportComplianceReportModal({
 
     autoTable(doc, {
       startY: 70,
-      head: [["Q No", "Question", "Answer", "Reference", "Confidence (%)"]],
+      head: [["Q No", "Question", "Answer", "Remarks", "Reference", "Confidence (%)"]],
       body: questions.map(q => [
         q.question_no,
         q.question,
-        formatAnswer(q),   // 👈 UPDATED
+        q.answer,
+        extractComplianceRemark(q.remarks),
         q.reference,
         `${q.score}%`,
       ]),
@@ -72,11 +88,13 @@ export default function ExportComplianceReportModal({
       headStyles: { fillColor: [11, 99, 229], textColor: 255 },
       columnStyles: {
         0: { cellWidth: 40 },
-        1: { cellWidth: 250 },
-        2: { cellWidth: 220 },
-        3: { cellWidth: 220 },
-        4: { cellWidth: 50 },
+        1: { cellWidth: 200 },
+        2: { cellWidth: 200 },
+        3: { cellWidth: 90 },   // Remarks
+        4: { cellWidth: 200 },
+        5: { cellWidth: 50 },
       },
+
     });
 
     doc.save(filename + ".pdf");
@@ -87,7 +105,8 @@ export default function ExportComplianceReportModal({
     const rows = questions.map(q => ({
       "Question No": q.question_no,
       Question: q.question,
-      Answer: formatAnswer(q), // 👈 UPDATED
+      Answer: q.answer, // 👈 UPDATED
+      Remarks: extractComplianceRemark(q.remarks),
       Reference: q.reference,
       "Confidence (%)": q.score,
     }));
