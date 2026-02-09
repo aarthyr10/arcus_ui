@@ -95,7 +95,6 @@ export default function UploadTrainingDocument() {
 
       navigate("/knowledge");
     } catch (err) {
-      console.error(err);
       alert("Upload failed");
     } finally {
       setLoading(false);
@@ -104,12 +103,12 @@ export default function UploadTrainingDocument() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-3 sm:px-6 py-6 mt-2 sm:mt-10">
-      <div className="w-full max-w-[1100px]">
+      <div className="w-full max-w-[1200px] mx-auto">
 
         {/* HEADER */}
         <div className="flex sm:flex-row sm:items-center sm:justify-between gap-15 sm:gap-3 mb-6">
           <div>
-            <h1 className="text-sm sm:text-2xl font-semibold text-gray-800">
+            <h1 className="text-sm sm:text-2xl lg:text-3xl font-semibold text-gray-800">
               Upload Training Document
             </h1>
             <p className="text-[10px] sm:text-sm text-gray-500 mt-1">

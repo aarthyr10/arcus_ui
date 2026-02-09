@@ -76,52 +76,52 @@ export default function TrainingDocuments() {
     ServiceEndpoint.trainDocuments.getAll;
 
   const getUploadedDocuments = async (
-  setLoading?: (loading: boolean) => void
-): Promise<UploadedDoc[]> => {
-  setLoading?.(true);
-  try {
-    const res = await axios.get(endPoint, {
-      headers: { "ngrok-skip-browser-warning": "true" },
-    });
-
-    const data = res.data
-      .map((doc: any) => ({
-        doc_id: doc.train_id,
-        file_name: doc.file_name,
-        created_at: doc.created_at,
-        status: doc.status,
-        file_url: doc.path,
-        clauses: Math.floor(Math.random() * 20) + 5,
-      }))
-      .sort(
-        (a: UploadedDoc, b: UploadedDoc) =>
-          new Date(b.created_at).getTime() -
-          new Date(a.created_at).getTime()
-      );
-
-    setLoading?.(false);
-    return data;
-  } catch (error) {
-    setLoading?.(false);
-    throw error;
-  }
-};
-
-useEffect(() => {
-  const fetchDocs = async () => {
+    setLoading?: (loading: boolean) => void
+  ): Promise<UploadedDoc[]> => {
+    setLoading?.(true);
     try {
-      setLoading(true);
-      const data = await getUploadedDocuments();
-      setDocs(data);
+      const res = await axios.get(endPoint, {
+        headers: { "ngrok-skip-browser-warning": "true" },
+      });
+
+      const data = res.data
+        .map((doc: any) => ({
+          doc_id: doc.train_id,
+          file_name: doc.file_name,
+          created_at: doc.created_at,
+          status: doc.status,
+          file_url: doc.path,
+          clauses: Math.floor(Math.random() * 20) + 5,
+        }))
+        .sort(
+          (a: UploadedDoc, b: UploadedDoc) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        );
+
+      setLoading?.(false);
+      return data;
     } catch (error) {
-      setDocs([]);
-    } finally {
-      setLoading(false);
+      setLoading?.(false);
+      throw error;
     }
   };
 
-  fetchDocs();
-}, []);
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        setLoading(true);
+        const data = await getUploadedDocuments();
+        setDocs(data);
+      } catch (error) {
+        setDocs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocs();
+  }, []);
 
 
   const rows = docs;
@@ -139,16 +139,16 @@ useEffect(() => {
   }, [docs]);
 
   if (loading) {
-   return (
-     <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
-       <Loader2 className="animate-spin text-blue-500" size={50} />
-     </div>
-   );
- }
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
+        <Loader2 className="animate-spin text-blue-500" size={50} />
+      </div>
+    );
+  }
   return (
     <>
       <div className="w-full flex justify-center px-3 sm:px-6 py-4 sm:py-6 mt-4 md:mt-10 lg:mt-15">
-        <div className="w-full max-w-6xl">
+        <div className="w-full max-w-[1200px] mx-auto">
 
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-10">
@@ -240,16 +240,29 @@ useEffect(() => {
                     value={String(pageSize)}
                     onChange={(v) => {
                       setPageSize(Number(v));
-                      setPage(1);
+                      setPage(1); // reset to first page
                     }}
-                    data={["10", "20", "30", "40", "50"]}
+                    data={(() => {
+                      const sizes: number[] = [];
+                      const total = docs.length;
+                      const step = 10; // you can adjust step if needed
+                      for (let i = step; i <= total + step; i += step) {
+                        sizes.push(i);
+                      }
+                      return sizes.map(String);
+                    })()}
                     size="xs"
                     w={70}
+                    classNames={{
+                      input:
+                        "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500",
+                    }}
                   />
 
                   <Text size="sm">
-                    {`${startIndex} - ${endIndex} of ${totalResults}`}
+                    {`${startIndex} - ${endIndex} of ${totalResults} Results`}
                   </Text>
+
                 </div>
 
                 {/* RIGHT */}
@@ -262,6 +275,20 @@ useEffect(() => {
                     radius="xl"
                     siblings={1}
                     withEdges
+                     classNames={{
+                    root: "flex flex-row flex-nowrap items-center gap-1",
+                    control:
+                      "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
+                  }}
+                  styles={{
+                    control: {
+                      "&[dataActive]": {
+                        backgroundColor: "#0B63E5",
+                        color: "white",
+                        borderColor: "#0B63E5",
+                      },
+                    },
+                  }}
                   />
                 )}
               </div>

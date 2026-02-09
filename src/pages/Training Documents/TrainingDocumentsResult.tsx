@@ -71,35 +71,35 @@ function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
   //   );
   // };
 
-const getChildren = (n: any): any[] => {
-  if (!n || typeof n !== "object") return [];
+  const getChildren = (n: any): any[] => {
+    if (!n || typeof n !== "object") return [];
 
-  // ROOT → sections
-  if (Array.isArray(n.nodes)) return n.nodes;
+    // ROOT → sections
+    if (Array.isArray(n.nodes)) return n.nodes;
 
-  // SECTION → group items by key
-  if (Array.isArray(n.items)) {
-    const grouped: Record<string, any[]> = {};
+    // SECTION → group items by key
+    if (Array.isArray(n.items)) {
+      const grouped: Record<string, any[]> = {};
 
-    n.items.forEach((item: any) => {
-      if (!grouped[item.key]) grouped[item.key] = [];
-      grouped[item.key].push({
-        value: item.value,
-        source: item.source,
+      n.items.forEach((item: any) => {
+        if (!grouped[item.key]) grouped[item.key] = [];
+        grouped[item.key].push({
+          value: item.value,
+          source: item.source,
+        });
       });
-    });
 
-    return Object.entries(grouped).map(([key, values]) => ({
-      title: key,
-      children: values,
-    }));
-  }
+      return Object.entries(grouped).map(([key, values]) => ({
+        title: key,
+        children: values,
+      }));
+    }
 
-  // KEY NODE → values
-  if (Array.isArray(n.children)) return n.children;
+    // KEY NODE → values
+    if (Array.isArray(n.children)) return n.children;
 
-  return [];
-};
+    return [];
+  };
 
   const isTreeFormat =
     typeof mindmap === "object" &&
@@ -126,74 +126,74 @@ const getChildren = (n: any): any[] => {
   };
 
   const depthStyle = (depth: number): CSSProperties => {
-  if (depth === 0) {
-    return {
-      width: 380,
-      minHeight: 120,
-      background:
-        "linear-gradient(135deg, #2563eb 0%, #12c2e9 100%)",
-      color: "#ffffff",
-      padding: 16,
-      borderRadius: 18,
-      border: "1px solid rgba(255,255,255,0.35)",
-      boxShadow: "0 20px 40px rgba(37,99,235,0.35)",
-    };
-  }
+    if (depth === 0) {
+      return {
+        width: 380,
+        minHeight: 120,
+        background:
+          "linear-gradient(135deg, #2563eb 0%, #12c2e9 100%)",
+        color: "#ffffff",
+        padding: 16,
+        borderRadius: 18,
+        border: "1px solid rgba(255,255,255,0.35)",
+        boxShadow: "0 20px 40px rgba(37,99,235,0.35)",
+      };
+    }
 
-  if (depth === 1) {
-    return {
-      width: 340,
-      minHeight: 110,
-      background:
-        "linear-gradient(135deg, #e0f2fe, #f0f9ff)",
-      padding: 14,
-      borderRadius: 16,
-      border: "1px solid #bae6fd",
-      boxShadow: "0 12px 28px rgba(59,130,246,0.15)",
-    };
-  }
+    if (depth === 1) {
+      return {
+        width: 340,
+        minHeight: 110,
+        background:
+          "linear-gradient(135deg, #e0f2fe, #f0f9ff)",
+        padding: 14,
+        borderRadius: 16,
+        border: "1px solid #bae6fd",
+        boxShadow: "0 12px 28px rgba(59,130,246,0.15)",
+      };
+    }
 
-  return {
-    width: 420,
-    minHeight: 100,
-    background: "rgba(255,255,255,0.9)",
-    padding: 12,
-    borderRadius: 14,
-    border: "1px solid #e5e7eb",
-    boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
+    return {
+      width: 420,
+      minHeight: 100,
+      background: "rgba(255,255,255,0.9)",
+      padding: 12,
+      borderRadius: 14,
+      border: "1px solid #e5e7eb",
+      boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
+    };
   };
-};
 
-const labelFor = (n: any, depth: number) => {
-  // LEAF NODE → value + source on ONE line
-  if (!n.title && n.value) {
+  const labelFor = (n: any, depth: number) => {
+    // LEAF NODE → value + source on ONE line
+    if (!n.title && n.value) {
+      return (
+        <div className="text-xs text-gray-700 font-medium">
+          {safeString(n.value)}
+          {n.source && (
+            <span className="text-[10px] text-gray-400">
+              {", " + safeString(n.source)}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    // NORMAL NODE
     return (
-      <div className="text-xs text-gray-700 font-medium">
-        {safeString(n.value)}
-        {n.source && (
-          <span className="text-[10px] text-gray-400">
-            {", " + safeString(n.source)}
-          </span>
-        )}
+      <div className="space-y-1 text-xs">
+        <div
+          className={
+            depth === 0
+              ? "font-semibold text-sm tracking-wide"
+              : "font-semibold"
+          }
+        >
+          {n.title}
+        </div>
       </div>
     );
-  }
-
-  // NORMAL NODE
-  return (
-    <div className="space-y-1 text-xs">
-      <div
-        className={
-          depth === 0
-            ? "font-semibold text-sm tracking-wide"
-            : "font-semibold"
-        }
-      >
-        {n.title}
-      </div>
-    </div>
-  );
-};
+  };
 
 
 
@@ -310,7 +310,6 @@ const labelFor = (n: any, depth: number) => {
 
     return { nodes, edges };
   } catch (e) {
-    console.error("Failed to build mindmap graph", e);
     return { nodes: [], edges: [] };
   }
 }
@@ -332,7 +331,8 @@ export default function TrainingDocumentsResult() {
   const shouldFitView = rfNodes.length <= 6;
   const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
   const [lightbox, setLightbox] = useState<{ open: boolean; src?: string; info?: string; }>({ open: false, src: undefined, info: undefined });
-
+  const [imagePage, setImagePage] = useState(1);
+  const [imagesPerPage, setImagesPerPage] = useState(12);
 
   useEffect(() => {
     if (!docId) return;
@@ -363,7 +363,6 @@ export default function TrainingDocumentsResult() {
         setImages(res.data?.data?.image_assets ?? res.data.image_assets ?? []);
         setPage(1);
       } catch (err) {
-        console.error("Failed to load results", err);
         setRows([]);
       } finally {
         setLoading(false);
@@ -434,14 +433,16 @@ export default function TrainingDocumentsResult() {
 
       URL.revokeObjectURL(blobUrl);
     } catch (err: any) {
-      console.error("Failed to download image:", err);
       alert(err.message);
     }
   };
   useEffect(() => {
-    const fetchImages = async () => {
-      const urls: { [key: string]: string } = {};
+    if (!images.length) return;
 
+    const urls: { [key: string]: string } = {};
+    let cancelled = false;
+
+    const fetchImages = async () => {
       for (const img of images) {
         try {
           const imageUrl =
@@ -453,21 +454,23 @@ export default function TrainingDocumentsResult() {
             headers: { "ngrok-skip-browser-warning": "true" },
           });
 
-          urls[img.image_id] = URL.createObjectURL(res.data);
+          if (!cancelled) {
+            urls[img.image_id] = URL.createObjectURL(res.data);
+            setImageUrls((prev) => ({ ...prev, [img.image_id]: urls[img.image_id] }));
+          }
         } catch (err) {
-          console.error("Failed to fetch image:", img.image_id, err);
         }
       }
-
-      setImageUrls(urls);
-
-      return () => {
-        Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
-      };
     };
 
-    if (images.length) fetchImages();
+    fetchImages();
+
+    return () => {
+      cancelled = true;
+      Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
+    };
   }, [images]);
+
 
 
 
@@ -479,20 +482,30 @@ export default function TrainingDocumentsResult() {
     }
   }, [mindmap]);
 
- if (loading) {
-   return (
-     <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
-       <Loader2 className="animate-spin text-blue-500" size={50} />
-     </div>
-   );
- }
+  // const imagePages = useMemo(
+  //   () => chunk(images, imagesPerPage),
+  //   [images, imagesPerPage]
+  // );
+
+  const imagePages = useMemo(() => chunk(images, imagesPerPage), [images, imagesPerPage]);
+
+  const paginatedImages = imagePages[imagePage - 1] ?? [];
+  const totalImagePages = imagePages.length;
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center backdrop-blur-md bg-white/30">
+        <Loader2 className="animate-spin text-blue-500" size={50} />
+      </div>
+    );
+  }
   return (
-     <div className="z-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 mt-3 md:mt-8 lg:mt-8">
+    <div className="z-10 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 mt-3 md:mt-8 lg:mt-8">
       <div className="max-w-[1200px] mx-auto w-full">
         {/* HEADER */}
         <div className="flex sm:flex-row sm:items-center sm:justify-between mb-6 gap-10 sm:gap-2">
           <div>
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
               Training Documents            </h1>
             <p className="text-xs sm:text-sm text-gray-500 mt-1">
               Review AI-generated compliance responses
@@ -509,7 +522,7 @@ export default function TrainingDocumentsResult() {
             </button>
           </div>
         </div>
-       <div className="flex flex-wrap gap-2 border-b pb-3 mb-6 overflow-x-auto">
+        <div className="flex flex-wrap gap-2 border-b pb-3 mb-6 overflow-x-auto">
           {[
             mindmapGraph.nodes.length > 0 && { k: "mindmap", l: "Mindmap" },
             extractedText.length > 0 && { k: "extracted", l: "Extracted JSON" },
@@ -532,7 +545,7 @@ export default function TrainingDocumentsResult() {
         </div>
 
         {activeTab === "mindmap" && mindmapGraph && (
-         <div className="mb-6 sm:mb-8">
+          <div className="mb-6 sm:mb-8">
             {/* HEADER */}
             <div
               className="
@@ -579,17 +592,17 @@ export default function TrainingDocumentsResult() {
             mt-4 
             overflow-hidden
           "
-        >
+                >
                   <div
-            style={{
-              width: "100%",
-              height: mindmapHeight,
-              overflow: "auto",
-            }}
-            className="
+                    style={{
+                      width: "100%",
+                      height: mindmapHeight,
+                      overflow: "auto",
+                    }}
+                    className="
               rounded-xl
             "
-          >
+                  >
                     <ReactFlow
                       nodes={rfNodes}
                       edges={rfEdges}
@@ -598,11 +611,11 @@ export default function TrainingDocumentsResult() {
                         padding: 0.2,
                       }}
                       defaultEdgeOptions={{
-    type: "bezier",
-    style: {
-      strokeWidth: 2,
-    },
-  }}
+                        type: "bezier",
+                        style: {
+                          strokeWidth: 2,
+                        },
+                      }}
                       zoomOnScroll={!shouldFitView}
                       panOnScroll={!shouldFitView}
                       minZoom={0.4}
@@ -618,18 +631,18 @@ export default function TrainingDocumentsResult() {
               ))}
           </div>
         )}
-{activeTab === "images" && (
-  images.length > 0 ? (
-    <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-10 mb-8">
-      <Text fw={600} size="md" mb="sm">
-        Document Pages
-      </Text>
+        {activeTab === "images" && (
+          images.length > 0 ? (
+            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-10 mb-8">
+              <Text fw={600} size="md" mb="sm">
+                Document Pages
+              </Text>
 
-     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-  {images.map((img) => (
-    <div
-      key={img.image_id}
-      className="
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                {paginatedImages.map((img) => (
+                  <div
+                    key={img.image_id}
+                    className="
         group relative
         flex flex-col
         h-[420px]
@@ -641,34 +654,34 @@ export default function TrainingDocumentsResult() {
         transition
         overflow-hidden
       "
-    >
-      {/* IMAGE */}
-      <div className="relative h-60 w-full bg-gray-100 overflow-hidden">
-        {imageUrls[img.image_id] ? (
-          <img
-            src={imageUrls[img.image_id]}
-            alt={`Page ${img.page_no}`}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            Loading...
-          </div>
-        )}
+                  >
+                    {/* IMAGE */}
+                    <div className="relative h-60 w-full bg-gray-100 overflow-hidden">
+                      {imageUrls[img.image_id] ? (
+                        <img
+                          src={imageUrls[img.image_id]}
+                          alt={`Page ${img.page_no}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          Loading...
+                        </div>
+                      )}
 
-        {/* VIEW OVERLAY */}
-        {imageUrls[img.image_id] && (
-          <button
-            type="button"
-            title="View image"
-            onClick={() =>
-              setLightbox({
-                open: true,
-                src: imageUrls[img.image_id],
-                info: `Page: ${img.page_no} | ${img.file_name}`,
-              })
-            }
-            className="
+                      {/* VIEW OVERLAY */}
+                      {imageUrls[img.image_id] && (
+                        <button
+                          type="button"
+                          title="View image"
+                          onClick={() =>
+                            setLightbox({
+                              open: true,
+                              src: imageUrls[img.image_id],
+                              info: `Page: ${img.page_no} | ${img.file_name}`,
+                            })
+                          }
+                          className="
               absolute inset-0
               flex items-center justify-center
               gap-2
@@ -678,30 +691,30 @@ export default function TrainingDocumentsResult() {
               group-hover:opacity-100
               transition
             "
-          >
-            <Eye className="w-4 h-4" />
-            View
-          </button>
-        )}
-      </div>
+                        >
+                          <Eye className="w-4 h-4" />
+                          View
+                        </button>
+                      )}
+                    </div>
 
-      {/* INFO */}
-      <div className="flex-1 p-3 text-sm text-gray-700">
-        <p className="font-medium mb-1">Page: {img.page_no}</p>
-        <p className="line-clamp-2 text-gray-600">
-          {img.file_name}
-        </p>
-      </div>
+                    {/* INFO */}
+                    <div className="flex-1 p-3 text-sm text-gray-700">
+                      <p className="font-medium mb-1">Page: {img.page_no}</p>
+                      <p className="line-clamp-2 text-gray-600">
+                        {img.file_name}
+                      </p>
+                    </div>
 
-      {/* DOWNLOAD BUTTON */}
-      <div className="p-3 pt-0">
-        <button
-          type="button"
-          title="Download image"
-          onClick={() =>
-            downloadImage(imageUrls[img.image_id], img.file_name)
-          }
-          className="
+                    {/* DOWNLOAD BUTTON */}
+                    <div className="p-3 pt-0">
+                      <button
+                        type="button"
+                        title="Download image"
+                        onClick={() =>
+                          downloadImage(imageUrls[img.image_id], img.file_name)
+                        }
+                        className="
             w-full py-2
             text-sm
             rounded-md
@@ -710,52 +723,117 @@ export default function TrainingDocumentsResult() {
             hover:opacity-90
             transition
           "
-        >
-          Download
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-
-
-      {/* Fullscreen Lightbox Popup */}
-      {lightbox.open && lightbox.src && (
-        <div
-          className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-2"
-          onClick={() => setLightbox({ open: false })}
-        >
-          <div
-            className="relative w-full h-full flex items-center justify-center"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
-            <img
-              src={lightbox.src}
-              alt="Preview"
-              className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
-            />
-
-            {lightbox.info && (
-              <div className="absolute bottom-20 text-white text-sm bg-black/50 px-4 py-2 rounded-md">
-                {lightbox.info}
+                      >
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
 
-            {/* X mark close button with background */}
-            <button type="button" title="close image"
-              className="absolute top-5 right-5 text-white bg-black/70 p-2 rounded-full hover:bg-black/90 transition"
-              onClick={() => setLightbox({ open: false })}
-            >
-              <X className="w-5 h-5" />
-            </button>
+
+              {/* Fullscreen Lightbox Popup */}
+              {lightbox.open && lightbox.src && (
+                <div
+                  className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-2"
+                  onClick={() => setLightbox({ open: false })}
+                >
+                  <div
+                    className="relative w-full h-full flex items-center justify-center"
+                    onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+                  >
+                    <img
+                      src={lightbox.src}
+                      alt="Preview"
+                      className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
+                    />
+
+                    {lightbox.info && (
+                      <div className="absolute bottom-20 text-white text-sm bg-black/50 px-4 py-2 rounded-md">
+                        {lightbox.info}
+                      </div>
+                    )}
+
+                    {/* X mark close button with background */}
+                    <button type="button" title="close image"
+                      className="absolute top-5 right-5 text-white bg-black/70 p-2 rounded-full hover:bg-black/90 transition"
+                      onClick={() => setLightbox({ open: false })}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <NoData label="Images" />
+          )
+        )}
+        {activeTab === "images" && images.length > 0 && (
+          <div className="max-w-[1200px] mx-auto mt-6 sm:mt-10 px-2 sm:px-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-center sm:text-left">
+                <Text size="sm">Showing</Text>
+                <Select
+                  value={String(imagesPerPage)}
+                  onChange={(v) => {
+                    setImagesPerPage(Number(v));
+                    setImagePage(1); // reset to first page
+                  }}
+                  data={(() => {
+                    const sizes: number[] = [];
+                    const total = images.length;
+                    for (let i = 12; i <= total + 12; i += 12) {
+                      sizes.push(i);
+                    }
+                    return sizes.map(String);
+                  })()}
+                  size="xs"
+                  w={70}
+                  classNames={{
+                    input:
+                      "text-sm border-gray-300 hover:border-gray-400 rounded-md shadow-sm focus:border-blue-500",
+                  }}
+                />
+
+                <Text size="sm">
+                  {`${(imagePage - 1) * imagesPerPage + 1} - ${Math.min(
+                    imagePage * imagesPerPage,
+                    images.length
+                  )} of ${images.length} Results`}
+                </Text>
+              </div>
+
+              {totalImagePages > 1 && (
+                <Pagination
+                  total={totalImagePages}
+                  value={imagePage}
+                  onChange={setImagePage}
+                  size="sm"
+                  radius="xl"
+                  siblings={1}
+                  withEdges
+                  classNames={{
+                    root: "flex flex-row flex-nowrap items-center gap-1",
+                    control:
+                      "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
+                  }}
+                  styles={{
+                    control: {
+                      "&[dataActive]": {
+                        backgroundColor: "#0B63E5",
+                        color: "white",
+                        borderColor: "#0B63E5",
+                      },
+                    },
+                  }}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  ) : (
-    <NoData label="Images" />
-  )
-)}
+        )}
+
 
         <div className="">
           {activeTab === "extracted" && extractedText && (
@@ -804,8 +882,8 @@ export default function TrainingDocumentsResult() {
       {/* PAGINATION */}
       {activeTab === "table" && (
         <div className="max-w-[1200px] mx-auto mt-6 sm:mt-10 px-2 sm:px-4">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-             <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-center sm:text-left">
               <Text size="sm">Showing</Text>
               <Select
                 value={String(pageSize)}

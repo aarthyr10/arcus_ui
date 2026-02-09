@@ -92,14 +92,9 @@ const PreviousUploads = () => {
 
         return sortedDocs;
       } else {
-        console.warn("Invalid API response: Expected array");
         return [];
       }
     } catch (err: any) {
-      console.error(
-        "Failed to fetch documents",
-        err.response?.data || err.message
-      );
       throw err;
     }
   };
@@ -107,8 +102,7 @@ const PreviousUploads = () => {
   useEffect(() => {
     getUploadedDocuments()
       .then((data) => setDocs(data))
-      .catch((err) => {
-        console.error("Error in useEffect:", err);
+      .catch((_err) => {
         setDocs([]);
       })
       .finally(() => setLoading(false));
