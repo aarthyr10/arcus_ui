@@ -51,19 +51,17 @@ const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
       </div>
 
       {/* Buttons row */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-[8px] w-full">
-        <button className="flex items-center justify-center gap-2 w-full sm:w-[161.5px] h-[32px] text-white rounded-[10px] text-sm font-medium bg-[var(--primary-btn-color)] hover:bg-[var(--primary-btn-color)] transition-colors"
+      <div className="flex flex-col sm:flex-row gap-2 w-full">
+       <button
+  className="flex-1 flex items-center justify-center gap-2 min-h-[32px] sm:min-h-[32px]
+ text-white rounded-[10px] text-sm font-medium bg-[var(--primary-btn-color)] hover:opacity-90 transition"
           onClick={() => onView(id)}
         >
           <Eye className="w-4 h-4" />
           View
         </button>
-
-        <button className="flex items-center justify-center gap-2 w-full sm:w-[161.5px] h-[32px] bg-white border border-[#d1d5db] rounded-[10px] text-sm font-medium text-gray-600 hover:bg-[#f9fafb] transition-colors">
-          <RefreshCw className="w-4 h-4" />
-          Reuse
-        </button>
       </div>
+
     </div>
   );
 };

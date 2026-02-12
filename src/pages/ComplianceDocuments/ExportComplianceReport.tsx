@@ -27,6 +27,21 @@ interface Props {
   questions: Question[];
 }
 
+const cleanAnswer = (text: string) =>
+  text
+    ?.replace(/\*/g, "")      // remove all *
+    .replace(/\s+/g, " ")     // remove extra spaces
+    .trim();
+
+const formatRemarks = (remarks: string | null) => {
+  if (!remarks) return "";
+
+  return remarks
+    .split("|")
+    .map(r => r.replace(/_/g, " "))
+    .join(", ");   // 👈 comma instead of \n
+};
+
 export default function ExportComplianceReportModal({
   opened,
   onClose,
@@ -44,26 +59,26 @@ export default function ExportComplianceReportModal({
     }
   }, [opened]);
 
-  const extractComplianceRemark = (remarks: string | null) => {
-    if (!remarks) return "";
+  // const extractComplianceRemark = (remarks: string | null) => {
+  //   if (!remarks) return "";
 
-    const parts = remarks.split("|").map(r => r.toLowerCase());
+  //   const parts = remarks.split("|").map(r => r.toLowerCase());
 
-    if (parts.includes("comply") || parts.includes("compliant"))
-      return "Comply";
+  //   if (parts.includes("comply") || parts.includes("compliant"))
+  //     return "Comply";
 
-    if (parts.includes("non comply") || parts.includes("non-compliant"))
-      return "Non-Comply";
+  //   if (parts.includes("non comply") || parts.includes("non-compliant"))
+  //     return "Non-Comply";
 
-    if (
-      parts.includes("partially comply") ||
-      parts.includes("partial") ||
-      parts.includes("partially compliant")
-    )
-      return "Partially Comply";
+  //   if (
+  //     parts.includes("partially comply") ||
+  //     parts.includes("partial") ||
+  //     parts.includes("partially compliant")
+  //   )
+  //     return "Partially Comply";
 
-    return "";
-  };
+  //   return "";
+  // };
 
 
   /* ---------- PDF ---------- */
@@ -79,8 +94,9 @@ export default function ExportComplianceReportModal({
       body: questions.map(q => [
         q.question_no,
         q.question,
-        q.answer,
-        extractComplianceRemark(q.remarks),
+        cleanAnswer(q.answer),
+        // extractComplianceRemark(q.remarks),
+        formatRemarks(q.remarks),
         q.reference,
         `${q.score}%`,
       ]),
@@ -105,8 +121,9 @@ export default function ExportComplianceReportModal({
     const rows = questions.map(q => ({
       "Question No": q.question_no,
       Question: q.question,
-      Answer: q.answer, // 👈 UPDATED
-      Remarks: extractComplianceRemark(q.remarks),
+      Answer: cleanAnswer(q.answer),  // 👈 cleaned
+      // Remarks: extractComplianceRemark(q.remarks),
+      Remarks: formatRemarks(q.remarks),
       Reference: q.reference,
       "Confidence (%)": q.score,
     }));
