@@ -61,6 +61,9 @@ const getRemarkStyle = (tag: string) => {
   return "bg-gray-100 text-gray-800 border border-gray-400";
 };
 
+const replaceAllStars = (tag: string) =>
+  tag.replace(/\*/g, "");
+
 export default function EditReviewComplianceDocuments() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -106,8 +109,8 @@ export default function EditReviewComplianceDocuments() {
 
         setQuestionNumber(found.question_no)
         setQuestion(found);
-        setText(found.modified_answer ?? found.answer ?? "");
-        setOriginalText(found.modified_answer ?? found.answer ?? "");
+setText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
+setOriginalText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
         setFileName(res.data?.file_name ?? null);
         setReference(found.reference ?? null);
         // remarks: q.remarks,
@@ -274,7 +277,7 @@ export default function EditReviewComplianceDocuments() {
               </div>
             </div>
           </div>
-          <p>{question.answer}</p>
+<p>{replaceAllStars(question.answer)}</p>
           <div className="py-4">
             {question?.answer_modified && (
               <span className="py-2 text-sm font-medium text-blue-600">
