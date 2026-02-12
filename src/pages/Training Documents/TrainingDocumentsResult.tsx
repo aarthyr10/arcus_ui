@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
 import { ChevronDown, ChevronLeft, Eye, Loader2, X } from "lucide-react";
@@ -314,6 +314,116 @@ function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
   }
 }
 
+const LazyImage = ({
+  imageId,
+  pageNo,
+  fileName,
+  onView,
+  onDownload
+}: {
+  imageId: string;
+  pageNo: number;
+  fileName: string;
+  onView: (src: string) => void;
+    onDownload: () => void;
+
+}) => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (entry.isIntersecting) {
+          observer.disconnect();
+
+          try {
+            const url =
+              ServiceEndpoint.apiBaseUrl +
+              ServiceEndpoint.trainDocumentsimage.getById(imageId);
+
+            const res = await axios.get(url, {
+              responseType: "blob",
+              headers: { "ngrok-skip-browser-warning": "true" },
+            });
+
+            const objectUrl = URL.createObjectURL(res.data);
+            setImageUrl(objectUrl);
+          } catch (err) {
+            setImageUrl(null);
+          }
+        }
+      },
+      { threshold: 0.1, rootMargin: "100px" }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [imageId]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="group relative flex flex-col h-[400px] rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition overflow-hidden"
+    >
+      {/* IMAGE */}
+      <div className="group relative h-60 w-full bg-gray-100 overflow-hidden">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={`Page ${pageNo}`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            Loading...
+          </div>
+        )}
+
+        {imageUrl && (
+          <button
+            type="button"
+            aria-label="View image"
+            title="View image"
+            onClick={() => onView(imageUrl)}
+            className="absolute inset-0 flex items-center justify-center bg-black/40 text-white opacity-0 group-hover:opacity-100 transition"
+          >
+            <Eye className="w-4 h-4" />
+            View
+          </button>
+        )}
+      </div>
+
+      {/* INFO */}
+      {/* <div className="flex-1 p-2 h-20 text-sm text-gray-700">
+        <p className="font-medium mb-1">Page: {pageNo}</p>
+        <p className="line-clamp-2 text-gray-600">{fileName}</p>
+      </div> */}
+      <div className="flex-1 p-3 text-sm text-gray-700 overflow-hidden">
+  <p className="font-medium mb-1">Page: {pageNo}</p>
+
+  <p className="text-gray-600 break-words line-clamp-3">
+    {fileName}
+  </p>
+</div>
+
+         <button
+        type="button"
+        onClick={onDownload}
+        className="w-full py-2 text-sm rounded-md text-white bg-gradient-to-br from-[#2f80ff] to-[#12c2e9] hover:opacity-90 transition"
+      >
+        Download
+      </button>
+    </div>
+  );
+};
+
+
 export default function TrainingDocumentsResult() {
   const navigate = useNavigate();
   const { docId } = useParams<{ docId: string }>();
@@ -329,7 +439,7 @@ export default function TrainingDocumentsResult() {
   const [activeTab, setActiveTab] = useState<ActiveTab>("table");
   const [showMindmap, setShowMindmap] = useState(false);
   const shouldFitView = rfNodes.length <= 6;
-  const [imageUrls, setImageUrls] = useState<{ [key: string]: string }>({});
+  // const [imageUrl, setImageUrl] = useState<{ [key: string]: string }>({});
   const [lightbox, setLightbox] = useState<{ open: boolean; src?: string; info?: string; }>({ open: false, src: undefined, info: undefined });
   const [imagePage, setImagePage] = useState(1);
   const [imagesPerPage, setImagesPerPage] = useState(12);
@@ -436,43 +546,14 @@ export default function TrainingDocumentsResult() {
       alert(err.message);
     }
   };
-  useEffect(() => {
-    if (!images.length) return;
+  // 2️⃣ Memo calculations
+  const imagePages = useMemo(
+    () => chunk(images, imagesPerPage),
+    [images, imagesPerPage]
+  );
 
-    const urls: { [key: string]: string } = {};
-    let cancelled = false;
-
-    const fetchImages = async () => {
-      for (const img of images) {
-        try {
-          const imageUrl =
-            ServiceEndpoint.apiBaseUrl +
-            ServiceEndpoint.trainDocumentsimage.getById(img.image_id);
-
-          const res = await axios.get(imageUrl, {
-            responseType: "blob",
-            headers: { "ngrok-skip-browser-warning": "true" },
-          });
-
-          if (!cancelled) {
-            urls[img.image_id] = URL.createObjectURL(res.data);
-            setImageUrls((prev) => ({ ...prev, [img.image_id]: urls[img.image_id] }));
-          }
-        } catch (err) {
-        }
-      }
-    };
-
-    fetchImages();
-
-    return () => {
-      cancelled = true;
-      Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [images]);
-
-
-
+  const paginatedImages = imagePages[imagePage - 1] ?? [];
+  const totalImagePages = imagePages.length;
 
   useEffect(() => {
     const graph = buildMindmapGraph(mindmap);
@@ -481,16 +562,6 @@ export default function TrainingDocumentsResult() {
       setRfEdges(graph.edges);
     }
   }, [mindmap]);
-
-  // const imagePages = useMemo(
-  //   () => chunk(images, imagesPerPage),
-  //   [images, imagesPerPage]
-  // );
-
-  const imagePages = useMemo(() => chunk(images, imagesPerPage), [images, imagesPerPage]);
-
-  const paginatedImages = imagePages[imagePage - 1] ?? [];
-  const totalImagePages = imagePages.length;
 
   if (loading) {
     return (
@@ -640,93 +711,44 @@ export default function TrainingDocumentsResult() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {paginatedImages.map((img) => (
-                  <div
-                    key={img.image_id}
-                    className="
-        group relative
-        flex flex-col
-        h-[420px]
-        rounded-xl
-        border border-gray-200
-        bg-white
-        shadow-sm
-        hover:shadow-lg
-        transition
-        overflow-hidden
-      "
-                  >
-                    {/* IMAGE */}
-                    <div className="relative h-60 w-full bg-gray-100 overflow-hidden">
-                      {imageUrls[img.image_id] ? (
-                        <img
-                          src={imageUrls[img.image_id]}
-                          alt={`Page ${img.page_no}`}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400">
-                          Loading...
-                        </div>
-                      )}
+                  <div key={img.image_id} className="flex flex-col gap-3">
 
-                      {/* VIEW OVERLAY */}
-                      {imageUrls[img.image_id] && (
-                        <button
-                          type="button"
-                          title="View image"
-                          onClick={() =>
-                            setLightbox({
-                              open: true,
-                              src: imageUrls[img.image_id],
-                              info: `Page: ${img.page_no} | ${img.file_name}`,
-                            })
-                          }
-                          className="
-              absolute inset-0
-              flex items-center justify-center
-              gap-2
-              bg-black/40
-              text-white
-              opacity-0
-              group-hover:opacity-100
-              transition
-            "
-                        >
-                          <Eye className="w-4 h-4" />
-                          View
-                        </button>
-                      )}
-                    </div>
+                    <LazyImage
+  key={img.image_id}
+  imageId={img.image_id}
+  pageNo={img.page_no}
+  fileName={img.file_name}
+  onView={(src) =>
+    setLightbox({
+      open: true,
+      src,
+      info: `Page: ${img.page_no} | ${img.file_name}`,
+    })
+  }
+  onDownload={() =>
+    downloadImage(
+      ServiceEndpoint.apiBaseUrl +
+        ServiceEndpoint.trainDocumentsimage.getById(img.image_id),
+      img.file_name
+    )
+  }
+/>
 
-                    {/* INFO */}
-                    <div className="flex-1 p-3 text-sm text-gray-700">
-                      <p className="font-medium mb-1">Page: {img.page_no}</p>
-                      <p className="line-clamp-2 text-gray-600">
-                        {img.file_name}
-                      </p>
-                    </div>
 
-                    {/* DOWNLOAD BUTTON */}
-                    <div className="p-3 pt-0">
-                      <button
-                        type="button"
-                        title="Download image"
-                        onClick={() =>
-                          downloadImage(imageUrls[img.image_id], img.file_name)
-                        }
-                        className="
-            w-full py-2
-            text-sm
-            rounded-md
-            text-white
-            bg-gradient-to-br from-[#2f80ff] to-[#12c2e9]
-            hover:opacity-90
-            transition
-          "
-                      >
-                        Download
-                      </button>
-                    </div>
+                    {/* <button
+                      type="button"
+                      onClick={() =>
+                        downloadImage(
+                          ServiceEndpoint.apiBaseUrl +
+                          ServiceEndpoint.trainDocumentsimage.getById(img.image_id),
+                          img.file_name
+                        )
+                      }
+                      className="w-full py-2 text-sm rounded-md text-white bg-gradient-to-br from-[#2f80ff] to-[#12c2e9] hover:opacity-90 transition"
+                    >
+                      Download
+                    </button> */}
+
                   </div>
                 ))}
               </div>
