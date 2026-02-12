@@ -31,46 +31,46 @@ function chunk<T>(array: T[], size: number): T[][] {
   return [head, ...chunk(tail, size)];
 }
 
-const formatRemarkLabel = (tag: string) =>
-  tag
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+// const formatRemarkLabel = (tag: string) =>
+//   tag
+//     .replace(/_/g, " ")
+//     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-const getRemarkStyle = (tag: string) => {
-  const value = tag.toLowerCase();
+// const getRemarkStyle = (tag: string) => {
+//   const value = tag.toLowerCase();
 
-  if (value.includes("not evaluated"))
-    return "bg-gray-100 text-gray-900 border border-gray-500";
+//   if (value.includes("not evaluated"))
+//     return "bg-gray-100 text-gray-900 border border-gray-500";
 
-  if (value.includes("non comply"))
-    return "bg-yellow-100 text-yellow-900 border border-yellow-500";
+//   if (value.includes("non comply"))
+//     return "bg-yellow-100 text-yellow-900 border border-yellow-500";
 
-  if (value.includes("not applicable"))
-    return "bg-teal-100 text-teal-900 border border-teal-400";
+//   if (value.includes("not applicable"))
+//     return "bg-teal-100 text-teal-900 border border-teal-400";
 
-  if (value.includes("contractor"))
-    return "bg-blue-100 text-blue-900 border border-blue-500";
+//   if (value.includes("contractor"))
+//     return "bg-blue-100 text-blue-900 border border-blue-500";
 
-  if (value.includes("partially compliant") || value.includes("partial"))
-    return "bg-orange-100 text-orange-900 border border-amber-500";
+//   if (value.includes("partially compliant") || value.includes("partial"))
+//     return "bg-orange-100 text-orange-900 border border-amber-500";
 
-  if (value.includes("non compliant") || value.includes("non-compliant"))
-    return "bg-red-100 text-red-900 border border-red-500";
+//   if (value.includes("non compliant") || value.includes("non-compliant"))
+//     return "bg-red-100 text-red-900 border border-red-500";
 
-  if (value.includes("compliant") || value.includes("comply"))
-    return "bg-green-100 text-green-900 border border-green-500";
+//   if (value.includes("compliant") || value.includes("comply"))
+//     return "bg-green-100 text-green-900 border border-green-500";
 
-  if (value.includes("product"))
-    return "bg-indigo-100 text-indigo-900 border border-indigo-500";
+//   if (value.includes("product"))
+//     return "bg-indigo-100 text-indigo-900 border border-indigo-500";
 
-  if (value.includes("project_specific"))
-    return "bg-purple-100 text-purple-900 border border-purple-500";
+//   if (value.includes("project_specific"))
+//     return "bg-purple-100 text-purple-900 border border-purple-500";
 
-  if (value.includes("this is a modified answer"))
-    return "bg-sky-50 text-sky-900 border border-sky-400";
+//   if (value.includes("this is a modified answer"))
+//     return "bg-sky-50 text-sky-900 border border-sky-400";
 
-  return "bg-gray-100 text-gray-800 border border-gray-400";
-};
+//   return "bg-gray-100 text-gray-800 border border-gray-400";
+// };
 
 export default function ComplianceResults() {
   const navigate = useNavigate();
@@ -86,6 +86,7 @@ export default function ComplianceResults() {
   useEffect(() => {
     if (!docId) return;
     const fetchResults = async () => {
+      
       try {
         setLoading(true);
 
@@ -102,24 +103,45 @@ export default function ComplianceResults() {
         const questions = res.data?.data?.questions ?? [];
         const mappedRows: ResultRow[] = questions.map((q: any) => {
           let score = Number(q.confidence_score ?? 0);
-
           if (score > 0 && score <= 1) {
             score = score * 100;
           }
-
           score = Math.max(0, Math.min(100, score));
+         let parsedAnswer =
+  q.answer_modified && q.modified_answer
+    ? q.modified_answer
+    : q.answer;
+
+let formattedResponse = "";
+
+// ✅ If backend sends object (your current case)
+if (parsedAnswer && typeof parsedAnswer === "object") {
+  formattedResponse = `${parsedAnswer.compliance}\n${parsedAnswer.reason ?? ""}`;
+}
+// ✅ Fallback if string
+else if (typeof parsedAnswer === "string") {
+  const complianceMatch = parsedAnswer.match(/Compliance:\s*(.*?)(?=\s*\*|$)/i);
+  const reasonMatch = parsedAnswer.match(/Reason:\s*(.*?)(?=\s*\*|$)/i);
+  const recommendationMatch = parsedAnswer.match(/Recommendation:\s*(.*?)(?=\s*\*|$)/i);
+
+  const compliance = complianceMatch?.[1]?.trim() || "";
+  const reason = reasonMatch?.[1]?.trim() || "";
+  const recommendation = recommendationMatch?.[1]?.trim() || "";
+
+  formattedResponse = [compliance, reason, recommendation]
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 
           return {
             id: q.question_no,
             clause: q.question,
-            response:
-              q.answer_modified && q.modified_answer
-                ? q.modified_answer
-                : q.answer, score,
+             response: formattedResponse,
+                score,
             reference: q.reference,
             remarks: q.remarks,
             answer_modified: q.answer_modified,
-
           };
         });
 
@@ -211,7 +233,7 @@ export default function ComplianceResults() {
                 </thead>
                 <tbody>
                   {paginatedRows.map((row: ResultRow) => {
-                    const remarkTags = row.remarks?.split("|") ?? [];
+                    // const remarkTags = row.remarks?.split("|") ?? [];
                     return (
                       <tr key={row.id}>
                         <td className="py-4 px-2">{row.id}</td>
@@ -221,7 +243,7 @@ export default function ComplianceResults() {
                             {row.clause}
                           </div>
 
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {/* <div className="mt-2 flex flex-wrap items-center gap-2">
                             {remarkTags.length > 0 && (
                               <div className="flex flex-wrap gap-2">
                                 {remarkTags.map((tag, index) => (
@@ -234,17 +256,21 @@ export default function ComplianceResults() {
                                 ))}
                               </div>
                             )}
-                          </div>
+                          </div> */}
                         </td>
 
                         <td className="py-4 px-5">
-                          <div className="mt-2 text-gray-800 leading-relaxed">
-                            {remarkTags.map((tag, index) => (
+                          {/* <div className="mt-2 text-gray-800 leading-relaxed"> */}
+                            <div className="mt-2 text-gray-800 leading-relaxed whitespace-pre-line">
+                            {/* {remarkTags.map((tag, index) => (
                               <span key={index} className="font-bold">
                                 {formatRemarkLabel(tag)}.
                               </span>
-                            ))}
-                            {row.response}
+                            ))} */}
+{row.response.split("\n").map((line, index) => (
+  <div key={index}>{line}</div>
+))}
+
                           </div>
 
                           {row.answer_modified && (

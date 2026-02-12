@@ -15,32 +15,32 @@ const UploadProgress = () => {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showAnalyzing, setShowAnalyzing] = useState(false);
-  useEffect(() => {
-    const handlePopState = () => {
-      // alert("Upload in progress. Please wait until it completes.");
-      window.history.pushState(null, "", window.location.href);
-    };
+  // useEffect(() => {
+  //   const handlePopState = () => {
+  //     // alert("Upload in progress. Please wait until it completes.");
+  //     window.history.pushState(null, "", window.location.href);
+  //   };
 
-    window.history.pushState(null, "", window.location.href);
-    window.addEventListener("popstate", handlePopState);
+  //   window.history.pushState(null, "", window.location.href);
+  //   window.addEventListener("popstate", handlePopState);
 
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("popstate", handlePopState);
+  //   };
+  // }, []);
   
-  useEffect(() => {
-    const blockRefresh = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = ""; // REQUIRED
-    };
+  // useEffect(() => {
+  //   const blockRefresh = (event: BeforeUnloadEvent) => {
+  //     event.preventDefault();
+  //     event.returnValue = ""; // REQUIRED
+  //   };
 
-    window.addEventListener("beforeunload", blockRefresh);
+  //   window.addEventListener("beforeunload", blockRefresh);
 
-    return () => {
-      window.removeEventListener("beforeunload", blockRefresh);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", blockRefresh);
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (!files.length) {
