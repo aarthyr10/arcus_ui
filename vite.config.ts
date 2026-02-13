@@ -11,7 +11,8 @@ export default defineConfig({
       "/api": {
         //target: "http://localhost:8000",
         //target: "https://robbi-ungouty-babette.ngrok-free.dev",
-        target: "https://20.193.149.193",
+        //target: "https://20.193.149.193",
+        target: "https://arcus.tarkasha.com",
         changeOrigin: true,
         secure: false,
       },},
