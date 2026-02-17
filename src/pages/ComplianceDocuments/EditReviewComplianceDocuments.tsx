@@ -2,9 +2,9 @@ import {
   Sparkles,
   Check,
   X,
-  FileText,
   Loader2,
   ChevronLeft,
+  FileText,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -64,6 +64,44 @@ const getRemarkStyle = (tag: string) => {
 const replaceAllStars = (tag: string) =>
   tag.replace(/\*/g, "");
 
+type ParsedReference = {
+  doc_name: string;
+  chunk: number;
+  details: string;
+};
+
+function parseDocChunkStatements(
+  input: string | null | undefined
+): ParsedReference[] {
+  if (!input || typeof input !== "string") return [];
+
+  const unwrapped = (() => {
+    const m = input.match(/"reference"\s*:\s*"([\s\S]*)"\s*,?\s*$/);
+    return m ? m[1] : input;
+  })();
+
+  const text = unwrapped
+    .replace(/\\n/g, "\n")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+
+  const results: ParsedReference[] = [];
+
+  const re =
+    /In\s+(.+?)\s+\(chunk\s+(\d+)\),\s+it\s+states:\s+"([\s\S]*?)"\s*\./g;
+
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    results.push({
+      doc_name: match[1].trim(),
+      chunk: Number(match[2]),
+      details: match[3].trim(),
+    });
+  }
+
+  return results;
+}
+
 export default function EditReviewComplianceDocuments() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,11 +113,13 @@ export default function EditReviewComplianceDocuments() {
   const [questionNumber, setQuestionNumber] = useState<any>(null);
   const [text, setText] = useState("");
   const [originalText, setOriginalText] = useState("");
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [_fileName, setFileName] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const showReset = text !== originalText;
   const [retrainLLM, setRetrainLLM] = useState(false);
+  const parsedReferences = parseDocChunkStatements(reference);
+
 
   useEffect(() => {
     if (!docId || !id) return;
@@ -101,7 +141,6 @@ export default function EditReviewComplianceDocuments() {
         const found = questions.find(
           (q: any) => q.question_no === Number(id)
         );
-
 
         if (!found) {
           return;
@@ -213,20 +252,40 @@ export default function EditReviewComplianceDocuments() {
               {question?.question || "No question text available"}
             </div>
           </div>
-
           {/* Reference */}
           <div className="mt-4 bg-white/60 rounded-xl px-4 py-3 text-sm border border-[#9AD8FB]">
-            <p className="text-gray-500">Referenced From:</p>
-            <p className="text-gray-700 mt-1 font-medium">
-              <span className="inline-flex items-center gap-2 mr-2">
-                <FileText className="w-5 h-5 text-[var(--primary-btn-color)] mt-1 shrink-0" />
-                {fileName || "No reference available"}
-              </span>
-            </p>
-            <p> {reference || "No reference available"} </p>
+            <p className="text-gray-500 mb-2">Referenced From:</p>
+
+            {!parsedReferences.length ? (
+              <p className="text-gray-700 whitespace-pre-line">
+                {reference || "No reference available"}
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {parsedReferences.map((ref, index) => (
+                  <div
+                    key={index}
+                    className="p-3 rounded-lg border border-gray-200 bg-gray-50"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-semibold text-blue-700 flex items-center gap-1">
+                        <FileText size={14} className="text-blue-700" />
+                        {ref.doc_name}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        Chunk #{ref.chunk}
+                      </span>
+                    </div>
+
+                    <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
+                      {ref.details}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
 
         {/* ===== AI RESPONSE CARD ===== */}
         <div className="bg-[#eef8fd] rounded-2xl p-4 sm:p-8 shadow-lg">
