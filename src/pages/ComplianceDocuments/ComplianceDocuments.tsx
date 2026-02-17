@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ChevronRight, FileText, Calendar, FileCheck, Loader2 } from "lucide-react";
+import { ChevronRight, FileText, Calendar, FileCheck, Loader2, Timer } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import { useNavigate } from "react-router-dom";
@@ -92,28 +92,32 @@ export default function ComplianceDocuments() {
     });
   };
 
-  const timeAgo = (utcString: string) => {
-    if (!utcString) return "-";
+  const getProcessingTime = (created: string, updated: string) => {
+    if (!created || !updated) return "-";
 
-    const now = new Date();
-    const updated = new Date(
-      utcString.endsWith("Z") ? utcString : utcString + "Z"
+    const createdDate = new Date(
+      created.endsWith("Z") ? created : created + "Z"
+    );
+
+    const updatedDate = new Date(
+      updated.endsWith("Z") ? updated : updated + "Z"
     );
 
     const diffInSeconds = Math.floor(
-      (now.getTime() - updated.getTime()) / 1000
+      (updatedDate.getTime() - createdDate.getTime()) / 1000
     );
 
-    if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+    if (diffInSeconds < 60) return `${diffInSeconds}s`;
 
     const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 60) return `${diffInMinutes}m ${diffInSeconds % 60}s`;
 
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h ago`;
+    if (diffInHours < 24)
+      return `${diffInHours}h ${diffInMinutes % 60}m`;
 
     const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ago`;
+    return `${diffInDays}d ${diffInHours % 24}h`;
   };
 
   useEffect(() => {
@@ -246,18 +250,18 @@ export default function ComplianceDocuments() {
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
                           Created: {formatDateTime(doc.created_at)}
-
-                          {/* {new Date(doc.created_at).toLocaleString()} */}
                         </span>
-                        <span className="text-xs text-gray-400">
-                          Updated: {formatDateTime(doc.updated_at)} • {timeAgo(doc.updated_at)}
+                        <span className="flex items-center gap-1">
+                          Updated: {formatDateTime(doc.updated_at)}
                         </span>
-
+                        <span className=" flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-700 ">
+                          <Timer size={14} />
+                          Processed in {getProcessingTime(doc.created_at, doc.updated_at)}
+                        </span>
                         <span className="flex items-center gap-1">
                           <FileCheck size={14} />
                           {doc.clauses} clauses
                         </span>
-
                         <span
                           className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium ${status.badgeClass}`}
                         >
