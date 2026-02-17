@@ -92,8 +92,43 @@ export default function ComplianceDocuments() {
     });
   };
 
-  const getProcessingTime = (created: string, updated: string) => {
-    if (!created || !updated) return "-";
+  const getProcessingTime = (
+    created: string,
+    updated: string,
+    status: string
+  ) => {
+    if (!created) return "-";
+
+    const createdDate = new Date(
+      created.endsWith("Z") ? created : created + "Z"
+    );
+
+    // If still processing → calculate till NOW
+    const endDate =
+      status === "SUCCESS"
+        ? new Date(updated.endsWith("Z") ? updated : updated + "Z")
+        : new Date();
+
+    const diffInSeconds = Math.floor(
+      (endDate.getTime() - createdDate.getTime()) / 1000
+    );
+
+    if (diffInSeconds < 60) return `${diffInSeconds}s`;
+
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60)
+      return `${diffInMinutes}m ${diffInSeconds % 60}s`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24)
+      return `${diffInHours}h ${diffInMinutes % 60}m`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d ${diffInHours % 24}h`;
+  };
+
+  const isUpdatedDifferent = (created: string, updated: string) => {
+    if (!created || !updated) return false;
 
     const createdDate = new Date(
       created.endsWith("Z") ? created : created + "Z"
@@ -103,21 +138,7 @@ export default function ComplianceDocuments() {
       updated.endsWith("Z") ? updated : updated + "Z"
     );
 
-    const diffInSeconds = Math.floor(
-      (updatedDate.getTime() - createdDate.getTime()) / 1000
-    );
-
-    if (diffInSeconds < 60) return `${diffInSeconds}s`;
-
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}m ${diffInSeconds % 60}s`;
-
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24)
-      return `${diffInHours}h ${diffInMinutes % 60}m`;
-
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ${diffInHours % 24}h`;
+    return createdDate.getTime() !== updatedDate.getTime();
   };
 
   useEffect(() => {
@@ -251,13 +272,24 @@ export default function ComplianceDocuments() {
                           <Calendar size={14} />
                           Created: {formatDateTime(doc.created_at)}
                         </span>
-                        <span className="flex items-center gap-1">
-                          Updated: {formatDateTime(doc.updated_at)}
+                        {isUpdatedDifferent(doc.created_at, doc.updated_at) && (
+                          <span className="flex items-center gap-1">
+                            Updated: {formatDateTime(doc.updated_at)}
+                          </span>
+                        )}
+                        <span
+                          className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium ${doc.status === "SUCCESS"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-yellow-100 text-yellow-700"
+                            }`} >
+                          <Timer
+                            size={14}
+                            className={doc.status !== "SUCCESS" ? "animate-pulse" : ""}
+                          />
+                          {doc.status === "SUCCESS" ? "Processed in" : "Processing for"}{" "}
+                          {getProcessingTime(doc.created_at, doc.updated_at, doc.status)}
                         </span>
-                        <span className=" flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium bg-blue-100 text-blue-700 ">
-                          <Timer size={14} />
-                          Processed in {getProcessingTime(doc.created_at, doc.updated_at)}
-                        </span>
+
                         <span className="flex items-center gap-1">
                           <FileCheck size={14} />
                           {doc.clauses} clauses
