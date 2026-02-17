@@ -10,6 +10,7 @@ export interface UploadedDoc {
   doc_id: string;
   file_name: string;
   created_at: string;
+  updated_at?: string;
   status: string;
   file_url?: string;
   clauses: number;
@@ -62,6 +63,46 @@ const STATUS_CONFIG: Record<
     iconBg: "bg-red-500",
   },
 };
+const formatDateTime = (utcString: string) => {
+  if (!utcString) return "-";
+
+  // Force UTC (because backend doesn't send "Z")
+  const date = new Date(utcString.endsWith("Z") ? utcString : utcString + "Z");
+
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const timeAgo = (utcString: string) => {
+  if (!utcString) return "-";
+
+  const now = new Date();
+  const updated = new Date(
+    utcString.endsWith("Z") ? utcString : utcString + "Z"
+  );
+
+  const diffInSeconds = Math.floor(
+    (now.getTime() - updated.getTime()) / 1000
+  );
+
+  if (diffInSeconds < 60) return `${diffInSeconds}s ago`;
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ago`;
+};
+
 
 export default function TrainingDocuments() {
   const navigate = useNavigate();
@@ -69,11 +110,19 @@ export default function TrainingDocuments() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
-
+  const [, setTick] = useState(0);
 
   const endPoint =
     ServiceEndpoint.apiBaseUrl +
     ServiceEndpoint.trainDocuments.getAll;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTick((prev: any) => prev + 1); // just trigger re-render
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const getUploadedDocuments = async (
     setLoading?: (loading: boolean) => void
@@ -89,6 +138,7 @@ export default function TrainingDocuments() {
           doc_id: doc.train_id,
           file_name: doc.file_name,
           created_at: doc.created_at,
+          updated_at: doc.updated_at,
           status: doc.status,
           file_url: doc.path,
           clauses: Math.floor(Math.random() * 20) + 5,
@@ -210,8 +260,14 @@ export default function TrainingDocuments() {
                       <div className="mt-1 flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-gray-500">
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
-                          {new Date(doc.created_at).toLocaleDateString()}
+                          Created: {formatDateTime(doc.created_at)}
+                          {/* {new Date(doc.created_at).toLocaleString()} */}
                         </span>
+
+                        <span className="text-xs text-gray-400">
+                          Updated: {formatDateTime(doc.updated_at)} • {timeAgo(doc.updated_at)}
+                        </span>
+                        {/* </span> */}
 
                         <span
                           className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium ${status.badgeClass}`}
@@ -275,20 +331,20 @@ export default function TrainingDocuments() {
                     radius="xl"
                     siblings={1}
                     withEdges
-                     classNames={{
-                    root: "flex flex-row flex-nowrap items-center gap-1",
-                    control:
-                      "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
-                  }}
-                  styles={{
-                    control: {
-                      "&[dataActive]": {
-                        backgroundColor: "#0B63E5",
-                        color: "white",
-                        borderColor: "#0B63E5",
+                    classNames={{
+                      root: "flex flex-row flex-nowrap items-center gap-1",
+                      control:
+                        "border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-md w-8 h-8 flex items-center justify-center",
+                    }}
+                    styles={{
+                      control: {
+                        "&[dataActive]": {
+                          backgroundColor: "#0B63E5",
+                          color: "white",
+                          borderColor: "#0B63E5",
+                        },
                       },
-                    },
-                  }}
+                    }}
                   />
                 )}
               </div>

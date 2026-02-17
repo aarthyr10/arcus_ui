@@ -1,4 +1,4 @@
-import { Eye, FileText, RefreshCw, CheckCircle, Clock, XCircle, Upload } from "lucide-react";
+import { Eye, FileText, CheckCircle, Clock, XCircle, Upload } from "lucide-react";
 
 interface UploadItemProps {
   id: string;
@@ -52,9 +52,8 @@ const UploadItem = ({ id, name, date, status, onView }: UploadItemProps) => {
 
       {/* Buttons row */}
       <div className="flex flex-col sm:flex-row gap-2 w-full">
-       <button
-  className="flex-1 flex items-center justify-center gap-2 min-h-[32px] sm:min-h-[32px]
- text-white rounded-[10px] text-sm font-medium bg-[var(--primary-btn-color)] hover:opacity-90 transition"
+        <button
+          className="flex-1 flex items-center justify-center gap-2 min-h-[32px] sm:min-h-[32px] text-white rounded-[10px] text-sm font-medium bg-[var(--primary-btn-color)] hover:opacity-90 transition"
           onClick={() => onView(id)}
         >
           <Eye className="w-4 h-4" />

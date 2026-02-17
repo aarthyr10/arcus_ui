@@ -109,8 +109,8 @@ export default function EditReviewComplianceDocuments() {
 
         setQuestionNumber(found.question_no)
         setQuestion(found);
-setText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
-setOriginalText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
+        setText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
+        setOriginalText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
         setFileName(res.data?.file_name ?? null);
         setReference(found.reference ?? null);
         // remarks: q.remarks,
@@ -277,7 +277,7 @@ setOriginalText(replaceAllStars(found.modified_answer ?? found.answer ?? ""));
               </div>
             </div>
           </div>
-<p>{replaceAllStars(question.answer)}</p>
+          <p>{replaceAllStars(question.answer)}</p>
           <div className="py-4">
             {question?.answer_modified && (
               <span className="py-2 text-sm font-medium text-blue-600">
