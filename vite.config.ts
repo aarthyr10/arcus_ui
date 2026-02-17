@@ -7,14 +7,19 @@ export default defineConfig({
     tailwindcss()
   ],
   server: {
-     proxy: {
+    allowedHosts: ["arcus.tarkasha.com"],
+    proxy: {
       "/api": {
-        target: "https://20.193.149.193",
+        //target: "http://localhost:8000",
+        //target: "https://robbi-ungouty-babette.ngrok-free.dev",
+        //target: "https://20.193.149.193",
+        target: "https://arcus.tarkasha.com",
         changeOrigin: true,
         secure: false,
       },},
     open: true,
     port: 5173,
-    host: "0.0.0.0"
+    host: true
   }
+  
 })
