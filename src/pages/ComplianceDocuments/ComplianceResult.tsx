@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronLeft, Download, Loader2, Pencil, PencilLine } from "lucide-react";
+import { ChevronLeft, Download, File, Loader2, Pencil, PencilLine } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import ExportComplianceReportModal from "./ExportComplianceReport";
@@ -75,6 +75,35 @@ const getRemarkStyle = (tag: string) => {
 const replaceAllStars = (tag: string) =>
   tag.replace(/\*/g, "");
 
+function parseDocChunkStatements(input: any) {
+  if (!input || typeof input !== "string") return [];
+
+  const unwrapped = (() => {
+    const m = input.match(/"reference"\s*:\s*"([\s\S]*)"\s*,?\s*$/);
+    return m ? m[1] : input;
+  })();
+
+  const text = unwrapped
+    .replace(/\\n/g, "\n")
+    .replace(/\\"/g, '"')
+    .replace(/\\\\/g, "\\");
+
+  const results = [];
+  const re =
+    /In\s+(.+?)\s+\(chunk\s+(\d+)\),\s+it\s+states:\s+"([\s\S]*?)"\s*\./g;
+
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    const doc_name = match[1].trim();
+    const chunk = Number(match[2]);
+    const details = match[3].trim();
+
+    results.push({ doc_name, chunk, details });
+  }
+
+  return results;
+}
+
 export default function ComplianceResults() {
   const navigate = useNavigate();
   const { docId } = useParams<{ docId: string }>();
@@ -82,6 +111,7 @@ export default function ComplianceResults() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [filename, setFilename] = useState<string>("");
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -210,8 +240,10 @@ export default function ComplianceResults() {
                 <tbody>
                   {paginatedRows.map((row: ResultRow) => {
                     const remarkTags = row.remarks?.split("|") ?? [];
+                    const parsed = parseDocChunkStatements(row.reference);
+
                     return (
-                      <tr key={row.id}>
+                      <tr key={row.id} className="">
                         <td className="py-4 px-2">{row.id}</td>
 
                         <td className="py-4 px-2">
@@ -254,7 +286,51 @@ export default function ComplianceResults() {
                         </td>
 
                         <td className="py-4 px-5">
-                          {row.reference}
+                          {!parsed.length ? (
+                            <div className="text-gray-700 whitespace-pre-line">
+                              {row.reference}
+                            </div>
+                          ) : (
+                            <>
+                              <div className="space-y-3">
+                                {(expandedRows[row.id]
+                                  ? parsed
+                                  : parsed.slice(0, 2)
+                                ).map((ref, index) => (
+                                  <div
+                                    key={index}
+                                    className="p-3 rounded-lg border border-gray-200 bg-gray-50"
+                                  >
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-xs font-semibold text-blue-700">
+                                        <File size={14} className="inline-block mr-1" />
+                                        {ref.doc_name}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        Chunk #{ref.chunk}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {parsed.length > 2 && (
+                                <button
+                                  onClick={() =>
+                                    setExpandedRows((prev) => ({
+                                      ...prev,
+                                      [row.id]: !prev[row.id],
+                                    }))
+                                  }
+                                  className="mt-2 text-xs font-medium text-blue-600 hover:underline"
+                                >
+                                  {expandedRows[row.id]
+                                    ? "Show Less"
+                                    : `+${parsed.length - 2} More References`}
+                                </button>
+                              )}
+                            </>
+                          )}
                         </td>
 
                         <td className="py-4 px-2">
