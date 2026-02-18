@@ -31,15 +31,10 @@ function chunk<T>(array: T[], size: number): T[][] {
   return [head, ...chunk(tail, size)];
 }
 
-const formatRemarkLabel = (tag: string) => {
-  const value = tag.toLowerCase().trim();
-  if (value.includes("partially comply") || value.includes("partially compliant")) {
-    return "Comply";
-  }
-  return tag
+const formatRemarkLabel = (tag: string) =>
+  tag
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-};
 
 const getRemarkStyle = (tag: string) => {
   const value = tag.toLowerCase();
@@ -56,16 +51,8 @@ const getRemarkStyle = (tag: string) => {
   if (value.includes("contractor"))
     return "bg-blue-100 text-blue-900 border border-blue-500";
 
-  // if (value.includes("partially compliant") || value.includes("partial"))
-  //   return "bg-orange-100 text-orange-900 border border-amber-500";
-  if (
-    value.includes("partially comply") ||
-    value.includes("partially compliant") ||
-    value.includes("compliant") ||
-    value.includes("comply")
-  )
-    return "bg-green-100 text-green-900 border border-green-500";
-
+  if (value.includes("partially compliant") || value.includes("partial"))
+    return "bg-orange-100 text-orange-900 border border-amber-500";
 
   if (value.includes("non compliant") || value.includes("non-compliant"))
     return "bg-red-100 text-red-900 border border-red-500";
