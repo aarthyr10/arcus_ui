@@ -8,7 +8,9 @@ const Start = () => {
 <div className="h-screen w-full bg-[#eaf6fb] flex flex-col">
 
       <div className="absolute top-10 left-10">
-        <img src={logo} alt="Daikin logo" className="h-7" />
+        {/* <img src={logo} alt="Daikin logo" className="h-7" /> */}
+              <img src={logo} alt="Daikin logo" className="h-10 w-35 fixed top-7 left-6 sm:left-12" />
+
       </div>
 
       <div className="h-full flex items-center justify-center px-4">
