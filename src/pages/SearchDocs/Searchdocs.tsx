@@ -66,10 +66,10 @@ const Searchdocs = () => {
         <div className="max-w-[1200px] mx-auto w-full">
 
           {/* PAGE TITLE */}
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-800">
             Search Documents
           </h1>
-      
+
           {/* SEARCH BAR */}
           <div className="flex justify-center mb-10 mt-4">
             <div className="
@@ -145,16 +145,21 @@ const Searchdocs = () => {
 
               {/* SEARCH BUTTON */}
               <Button
-                onClick={handleSearch}
+                onClick={(e) => {
+                  if (!query.trim()) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleSearch();
+                }}
                 loading={loading}
                 radius="md"
                 size="lg"
-                disabled={!query.trim()}
                 styles={{
                   root: {
                     height: 64,
-                    background:
-                      "linear-gradient(135deg, #2f80ff, #12c2e9)",
+                    background: "linear-gradient(135deg, #2f80ff, #12c2e9)",
+                    cursor: !query.trim() ? "not-allowed" : "pointer",
                   },
                 }}
               >
@@ -175,15 +180,15 @@ const Searchdocs = () => {
                   No results found
                 </div>
               ) : (
-               <table className="w-full min-w-[900px] text-sm table-fixed">
+                <table className="w-full min-w-[900px] text-sm table-fixed">
                   <thead>
                     <tr className="text-left text-gray-600 border-b">
-                     <th className="py-3 px-3 w-[60px]">#</th>
-      <th className="py-3 px-3 w-[150px]">File</th>
-      <th className="py-3 px-3 w-[100px]">Line</th>
-      <th className="py-3 px-3 w-[200px]">Matched</th>
-      <th className="py-3 px-3 w-[200px]">Context Before</th>
-      <th className="py-3 px-5 lg:px-3 w-[200px]">Context After</th>
+                      <th className="py-3 px-3 w-[60px]">#</th>
+                      <th className="py-3 px-3 w-[150px]">File</th>
+                      <th className="py-3 px-3 w-[100px]">Line</th>
+                      <th className="py-3 px-3 w-[200px]">Matched</th>
+                      <th className="py-3 px-3 w-[200px]">Context Before</th>
+                      <th className="py-3 px-5 lg:px-3 w-[200px]">Context After</th>
                     </tr>
                   </thead>
 
@@ -204,20 +209,20 @@ const Searchdocs = () => {
                         </td>
                         <td className="py-4 px-1 lg:px-2 w-[200px]">
                           <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
-  {item.match_line}
-</span>
+                            {item.match_line}
+                          </span>
                         </td>
                         <td className="py-4 px-1 lg:px-2 text-gray-600 w-[200px]">
-                            <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
-   {item.context_before}
-</span>
-                         
+                          <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
+                            {item.context_before}
+                          </span>
+
                         </td>
                         <td className="py-4 px-5 md:px-3 lg:px-2 text-gray-600 w-[200px]">
-                                     <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
-   {item.context_after}
-</span>
-                          
+                          <span className="inline-block w-[200px] px-2 py-1 rounded-md bg-blue-50 text-blue-700 break-words">
+                            {item.context_after}
+                          </span>
+
                         </td>
                       </tr>
                     ))}

@@ -5,11 +5,26 @@ import { HiOutlinePaperAirplane } from "react-icons/hi2";
 import { ChevronLeft, Download, FileText, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { Modal } from "@mantine/core";
+import { Modal, Select } from "@mantine/core";
 import * as XLSX from "xlsx";
 
-
 type ChatRole = "assistant" | "user";
+
+type ApiImage = {
+  file_name: string;
+  file_path: string;
+  url: string;
+};
+
+type ApiChatResponse = {
+  conversation_id?: string;
+  model_name?: string;
+  status?: "SUCCESS" | "ERROR";
+  response_text?: string | null;
+  references?: ApiChatReference[];
+  images?: ApiImage[];   // ✅ ADD THIS
+  error?: { code?: string; message?: string; details?: any } | null;
+};
 
 type ChatMessage = {
   id: string;
@@ -17,6 +32,8 @@ type ChatMessage = {
   content: string;
   ts: number;
   references?: string[];
+  images?: ApiImage[];   // ✅ ADD THIS
+  responseTimeMs?: number;   // ✅ ADD THIS
 };
 
 type ApiHistoryItem = {
@@ -31,20 +48,28 @@ type ApiChatReference = {
   score?: number | null;
 };
 
-type ApiChatResponse = {
-  conversation_id?: string;
-  model_name?: string;
-  status?: "SUCCESS" | "ERROR";
-  response_text?: string | null;
-  references?: ApiChatReference[];
-  error?: { code?: string; message?: string; details?: any } | null;
-};
-
 function formatTime(ts: number) {
   return new Date(ts).toLocaleTimeString([], {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function formatResponseTime(ms: number) {
+  if (ms < 1000) {
+    return `${ms} ms`;
+  }
+
+  const totalSeconds = Math.floor(ms / 1000);
+
+  if (totalSeconds < 60) {
+    return `${(ms / 1000).toFixed(2)} s`;
+  }
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}m ${seconds}s`;
 }
 
 function TypingDots() {
@@ -57,24 +82,30 @@ function TypingDots() {
   );
 }
 
+const getWelcomeMessage = (): ChatMessage => ({
+  id: "welcome",
+  role: "assistant",
+  ts: Date.now(),
+  content:
+    "Hello! I’m your Daikin Smart Compliance Assistant. I can help you with questions about compliance documents, training materials, and regulatory requirements. How can I assist you today?",
+});
+
 export default function SmartAssistant() {
 
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [_error, setError] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: "welcome",
-      role: "assistant",
-      ts: Date.now(),
-      content:
-        "Hello! I’m your Daikin Smart Compliance Assistant. I can help you with questions about compliance documents, training materials, and regulatory requirements. How can I assist you today?",
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [getWelcomeMessage()]);
   const [opened, setOpened] = useState(false);
   const [status, setStatus] = useState<"idle" | "generating" | "success">("idle");
   const [exportType, setExportType] = useState<"pdf" | "excel" | null>(null);
+  const [liveSeconds, setLiveSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
+  const [_requestStart, setRequestStart] = useState<number | null>(null);
+  const [conversationStarted, setConversationStarted] = useState(false);
 
   // const quickPrompts = useMemo(
   //   () => [
@@ -84,6 +115,22 @@ export default function SmartAssistant() {
   //   ],
   //   [],
   // );
+  const startNewConversation = () => {
+    setConversationStarted(true);   // 👈 ADD THIS
+    setConversationId(null);
+    setSelectedProduct(null);
+    setMessages([getWelcomeMessage()]);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+
   const getChatRows = () => {
     return messages
       .filter(m => m.content !== "__typing__")
@@ -110,8 +157,25 @@ export default function SmartAssistant() {
   }, [messages.length]);
 
   const sendMessage = async (text: string) => {
+    const requestStartTime = Date.now();
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
+    if (!selectedProduct) {
+      setError("Please select a product first.");
+      return;
+    }
+    const start = Date.now();
+    setRequestStart(start);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      if (start) {
+        const elapsed = Date.now() - start;
+        setLiveSeconds(elapsed);
+      }
+    }, 100);
+
 
     setError(null);
     setIsSending(true);
@@ -138,8 +202,14 @@ export default function SmartAssistant() {
     setInput("");
 
     try {
-      const history: ApiHistoryItem[] = [...messages, userMsg]
-        .filter((m) => m.id !== "welcome")
+      const updatedMessages = [
+        ...messages
+          .filter((m) => m.content !== "__typing__")
+          .concat(userMsg),
+      ];
+
+      const history: ApiHistoryItem[] = updatedMessages
+        .filter((m) => m.id !== "welcome" && m.content !== "__typing__")
         .map((m) => ({
           role: m.role,
           content: m.content,
@@ -153,7 +223,8 @@ export default function SmartAssistant() {
           conversation_id: conversationId,
           history,
           model_name: "llama3.2:latest",
-          metadata_filters: { product_code: "RXQ-ARYFK" },
+          // metadata_filters: { product_code: "RXQ-ARYFK" },
+          metadata_filters: { product_code: selectedProduct },
           max_tokens: 512,
           temperature: 0.2,
           top_p: 0.9,
@@ -171,12 +242,20 @@ export default function SmartAssistant() {
         (typeof data?.response_text === "string" && data.response_text) ||
         (typeof (data as any)?.answer === "string" && (data as any).answer) ||
         "I received your request, but couldn’t parse the response.";
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
 
+
+      const responseDuration = Date.now() - requestStartTime;
       const assistantMsg: ChatMessage = {
         id: `a_${Date.now()}`,
         role: "assistant",
         content: assistantText,
         ts: Date.now(),
+        images: data?.images ?? [],   // ✅ ADD THIS
+        responseTimeMs: responseDuration,   // ✅ ADD THIS
       };
 
       setMessages((prev) => [
@@ -184,6 +263,11 @@ export default function SmartAssistant() {
         assistantMsg,
       ]);
     } catch {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+
       setMessages((prev) => [
         ...prev.filter((m) => m.id !== typingId),
         {
@@ -247,6 +331,12 @@ export default function SmartAssistant() {
     XLSX.writeFile(workbook, "Smart-Assistant-Chat.xlsx");
   };
 
+  const hasValidResponse = messages.some(
+    (m) =>
+      m.role === "assistant" &&
+      m.content !== "__typing__" &&
+      m.id !== "welcome"
+  );
 
   const handleExport = (type: "pdf" | "excel") => {
     if (!messages.length) return;
@@ -280,28 +370,60 @@ export default function SmartAssistant() {
               Ask questions about compliance and training documents
             </div>
           </div>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-3 w-full lg:w-auto">
 
-          <button
-            onClick={() => setOpened(true)}
-            className="
-      w-full sm:w-auto
-      flex items-center justify-center gap-2
-      px-4 py-2
-      rounded-full
-      bg-gradient-to-r from-[#2f80ff] to-[#12c2e9]
-      text-white text-sm
-      shadow-lg
-      hover:scale-[1.03]
-      transition
-      cursor-pointer
-    "
-          >
-            <Download size={14} />
-            Export Report
-          </button>
+            {conversationStarted && (
+              <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
 
+                {/* Product Select */}
+                <Select
+                  placeholder="Select Product Code"
+                  value={selectedProduct}
+                  onChange={(value) => setSelectedProduct(value)}
+                  disabled={!conversationStarted || hasValidResponse || isSending}
+                  data={[
+                    { value: "RXQ-ARYFK", label: "RXQ-ARYFK" },
+                  ]}
+                  searchable
+                  clearable={false}
+                  size="sm"
+                  radius="md"
+                  className="w-full lg:w-56"
+                  styles={{
+                    input: {
+                      cursor:
+                        !conversationStarted || hasValidResponse || isSending
+                          ? "not-allowed"
+                          : "pointer",
+                    },
+                  }}
+                />
+
+                {/* New Conversation */}
+                {hasValidResponse && (
+                  <button
+                    onClick={startNewConversation}
+                    disabled={isSending}
+                    className="w-full lg:w-auto px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm shadow-lg transition hover:scale-[1.03] hover:bg-gradient-to-l disabled:cursor-not-allowed" >
+                    New Conversation
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Export Button */}
+            <button
+              onClick={() => setOpened(true)}
+              disabled={isSending || !hasValidResponse}
+              className={`w-full lg:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm shadow-lg transition 
+                ${isSending || !hasValidResponse
+                            ? "cursor-not-allowed"
+                            : "hover:scale-[1.03] hover:bg-gradient-to-l" }`} >
+              <Download size={14} />
+              Export Report
+            </button>
+          </div>
         </div>
-
 
         <div className="bg-white/60 backdrop-blur rounded-2xl shadow-md border border-white/60">
 
@@ -323,12 +445,51 @@ export default function SmartAssistant() {
                       }
                     >
                       <div className="leading-relaxed whitespace-pre-wrap">
-                        {m.content === "__typing__" ? <TypingDots /> : m.content}
-                      </div>
+                        {m.content === "__typing__" ? (
+                          <div className="flex flex-col gap-2">
+                            <TypingDots />
+                            <span className="text-[10px] text-gray-400">
+                              Processing... {formatResponseTime(liveSeconds)}
+                            </span>
+                          </div>
+                        ) : (
+                          m.content
+                        )}
 
+                      </div>
                       {m.content !== "__typing__" && (
-                        <div className={`mt-2 mb-2 text-[10px] ${isUser ? "text-white/80" : "text-gray-400"}`}>
-                          {formatTime(m.ts)}
+                        <div className="flex justify-between items-center mt-2 text-[10px]">
+                          {m.role === "assistant" && m.responseTimeMs !== undefined && (
+                            <div
+                              className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded-md text-[10px] sm:text-xs font-medium ${m.responseTimeMs < 5000
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-yellow-100 text-yellow-700"
+                                }`}
+                            >
+                              Processed in {formatResponseTime(m.responseTimeMs)}
+                            </div>
+                          )}
+                          {/* RIGHT SIDE – Message Clock Time */}
+                          <div className={`${isUser ? "text-white/80" : "text-gray-400"}`}>
+                            {formatTime(m.ts)}
+                          </div>
+
+                        </div>
+                      )}
+
+                      {/* ✅ Show Images */}
+                      {m.images && m.images.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          {m.images.map((img, idx) => (
+                            <img
+                              key={idx}
+                              src={img.url}   // ✅ JUST THIS
+                              alt={img.file_name}
+                              className="rounded-lg shadow-md max-h-40 object-contain cursor-pointer hover:scale-105 transition"
+                            />
+
+
+                          ))}
                         </div>
                       )}
                     </div>
@@ -354,34 +515,52 @@ export default function SmartAssistant() {
             </div>
           </div> */}
 
-          {/* Input */}
-          <div className="px-3 sm:px-6 pb-4 sm:pb-6">
-            <div className="flex items-center gap-2 sm:gap-3 bg-white/75 border border-white/80 rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessage(input);
-                  }
-                }}
-                placeholder="Ask about compliance or training documents..."
-                className="flex-1 bg-transparent outline-none text-[13px] sm:text-sm text-gray-800 placeholder:text-gray-400     placeholder:text-[10px] sm:placeholder:text-sm"
-                disabled={isSending}
-              />
+          {!conversationStarted ? (
+            // 🔹 START BUTTON
+            <div className="px-6 pb-6 text-center">
               <button
-                type="button"
-                onClick={() => sendMessage(input)}
-                disabled={isSending || !input.trim()}
-                aria-label="Send message"
-                title="Send message"
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-[#05b4e6] disabled:bg-gray-300 text-white flex items-center justify-center shadow"
+                onClick={() => setConversationStarted(true)}
+                className="px-6 py-3 w-full rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] hover:bg-gradient-to-l text-white shadow-lg"
               >
-                <HiOutlinePaperAirplane className="text-base sm:text-lg" />
+                Start Conversation
               </button>
             </div>
-          </div>
+          ) : (
+            // 🔹 INPUT SECTION
+            <div className="px-3 sm:px-6 pb-4 sm:pb-6">
+              <div className="flex items-center gap-2 bg-white/75 border rounded-2xl px-4 py-3 shadow-sm">
+                <input
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendMessage(input);
+                    }
+                  }}
+                  placeholder="Ask about compliance or training documents..."
+                  className="flex-1 bg-transparent outline-none text-sm text-gray-800 placeholder:text-gray-400"
+                  disabled={!selectedProduct || isSending}   // 🔥 DISABLED until product selected
+                />
+
+                <button
+                  onClick={() => sendMessage(input)}
+                  disabled={!input.trim() || !selectedProduct}
+                  className="h-10 w-10 rounded-full bg-[#05b4e6] text-white flex items-center justify-center disabled:opacity-50"
+                >
+                  <HiOutlinePaperAirplane />
+                </button>
+              </div>
+
+              {/* Show helper message if product not selected */}
+              {!selectedProduct && (
+                <p className="text-xs text-red-500 mt-2">
+                  Please select a product code to start chatting.
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
       <Modal
