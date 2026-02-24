@@ -149,9 +149,15 @@ export default function ComplianceResults() {
         const questions = res.data?.data?.questions ?? [];
         const mappedRows: ResultRow[] = questions.map((q: any) => {
           let score = Number(q.confidence_score ?? 0);
+          // if (score > 0 && score <= 1) {
+          //   score = score * 100;
+          // }
+          // score = Math.max(0, Math.min(100, score));
           if (score > 0 && score <= 1) {
             score = score * 100;
           }
+
+          score = Math.round(score * 100) / 100; // keep max 2 decimals
           score = Math.max(0, Math.min(100, score));
           return {
             id: q.question_no,

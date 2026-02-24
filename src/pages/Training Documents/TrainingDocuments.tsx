@@ -63,70 +63,70 @@ const STATUS_CONFIG: Record<
     iconBg: "bg-red-500",
   },
 };
-  const formatDateTime = (utcString: string) => {
-    if (!utcString) return "-";
+const formatDateTime = (utcString: string) => {
+  if (!utcString) return "-";
 
-    // Force UTC (because backend doesn't send "Z")
-    const date = new Date(utcString.endsWith("Z") ? utcString : utcString + "Z");
+  // Force UTC (because backend doesn't send "Z")
+  const date = new Date(utcString.endsWith("Z") ? utcString : utcString + "Z");
 
-    return date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
 
-  const getProcessingTime = (
-    created: string,
-    updated: string,
-    status: string
-  ) => {
-    if (!created) return "-";
+const getProcessingTime = (
+  created: string,
+  updated: string,
+  status: string
+) => {
+  if (!created) return "-";
 
-    const createdDate = new Date(
-      created.endsWith("Z") ? created : created + "Z"
-    );
+  const createdDate = new Date(
+    created.endsWith("Z") ? created : created + "Z"
+  );
 
-    // If still processing → calculate till NOW
-    const endDate =
-      status === "SUCCESS"
-        ? new Date(updated.endsWith("Z") ? updated : updated + "Z")
-        : new Date();
+  // If still processing → calculate till NOW
+  const endDate =
+    status === "SUCCESS"
+      ? new Date(updated.endsWith("Z") ? updated : updated + "Z")
+      : new Date();
 
-    const diffInSeconds = Math.floor(
-      (endDate.getTime() - createdDate.getTime()) / 1000
-    );
+  const diffInSeconds = Math.floor(
+    (endDate.getTime() - createdDate.getTime()) / 1000
+  );
 
-    if (diffInSeconds < 60) return `${diffInSeconds}s`;
+  if (diffInSeconds < 60) return `${diffInSeconds}s`;
 
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60)
-      return `${diffInMinutes}m ${diffInSeconds % 60}s`;
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60)
+    return `${diffInMinutes}m ${diffInSeconds % 60}s`;
 
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24)
-      return `${diffInHours}h ${diffInMinutes % 60}m`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24)
+    return `${diffInHours}h ${diffInMinutes % 60}m`;
 
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d ${diffInHours % 24}h`;
-  };
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays}d ${diffInHours % 24}h`;
+};
 
-  const isUpdatedDifferent = (created: string, updated: string) => {
-    if (!created || !updated) return false;
+const isUpdatedDifferent = (created: string, updated: string) => {
+  if (!created || !updated) return false;
 
-    const createdDate = new Date(
-      created.endsWith("Z") ? created : created + "Z"
-    );
+  const createdDate = new Date(
+    created.endsWith("Z") ? created : created + "Z"
+  );
 
-    const updatedDate = new Date(
-      updated.endsWith("Z") ? updated : updated + "Z"
-    );
+  const updatedDate = new Date(
+    updated.endsWith("Z") ? updated : updated + "Z"
+  );
 
-    return createdDate.getTime() !== updatedDate.getTime();
-  };
+  return createdDate.getTime() !== updatedDate.getTime();
+};
 
 export default function TrainingDocuments() {
   const navigate = useNavigate();
@@ -135,68 +135,79 @@ export default function TrainingDocuments() {
   const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [, setTick] = useState(0);
+  // const [initialLoading, setInitialLoading] = useState(true);
+  // const [refreshing, setRefreshing] = useState(false);
 
   const endPoint =
     ServiceEndpoint.apiBaseUrl +
     ServiceEndpoint.trainDocuments.getAll;
 
   useEffect(() => {
+    const hasProcessingDocs = docs.some(
+      (doc) => doc.status !== "SUCCESS"
+    );
+
+    if (!hasProcessingDocs) return; // stop interval if no processing docs
+
     const interval = setInterval(() => {
-      setTick((prev: any) => prev + 1); // just trigger re-render
-    }, 60000);
+      setTick((prev) => prev + 1);
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [docs]);
 
-  const getUploadedDocuments = async (
-    setLoading?: (loading: boolean) => void
-  ): Promise<UploadedDoc[]> => {
-    setLoading?.(true);
+const getUploadedDocuments = async (): Promise<UploadedDoc[]> => {
+  const res = await axios.get(endPoint, {
+    headers: { "ngrok-skip-browser-warning": "true" },
+  });
+
+  return res.data
+    .map((doc: any) => ({
+      doc_id: doc.train_id,
+      file_name: doc.file_name,
+      created_at: doc.created_at,
+      updated_at: doc.updated_at,
+      status: doc.status,
+      file_url: doc.path,
+      clauses: Math.floor(Math.random() * 20) + 5,
+    }))
+    .sort(
+      (a: UploadedDoc, b: UploadedDoc) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+};
+  useEffect(() => {
+  let interval: ReturnType<typeof setInterval>;
+
+  const fetchDocs = async (showLoader = false) => {
     try {
-      const res = await axios.get(endPoint, {
-        headers: { "ngrok-skip-browser-warning": "true" },
-      });
+      if (showLoader) setLoading(true);
 
-      const data = res.data
-        .map((doc: any) => ({
-          doc_id: doc.train_id,
-          file_name: doc.file_name,
-          created_at: doc.created_at,
-          updated_at: doc.updated_at,
-          status: doc.status,
-          file_url: doc.path,
-          clauses: Math.floor(Math.random() * 20) + 5,
-        }))
-        .sort(
-          (a: UploadedDoc, b: UploadedDoc) =>
-            new Date(b.created_at).getTime() -
-            new Date(a.created_at).getTime()
-        );
+      const data = await getUploadedDocuments();
+      setDocs(data);
 
-      setLoading?.(false);
-      return data;
+      const hasProcessing = data.some(
+        (doc) => doc.status !== "SUCCESS"
+      );
+
+      if (!hasProcessing && interval) {
+        clearInterval(interval);
+      }
     } catch (error) {
-      setLoading?.(false);
-      throw error;
+    } finally {
+      if (showLoader) setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        setLoading(true);
-        const data = await getUploadedDocuments();
-        setDocs(data);
-      } catch (error) {
-        setDocs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // First load → show loader
+  fetchDocs(true);
 
-    fetchDocs();
-  }, []);
+  // Polling → no full loader
+  interval = setInterval(() => fetchDocs(false), 5000);
 
+  return () => clearInterval(interval);
+}, []);
 
   const rows = docs;
 
@@ -286,7 +297,7 @@ export default function TrainingDocuments() {
                           <Calendar size={14} />
                           Created: {formatDateTime(doc.created_at)}
                         </span>
-                       {isUpdatedDifferent(doc.created_at, doc.updated_at) && (
+                        {isUpdatedDifferent(doc.created_at, doc.updated_at) && (
                           <span className="flex items-center gap-1">
                             Updated: {formatDateTime(doc.updated_at)}
                           </span>

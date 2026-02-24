@@ -179,7 +179,7 @@ export default function EditReviewComplianceDocuments() {
   const score =
     typeof rawScore === "number"
       ? rawScore > 0 && rawScore <= 1
-        ? Math.round(rawScore * 100)
+        ? Math.round(rawScore * 100)/100
         : Math.max(0, Math.min(100, rawScore))
       : 0; // ← NO confidence from backend → 0
 
