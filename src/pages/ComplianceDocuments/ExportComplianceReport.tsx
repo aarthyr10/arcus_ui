@@ -90,25 +90,26 @@ export default function ExportComplianceReportModal({
 
     autoTable(doc, {
       startY: 70,
-      head: [["Q No", "Question", "Answer", "Remarks", "Reference", "Confidence (%)"]],
+      head: [["Q No", "Question", "Answer", "Remarks", "Confidence (%)"]],
+      // head: [["Q No", "Spec Clause", "Original Answer", "Remarks", "Confidence (%)"]],
       body: questions.map(q => [
         q.question_no,
         q.question,
         cleanAnswer(q.answer),
         // extractComplianceRemark(q.remarks),
         formatRemarks(q.remarks),
-        q.reference,
+        // q.reference,
         `${q.score}%`,
       ]),
       styles: { fontSize: 8, cellPadding: 7, overflow: "linebreak" },
       headStyles: { fillColor: [11, 99, 229], textColor: 255 },
       columnStyles: {
         0: { cellWidth: 40 },
-        1: { cellWidth: 200 },
-        2: { cellWidth: 200 },
+        1: { cellWidth: 300 },
+        2: { cellWidth: 300 },
         3: { cellWidth: 90 },   // Remarks
-        4: { cellWidth: 200 },
-        5: { cellWidth: 50 },
+        // 4: { cellWidth: 200 },
+        4: { cellWidth: 50 },
       },
 
     });
@@ -121,10 +122,11 @@ export default function ExportComplianceReportModal({
     const rows = questions.map(q => ({
       "Question No": q.question_no,
       Question: q.question,
+      // "Spec Clause": q.question,
       Answer: cleanAnswer(q.answer),  // 👈 cleaned
       // Remarks: extractComplianceRemark(q.remarks),
       Remarks: formatRemarks(q.remarks),
-      Reference: q.reference,
+      // Reference: q.reference,
       "Confidence (%)": q.score,
     }));
 

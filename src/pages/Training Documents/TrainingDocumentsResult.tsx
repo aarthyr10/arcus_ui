@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ServiceEndpoint } from "../../config/ServiceEndpoint";
 import axios from "axios";
-import { ChevronDown, ChevronLeft, Eye, Loader2, X } from "lucide-react";
+import { ChevronLeft, Eye, Loader2, X } from "lucide-react";
 import { Pagination, Select, Text } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import ReactFlow, { Background, Controls } from "reactflow";
+// import ReactFlow, { Background, Controls } from "reactflow";
 import "reactflow/dist/style.css";
-import type { Node, Edge } from "reactflow";
+// import type { Node, Edge } from "reactflow";
 
 type ResultRow = {
   id: number;
@@ -33,286 +33,286 @@ function NoData({ label }: { label: string }) {
   );
 }
 
-function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
-  if (!mindmap) return { nodes: [], edges: [] };
+// function buildMindmapGraph(mindmap: any): { nodes: Node[]; edges: Edge[] } {
+//   if (!mindmap) return { nodes: [], edges: [] };
 
-  /**
-   * Supports *dynamic* mindmaps.
-   *
-   * Expected formats:
-   * 1) Tree format (preferred): { root: { title, id?, type?, children?: [...] } }
-   * 2) Legacy format (older): { root: {...}, nodes: [...] }
-   */
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
+//   /**
+//    * Supports *dynamic* mindmaps.
+//    *
+//    * Expected formats:
+//    * 1) Tree format (preferred): { root: { title, id?, type?, children?: [...] } }
+//    * 2) Legacy format (older): { root: {...}, nodes: [...] }
+//    */
+//   const nodes: Node[] = [];
+//   const edges: Edge[] = [];
 
-  const X_GAP = 460;
-  const Y_GAP = 520;
+//   const X_GAP = 460;
+//   const Y_GAP = 520;
 
-  const safeString = (v: any): string => {
-    if (v === null || v === undefined) return "";
-    if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean") return String(v);
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return String(v);
-    }
-  };
+//   const safeString = (v: any): string => {
+//     if (v === null || v === undefined) return "";
+//     if (typeof v === "string") return v;
+//     if (typeof v === "number" || typeof v === "boolean") return String(v);
+//     try {
+//       return JSON.stringify(v);
+//     } catch {
+//       return String(v);
+//     }
+//   };
 
-  // const getTitle = (n: any): string => {
-  //   // Try common fields; fall back to stringified object
-  //   return (
-  //     safeString(n?.title) ||
-  //     safeString(n?.name) ||
-  //     safeString(n?.label) ||
-  //     safeString(n?.key) ||
-  //     safeString(n?.value)
-  //   );
-  // };
+//   // const getTitle = (n: any): string => {
+//   //   // Try common fields; fall back to stringified object
+//   //   return (
+//   //     safeString(n?.title) ||
+//   //     safeString(n?.name) ||
+//   //     safeString(n?.label) ||
+//   //     safeString(n?.key) ||
+//   //     safeString(n?.value)
+//   //   );
+//   // };
 
-  const getChildren = (n: any): any[] => {
-    if (!n || typeof n !== "object") return [];
+//   const getChildren = (n: any): any[] => {
+//     if (!n || typeof n !== "object") return [];
 
-    // ROOT → sections
-    if (Array.isArray(n.nodes)) return n.nodes;
+//     // ROOT → sections
+//     if (Array.isArray(n.nodes)) return n.nodes;
 
-    // SECTION → group items by key
-    if (Array.isArray(n.items)) {
-      const grouped: Record<string, any[]> = {};
+//     // SECTION → group items by key
+//     if (Array.isArray(n.items)) {
+//       const grouped: Record<string, any[]> = {};
 
-      n.items.forEach((item: any) => {
-        if (!grouped[item.key]) grouped[item.key] = [];
-        grouped[item.key].push({
-          value: item.value,
-          source: item.source,
-        });
-      });
+//       n.items.forEach((item: any) => {
+//         if (!grouped[item.key]) grouped[item.key] = [];
+//         grouped[item.key].push({
+//           value: item.value,
+//           source: item.source,
+//         });
+//       });
 
-      return Object.entries(grouped).map(([key, values]) => ({
-        title: key,
-        children: values,
-      }));
-    }
+//       return Object.entries(grouped).map(([key, values]) => ({
+//         title: key,
+//         children: values,
+//       }));
+//     }
 
-    // KEY NODE → values
-    if (Array.isArray(n.children)) return n.children;
+//     // KEY NODE → values
+//     if (Array.isArray(n.children)) return n.children;
 
-    return [];
-  };
+//     return [];
+//   };
 
-  const isTreeFormat =
-    typeof mindmap === "object" &&
-    mindmap?.root &&
-    (Array.isArray(mindmap.root.children) || !Array.isArray(mindmap.nodes));
+//   const isTreeFormat =
+//     typeof mindmap === "object" &&
+//     mindmap?.root &&
+//     (Array.isArray(mindmap.root.children) || !Array.isArray(mindmap.nodes));
 
-  // Generate stable ids without hardcoding any schema
-  const usedIds = new Set<string>();
-  const makeId = (candidate: string) => {
-    const base = candidate?.trim() || "node";
-    let id = base;
-    let i = 1;
-    while (usedIds.has(id)) {
-      id = `${base}-${i++}`;
-    }
-    usedIds.add(id);
-    return id;
-  };
+//   // Generate stable ids without hardcoding any schema
+//   const usedIds = new Set<string>();
+//   const makeId = (candidate: string) => {
+//     const base = candidate?.trim() || "node";
+//     let id = base;
+//     let i = 1;
+//     while (usedIds.has(id)) {
+//       id = `${base}-${i++}`;
+//     }
+//     usedIds.add(id);
+//     return id;
+//   };
 
-  const getNodeId = (n: any, path: string) => {
-    // Prefer explicit ids (if present), otherwise build from path.
-    const explicit = safeString(n?.id) || safeString(n?.node_id);
-    return makeId(explicit || path);
-  };
+//   const getNodeId = (n: any, path: string) => {
+//     // Prefer explicit ids (if present), otherwise build from path.
+//     const explicit = safeString(n?.id) || safeString(n?.node_id);
+//     return makeId(explicit || path);
+//   };
 
-  const depthStyle = (depth: number): CSSProperties => {
-    if (depth === 0) {
-      return {
-        width: 380,
-        minHeight: 120,
-        background:
-          "linear-gradient(135deg, #2563eb 0%, #12c2e9 100%)",
-        color: "#ffffff",
-        padding: 16,
-        borderRadius: 18,
-        border: "1px solid rgba(255,255,255,0.35)",
-        boxShadow: "0 20px 40px rgba(37,99,235,0.35)",
-      };
-    }
+//   const depthStyle = (depth: number): CSSProperties => {
+//     if (depth === 0) {
+//       return {
+//         width: 380,
+//         minHeight: 120,
+//         background:
+//           "linear-gradient(135deg, #2563eb 0%, #12c2e9 100%)",
+//         color: "#ffffff",
+//         padding: 16,
+//         borderRadius: 18,
+//         border: "1px solid rgba(255,255,255,0.35)",
+//         boxShadow: "0 20px 40px rgba(37,99,235,0.35)",
+//       };
+//     }
 
-    if (depth === 1) {
-      return {
-        width: 340,
-        minHeight: 110,
-        background:
-          "linear-gradient(135deg, #e0f2fe, #f0f9ff)",
-        padding: 14,
-        borderRadius: 16,
-        border: "1px solid #bae6fd",
-        boxShadow: "0 12px 28px rgba(59,130,246,0.15)",
-      };
-    }
+//     if (depth === 1) {
+//       return {
+//         width: 340,
+//         minHeight: 110,
+//         background:
+//           "linear-gradient(135deg, #e0f2fe, #f0f9ff)",
+//         padding: 14,
+//         borderRadius: 16,
+//         border: "1px solid #bae6fd",
+//         boxShadow: "0 12px 28px rgba(59,130,246,0.15)",
+//       };
+//     }
 
-    return {
-      width: 420,
-      minHeight: 100,
-      background: "rgba(255,255,255,0.9)",
-      padding: 12,
-      borderRadius: 14,
-      border: "1px solid #e5e7eb",
-      boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
-    };
-  };
+//     return {
+//       width: 420,
+//       minHeight: 100,
+//       background: "rgba(255,255,255,0.9)",
+//       padding: 12,
+//       borderRadius: 14,
+//       border: "1px solid #e5e7eb",
+//       boxShadow: "0 8px 20px rgba(15,23,42,0.08)",
+//     };
+//   };
 
-  const labelFor = (n: any, depth: number) => {
-    // LEAF NODE → value + source on ONE line
-    if (!n.title && n.value) {
-      return (
-        <div className="text-xs text-gray-700 font-medium">
-          {safeString(n.value)}
-          {n.source && (
-            <span className="text-[10px] text-gray-400">
-              {", " + safeString(n.source)}
-            </span>
-          )}
-        </div>
-      );
-    }
+//   const labelFor = (n: any, depth: number) => {
+//     // LEAF NODE → value + source on ONE line
+//     if (!n.title && n.value) {
+//       return (
+//         <div className="text-xs text-gray-700 font-medium">
+//           {safeString(n.value)}
+//           {n.source && (
+//             <span className="text-[10px] text-gray-400">
+//               {", " + safeString(n.source)}
+//             </span>
+//           )}
+//         </div>
+//       );
+//     }
 
-    // NORMAL NODE
-    return (
-      <div className="space-y-1 text-xs">
-        <div
-          className={
-            depth === 0
-              ? "font-semibold text-sm tracking-wide"
-              : "font-semibold"
-          }
-        >
-          {n.title}
-        </div>
-      </div>
-    );
-  };
-
-
+//     // NORMAL NODE
+//     return (
+//       <div className="space-y-1 text-xs">
+//         <div
+//           className={
+//             depth === 0
+//               ? "font-semibold text-sm tracking-wide"
+//               : "font-semibold"
+//           }
+//         >
+//           {n.title}
+//         </div>
+//       </div>
+//     );
+//   };
 
 
-  // --- Tree layout (tidy-ish) ---
-  let nextLeafY = 0;
-  const visited = new Set<string>();
 
-  const layout = (n: any, depth: number, path: string): number => {
-    const id = getNodeId(n, path);
-    if (visited.has(id)) {
-      // Avoid accidental cycles / duplicate ids creating loops
-      return 0;
-    }
-    visited.add(id);
 
-    const children = getChildren(n);
-    let yCenter = 0;
+//   // --- Tree layout (tidy-ish) ---
+//   let nextLeafY = 0;
+//   const visited = new Set<string>();
 
-    if (!children.length) {
-      yCenter = nextLeafY;
-      nextLeafY += 1;
-    } else {
-      const childCenters = children
-        .map((c, idx) => layout(c, depth + 1, `${path}/${idx}`))
-        .filter((v) => Number.isFinite(v));
-      yCenter =
-        childCenters.length > 0
-          ? childCenters.reduce((a, b) => a + b, 0) / childCenters.length
-          : nextLeafY++;
-    }
+//   const layout = (n: any, depth: number, path: string): number => {
+//     const id = getNodeId(n, path);
+//     if (visited.has(id)) {
+//       // Avoid accidental cycles / duplicate ids creating loops
+//       return 0;
+//     }
+//     visited.add(id);
 
-    nodes.push({
-      id,
-      position: { x: depth * X_GAP, y: yCenter * Y_GAP },
-      data: { label: labelFor(n, depth) },
-      style: depthStyle(depth),
-    });
+//     const children = getChildren(n);
+//     let yCenter = 0;
 
-    children.forEach((c, idx) => {
-      const childId = getNodeId(c, `${path}/${idx}`);
-      if (id !== childId) {
-        edges.push({
-          id: makeId(`edge-${id}-${childId}`),
-          source: id,
-          target: childId,
-        });
-      }
-    });
+//     if (!children.length) {
+//       yCenter = nextLeafY;
+//       nextLeafY += 1;
+//     } else {
+//       const childCenters = children
+//         .map((c, idx) => layout(c, depth + 1, `${path}/${idx}`))
+//         .filter((v) => Number.isFinite(v));
+//       yCenter =
+//         childCenters.length > 0
+//           ? childCenters.reduce((a, b) => a + b, 0) / childCenters.length
+//           : nextLeafY++;
+//     }
 
-    return yCenter;
-  };
+//     nodes.push({
+//       id,
+//       position: { x: depth * X_GAP, y: yCenter * Y_GAP },
+//       data: { label: labelFor(n, depth) },
+//       style: depthStyle(depth),
+//     });
 
-  if (isTreeFormat) {
-    layout(mindmap.root, 0, "root");
-    return { nodes, edges };
-  }
+//     children.forEach((c, idx) => {
+//       const childId = getNodeId(c, `${path}/${idx}`);
+//       if (id !== childId) {
+//         edges.push({
+//           id: makeId(`edge-${id}-${childId}`),
+//           source: id,
+//           target: childId,
+//         });
+//       }
+//     });
 
-  // --- Legacy fallback (keeps existing behavior if older mindmap structure is returned) ---
-  try {
-    const legacy = mindmap;
-    const rootId = makeId("root");
+//     return yCenter;
+//   };
 
-    nodes.push({
-      id: rootId,
-      position: { x: 0, y: 0 },
-      data: { label: labelFor(legacy.root ?? { title: "Mindmap" }, 0) },
-      style: depthStyle(0),
-    });
+//   if (isTreeFormat) {
+//     layout(mindmap.root, 0, "root");
+//     return { nodes, edges };
+//   }
 
-    (legacy.nodes ?? []).forEach((section: any, sIndex: number) => {
-      const sectionId = makeId(`section-${sIndex}`);
-      nodes.push({
-        id: sectionId,
-        position: { x: X_GAP, y: sIndex * 350 },
-        data: { label: labelFor(section, 1) },
-        style: depthStyle(1),
-      });
-      edges.push({
-        id: makeId(`edge-${rootId}-${sectionId}`),
-        source: rootId,
-        target: sectionId,
-      });
+//   // --- Legacy fallback (keeps existing behavior if older mindmap structure is returned) ---
+//   try {
+//     const legacy = mindmap;
+//     const rootId = makeId("root");
 
-      // If the legacy structure contains nested content, still render it generically.
-      const items = section?.items;
-      if (items && typeof items === "object") {
-        const entries = Object.entries(items);
-        entries.forEach(([k, v], i) => {
-          const childId = makeId(`${sectionId}-${k}-${i}`);
-          nodes.push({
-            id: childId,
-            position: { x: X_GAP * 2, y: sIndex * 350 + i * Y_GAP },
-            data: {
-              label: (
-                <div className="text-xs leading-snug">
-                  <div className="font-semibold">{k}</div>
-                  <div className="text-gray-600 whitespace-pre-wrap">
-                    {safeString(v)}
-                  </div>
-                </div>
-              ),
-            },
-            style: depthStyle(2),
-          });
-          edges.push({
-            id: makeId(`edge-${sectionId}-${childId}`),
-            source: sectionId,
-            target: childId,
-          });
-        });
-      }
-    });
+//     nodes.push({
+//       id: rootId,
+//       position: { x: 0, y: 0 },
+//       data: { label: labelFor(legacy.root ?? { title: "Mindmap" }, 0) },
+//       style: depthStyle(0),
+//     });
 
-    return { nodes, edges };
-  } catch (e) {
-    return { nodes: [], edges: [] };
-  }
-}
+//     (legacy.nodes ?? []).forEach((section: any, sIndex: number) => {
+//       const sectionId = makeId(`section-${sIndex}`);
+//       nodes.push({
+//         id: sectionId,
+//         position: { x: X_GAP, y: sIndex * 350 },
+//         data: { label: labelFor(section, 1) },
+//         style: depthStyle(1),
+//       });
+//       edges.push({
+//         id: makeId(`edge-${rootId}-${sectionId}`),
+//         source: rootId,
+//         target: sectionId,
+//       });
+
+//       // If the legacy structure contains nested content, still render it generically.
+//       const items = section?.items;
+//       if (items && typeof items === "object") {
+//         const entries = Object.entries(items);
+//         entries.forEach(([k, v], i) => {
+//           const childId = makeId(`${sectionId}-${k}-${i}`);
+//           nodes.push({
+//             id: childId,
+//             position: { x: X_GAP * 2, y: sIndex * 350 + i * Y_GAP },
+//             data: {
+//               label: (
+//                 <div className="text-xs leading-snug">
+//                   <div className="font-semibold">{k}</div>
+//                   <div className="text-gray-600 whitespace-pre-wrap">
+//                     {safeString(v)}
+//                   </div>
+//                 </div>
+//               ),
+//             },
+//             style: depthStyle(2),
+//           });
+//           edges.push({
+//             id: makeId(`edge-${sectionId}-${childId}`),
+//             source: sectionId,
+//             target: childId,
+//           });
+//         });
+//       }
+//     });
+
+//     return { nodes, edges };
+//   } catch (e) {
+//     return { nodes: [], edges: [] };
+//   }
+// }
 
 const LazyImage = ({
   imageId,
@@ -431,14 +431,14 @@ export default function TrainingDocumentsResult() {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [mindmap, setMindmap] = useState<any>(null);
+  // const [mindmap, setMindmap] = useState<any>(null);
   const [images, setImages] = useState<any[]>([]);
-  const [rfNodes, setRfNodes] = useState<Node[]>([]);
-  const [rfEdges, setRfEdges] = useState<Edge[]>([]);
+  // const [rfNodes, setRfNodes] = useState<Node[]>([]);
+  // const [rfEdges, setRfEdges] = useState<Edge[]>([]);
   const [extractedText, setExtractedText] = useState<string>("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("table");
-  const [showMindmap, setShowMindmap] = useState(false);
-  const shouldFitView = rfNodes.length <= 6;
+  // const [showMindmap, setShowMindmap] = useState(false);
+  // const shouldFitView = rfNodes.length <= 6;
   // const [imageUrl, setImageUrl] = useState<{ [key: string]: string }>({});
   const [lightbox, setLightbox] = useState<{ open: boolean; src?: string; info?: string; }>({ open: false, src: undefined, info: undefined });
   const [imagePage, setImagePage] = useState(1);
@@ -468,7 +468,7 @@ export default function TrainingDocumentsResult() {
         );
         const extracted = res.data?.data?.extracted_json;
         setRows(mappedRows);
-        setMindmap(res.data?.data?.mindmap_json);
+        // setMindmap(res.data?.data?.mindmap_json);
         setExtractedText(extracted ? JSON.stringify(extracted, null, 2) : "");
         setImages(res.data?.data?.image_assets ?? res.data.image_assets ?? []);
         setPage(1);
@@ -496,32 +496,32 @@ export default function TrainingDocumentsResult() {
   // const handleDelete = (id: number) => {
   //   console.log("Delete row:", id);
   // };
-  const mindmapHeight = useMemo(() => {
-    if (!rfNodes.length) return 260;
+  // const mindmapHeight = useMemo(() => {
+  //   if (!rfNodes.length) return 260;
 
-    let minY = Infinity;
-    let maxY = -Infinity;
+  //   let minY = Infinity;
+  //   let maxY = -Infinity;
 
-    rfNodes.forEach((node) => {
-      const estimatedHeight =
-        node.style?.width === 380 ? 140 :
-          node.style?.width === 340 ? 120 :
-            110;
+  //   rfNodes.forEach((node) => {
+  //     const estimatedHeight =
+  //       node.style?.width === 380 ? 140 :
+  //         node.style?.width === 340 ? 120 :
+  //           110;
 
-      minY = Math.min(minY, node.position.y);
-      maxY = Math.max(maxY, node.position.y + estimatedHeight);
-    });
+  //     minY = Math.min(minY, node.position.y);
+  //     maxY = Math.max(maxY, node.position.y + estimatedHeight);
+  //   });
 
-    const height = maxY - minY + 32;
+  //   const height = maxY - minY + 32;
 
-    // 🔥 key line
-    return rfNodes.length <= 6 ? height : Math.max(height, 260);
-  }, [rfNodes]);
+  //   // 🔥 key line
+  //   return rfNodes.length <= 6 ? height : Math.max(height, 260);
+  // }, [rfNodes]);
 
-  const mindmapGraph = useMemo(() => {
-    const graph = buildMindmapGraph(mindmap);
-    return graph;
-  }, [mindmap]);
+  // const mindmapGraph = useMemo(() => {
+  //   const graph = buildMindmapGraph(mindmap);
+  //   return graph;
+  // }, [mindmap]);
 
   const downloadImage = async (url: string, filename?: string) => {
     try {
@@ -555,13 +555,13 @@ export default function TrainingDocumentsResult() {
   const paginatedImages = imagePages[imagePage - 1] ?? [];
   const totalImagePages = imagePages.length;
 
-  useEffect(() => {
-    const graph = buildMindmapGraph(mindmap);
-    if (graph) {
-      setRfNodes(graph.nodes);
-      setRfEdges(graph.edges);
-    }
-  }, [mindmap]);
+  // useEffect(() => {
+  //   const graph = buildMindmapGraph(mindmap);
+  //   if (graph) {
+  //     setRfNodes(graph.nodes);
+  //     setRfEdges(graph.edges);
+  //   }
+  // }, [mindmap]);
 
   if (loading) {
     return (
@@ -595,7 +595,7 @@ export default function TrainingDocumentsResult() {
         </div>
         <div className="flex flex-wrap gap-2 border-b pb-3 mb-6 overflow-x-auto">
           {[
-            mindmapGraph.nodes.length > 0 && { k: "mindmap", l: "Mindmap" },
+            // mindmapGraph.nodes.length > 0 && { k: "mindmap", l: "Mindmap" },
             extractedText.length > 0 && { k: "extracted", l: "Extracted JSON" },
             { k: "table", l: "ID & Chunks" },
             images.length > 0 && { k: "images", l: "Images" },
@@ -615,9 +615,9 @@ export default function TrainingDocumentsResult() {
             ))}
         </div>
 
-        {activeTab === "mindmap" && mindmapGraph && (
+        {/* {activeTab === "mindmap" && mindmapGraph && (
           <div className="mb-6 sm:mb-8">
-            {/* HEADER */}
+            {/* HEADER 
             <div
               className="
         flex items-center justify-between
@@ -654,7 +654,7 @@ export default function TrainingDocumentsResult() {
             </div>
 
             {/* CONTENT */}
-            {showMindmap &&
+            {/* {showMindmap &&
               (mindmapGraph.nodes.length > 0 ? (
                 <div className="
             bg-white/70 backdrop-blur-xl 
@@ -701,7 +701,7 @@ export default function TrainingDocumentsResult() {
                 <NoData label="Mindmap" />
               ))}
           </div>
-        )}
+        )} */} 
         {activeTab === "images" && (
           images.length > 0 ? (
             <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-lg p-10 mb-8">

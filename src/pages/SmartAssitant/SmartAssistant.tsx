@@ -55,22 +55,69 @@ function formatTime(ts: number) {
   });
 }
 
+// function formatResponseTime(ms: number) {
+//   if (ms < 1000) {
+//     return `${ms} ms`;
+//   }
+
+//   const totalSeconds = Math.floor(ms / 1000);
+
+//   if (totalSeconds < 60) {
+//     return `${(ms / 1000).toFixed(2)} s`;
+//   }
+
+//   const minutes = Math.floor(totalSeconds / 60);
+//   const seconds = totalSeconds % 60;
+
+//   return `${minutes}m ${seconds}s`;
+// }
 function formatResponseTime(ms: number) {
-  if (ms < 1000) {
-    return `${ms} ms`;
-  }
+  // ✅ Round milliseconds to nearest second
+  const totalSeconds = Math.round(ms / 1000);
 
-  const totalSeconds = Math.floor(ms / 1000);
-
-  if (totalSeconds < 60) {
-    return `${(ms / 1000).toFixed(2)} s`;
-  }
-
-  const minutes = Math.floor(totalSeconds / 60);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
 
-  return `${minutes}m ${seconds}s`;
+  // 🔹 Under 60 seconds
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
+  // 🔹 Under 1 hour
+  if (hours === 0) {
+    return seconds === 0
+      ? `${minutes}m`
+      : `${minutes}m ${seconds}s`;
+  }
+
+  // 🔹 1 hour or more
+  if (seconds === 0 && minutes === 0) {
+    return `${hours}h`;
+  }
+
+  if (seconds === 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  return `${hours}h ${minutes}m ${seconds}s`;
 }
+// function formatResponseTime(ms: number) {
+//   const totalSeconds = Math.floor(ms / 1000);
+//   const hours = Math.floor(totalSeconds / 3600);
+//   const minutes = Math.floor((totalSeconds % 3600) / 60);
+//   const seconds = totalSeconds % 60;
+
+//   if (totalSeconds < 60) {
+//     return `${(ms / 1000).toFixed(2)}s`;
+//   }
+
+//   if (hours === 0) {
+//     return `${minutes}m ${seconds}s`;
+//   }
+
+//   return `${hours}h ${minutes}m ${seconds}s`;
+// }
 
 function TypingDots() {
   return (
@@ -104,7 +151,7 @@ export default function SmartAssistant() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
-  const [_requestStart, setRequestStart] = useState<number | null>(null);
+  // const [_requestStart, setRequestStart] = useState<number | null>(null);
   const [conversationStarted, setConversationStarted] = useState(false);
 
   // const quickPrompts = useMemo(
@@ -120,6 +167,7 @@ export default function SmartAssistant() {
     setConversationId(null);
     setSelectedProduct(null);
     setMessages([getWelcomeMessage()]);
+        setLiveSeconds(0);
   };
 
   useEffect(() => {
@@ -157,26 +205,23 @@ export default function SmartAssistant() {
   }, [messages.length]);
 
   const sendMessage = async (text: string) => {
-    const requestStartTime = Date.now();
+      setLiveSeconds(0);
+
+    // const requestStartTime = performance.now();
     const trimmed = text.trim();
     if (!trimmed || isSending) return;
     if (!selectedProduct) {
       setError("Please select a product first.");
       return;
     }
-    const start = Date.now();
-    setRequestStart(start);
-
+     const start = performance.now();
     if (timerRef.current) clearInterval(timerRef.current);
 
     timerRef.current = setInterval(() => {
-      if (start) {
-        const elapsed = Date.now() - start;
-        setLiveSeconds(elapsed);
-      }
-    }, 100);
-
-
+      const elapsed = performance.now() - start;
+      setLiveSeconds(elapsed);
+    }, 50);
+  // const requestStartTime = performance.now();
     setError(null);
     setIsSending(true);
     const typingId = `typing_${Date.now()}`;
@@ -214,6 +259,7 @@ export default function SmartAssistant() {
           role: m.role,
           content: m.content,
         }));
+            const requestStartTime = performance.now();
 
       const resp = await axios.post<ApiChatResponse>(
         ServiceEndpoint.apiBaseUrl + ServiceEndpoint.chat.send,
@@ -248,7 +294,7 @@ export default function SmartAssistant() {
       }
 
 
-      const responseDuration = Date.now() - requestStartTime;
+      const responseDuration = performance.now() - requestStartTime;
       const assistantMsg: ChatMessage = {
         id: `a_${Date.now()}`,
         role: "assistant",
@@ -417,8 +463,8 @@ export default function SmartAssistant() {
               disabled={isSending || !hasValidResponse}
               className={`w-full lg:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#2f80ff] to-[#12c2e9] text-white text-sm shadow-lg transition 
                 ${isSending || !hasValidResponse
-                            ? "cursor-not-allowed"
-                            : "hover:scale-[1.03] hover:bg-gradient-to-l" }`} >
+                  ? "cursor-not-allowed"
+                  : "hover:scale-[1.03] hover:bg-gradient-to-l"}`} >
               <Download size={14} />
               Export Report
             </button>

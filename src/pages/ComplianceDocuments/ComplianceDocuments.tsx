@@ -142,12 +142,18 @@ export default function ComplianceDocuments() {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTick((prev) => prev + 1); // just trigger re-render
-    }, 60000);
+  const hasProcessingDocs = docs.some(
+    (doc) => doc.status !== "SUCCESS"
+  );
 
-    return () => clearInterval(interval);
-  }, []);
+  if (!hasProcessingDocs) return; // stop interval if no processing docs
+
+  const interval = setInterval(() => {
+    setTick((prev) => prev + 1);
+  }, 3000);
+
+  return () => clearInterval(interval);
+}, [docs]);
 
   const getUploadedDocuments = async (): Promise<UploadedDoc[]> => {
     const res = await axios.get(endPoint, {
@@ -171,21 +177,37 @@ export default function ComplianceDocuments() {
       );
   };
 
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        setLoading(true);
-        const data = await getUploadedDocuments();
-        setDocs(data);
-      } catch (error) {
-        setDocs([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+  let interval: ReturnType<typeof setInterval>;
 
-    fetchDocs();
-  }, []);
+  const fetchDocs = async (showLoader = false) => {
+    try {
+      if (showLoader) setLoading(true);
+
+      const data = await getUploadedDocuments();
+      setDocs(data);
+
+      const hasProcessing = data.some(
+        (doc) => doc.status !== "SUCCESS"
+      );
+
+      if (!hasProcessing && interval) {
+        clearInterval(interval);
+      }
+    } catch (error) {
+    } finally {
+      if (showLoader) setLoading(false);
+    }
+  };
+
+  // First load → show loader
+  fetchDocs(true);
+
+  // Polling → no full loader
+  interval = setInterval(() => fetchDocs(false), 5000);
+
+  return () => clearInterval(interval);
+}, []);
 
 
   const rows = docs;
